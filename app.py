@@ -1003,7 +1003,7 @@ elif pagina == "🔄 Comparación Simulacros":
             <p>puntos</p>
         </div>
         """, unsafe_allow_html=True)
-        
+        st.markdown(f"""<div></div>""", unsafe_allow_html=True)
         st.markdown(f"""
         <div class='stats-box' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);'>
             <h4>HP2 → AVANCEMOS</h4>
