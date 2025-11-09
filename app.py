@@ -1297,7 +1297,7 @@ elif pagina == "📊 Reporte General":
         fig = go.Figure(data=[go.Pie(
             labels=list(rangos.keys()),
             values=list(rangos.values()),
-            hole=10,
+            hole=0.9,
             marker_colors=['#27ae60', '#3498db', '#f39c12', '#e67e22', '#e74c3c']
         )])
         fig.update_traces(textposition='inside', textinfo='percent+label')
