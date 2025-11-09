@@ -2010,7 +2010,7 @@ st.markdown("""
     <p style='font-size: 0.9rem;'>
         <strong> Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
-        DNI HS JKS SSO Desarrallado con Streamlit, Pandas, Plotly y NumPy
+        DIN HS JKS SSO Desarrallado con Streamlit, Pandas, Plotly y NumPy
     </p>
 </div>
 """, unsafe_allow_html=True)
