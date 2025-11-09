@@ -236,6 +236,184 @@ st.markdown("""
         font-size: 2rem;
         font-weight: 700;
     }
+    
+    /* ESTILOS PARA EL RANKING */
+    .ranking-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2rem;
+    }
+    
+    .podium-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 1.5rem;
+        margin: 2rem 0;
+        padding: 2rem;
+    }
+    
+    .podium-place {
+        flex: 1;
+        max-width: 200px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .podium-place:hover {
+        transform: translateY(-10px);
+    }
+    
+    .podium-first {
+        order: 2;
+    }
+    
+    .podium-second {
+        order: 1;
+    }
+    
+    .podium-third {
+        order: 3;
+    }
+    
+    .podium-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin: 0 auto 1rem;
+        border: 4px solid;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .podium-first .podium-avatar {
+        width: 140px;
+        height: 140px;
+        border-color: #FFD700;
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    }
+    
+    .podium-second .podium-avatar {
+        width: 120px;
+        height: 120px;
+        border-color: #C0C0C0;
+        background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
+    }
+    
+    .podium-third .podium-avatar {
+        width: 110px;
+        height: 110px;
+        border-color: #CD7F32;
+        background: linear-gradient(135deg, #CD7F32 0%, #B8732E 100%);
+    }
+    
+    .podium-base {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        margin-top: 1rem;
+    }
+    
+    .podium-first .podium-base {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
+        padding: 2rem 1.5rem;
+    }
+    
+    .podium-second .podium-base {
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
+    }
+    
+    .podium-third .podium-base {
+        background: linear-gradient(135deg, rgba(205, 127, 50, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
+    }
+    
+    .podium-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .podium-score {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #667eea;
+        margin: 0.5rem 0;
+    }
+    
+    .podium-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+        margin-top: 0.5rem;
+    }
+    
+    .leaderboard-row {
+        background: white;
+        padding: 1rem 1.5rem;
+        margin: 0.5rem 0;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .leaderboard-row:hover {
+        transform: translateX(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .rank-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #667eea;
+        min-width: 50px;
+        text-align: center;
+    }
+    
+    .player-info {
+        flex: 1;
+        margin: 0 1rem;
+    }
+    
+    .player-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 0.2rem;
+    }
+    
+    .player-score {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #667eea;
+        min-width: 100px;
+        text-align: right;
+    }
+    
+    .trophy-icon {
+        font-size: 2.5rem;
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -370,7 +548,84 @@ if pagina == "🏠 Inicio":
     st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
     
-    # Métricas principales con más información
+    # ========== RANKING GLOBAL TOP 10 ==========
+    st.markdown("<h2 class='section-header'>🏆 Top 10 Global - Mejores Promedios</h2>", unsafe_allow_html=True)
+    
+    # Crear dataset combinado con todos los simulacros
+    hp1_ranking = hp1[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
+    hp1_ranking['SIMULACRO'] = 'Helmer Pardo 1'
+    
+    hp2_ranking = hp2[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
+    hp2_ranking['SIMULACRO'] = 'Helmer Pardo 2'
+    
+    prep_ranking = prep[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
+    prep_ranking['SIMULACRO'] = 'AVANCEMOS'
+    
+    # Combinar todos
+    ranking_global = pd.concat([hp1_ranking, hp2_ranking, prep_ranking], ignore_index=True)
+    ranking_global = ranking_global.sort_values('PROMEDIO PONDERADO', ascending=False).head(10).reset_index(drop=True)
+    
+    # Colores para medallas y podio
+    medallas = {0: '🥇', 1: '🥈', 2: '🥉'}
+    colores_simulacro = {'Helmer Pardo 1': '#3498db', 'Helmer Pardo 2': '#2ecc71', 'AVANCEMOS': '#e74c3c'}
+    
+    # Crear el podio (Top 3)
+    if len(ranking_global) >= 3:
+        st.markdown('<div class="ranking-container">', unsafe_allow_html=True)
+        st.markdown('<div class="podium-container">', unsafe_allow_html=True)
+        
+        for pos in [1, 0, 2]:  # Segundo, Primero, Tercero
+            if pos < len(ranking_global):
+                estudiante = ranking_global.iloc[pos]
+                medalla = medallas.get(pos, '')
+                posicion_class = ['podium-first', 'podium-second', 'podium-third'][pos]
+                
+                nombre_corto = estudiante['ESTUDIANTE'].split()[0] if len(estudiante['ESTUDIANTE'].split()) > 0 else estudiante['ESTUDIANTE']
+                
+                st.markdown(f"""
+                <div class="podium-place {posicion_class}">
+                    <div class="podium-avatar">
+                        <span class="trophy-icon">{medalla}</span>
+                    </div>
+                    <div class="podium-base">
+                        <div class="podium-name" title="{estudiante['ESTUDIANTE']}">{nombre_corto}</div>
+                        <div class="podium-score">{estudiante['PROMEDIO PONDERADO']:.1f}</div>
+                        <span class="podium-badge" style="background-color: {colores_simulacro[estudiante['SIMULACRO']]}">
+                            {estudiante['SIMULACRO']}
+                        </span>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Mostrar posiciones 4-10
+    if len(ranking_global) > 3:
+        st.markdown('<div class="ranking-container" style="background: white;">', unsafe_allow_html=True)
+        
+        for idx in range(3, len(ranking_global)):
+            estudiante = ranking_global.iloc[idx]
+            nombre_corto = estudiante['ESTUDIANTE'].split()[0] if len(estudiante['ESTUDIANTE'].split()) > 0 else estudiante['ESTUDIANTE']
+            
+            st.markdown(f"""
+            <div class="leaderboard-row">
+                <div class="rank-number">#{idx + 1}</div>
+                <div class="player-info">
+                    <div class="player-name" title="{estudiante['ESTUDIANTE']}">{nombre_corto}</div>
+                    <span class="podium-badge" style="background-color: {colores_simulacro[estudiante['SIMULACRO']]}">
+                        {estudiante['SIMULACRO']}
+                    </span>
+                </div>
+                <div class="player-score">{estudiante['PROMEDIO PONDERADO']:.1f}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Métricas principales
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -413,7 +668,7 @@ if pagina == "🏠 Inicio":
     
     st.markdown("---")
     
-    # Análisis de Promedios Generales con más detalle
+    # Análisis de Promedios Generales
     st.markdown("<h2 class='section-header'>📊 Análisis Comparativo de Simulacros</h2>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
@@ -450,7 +705,7 @@ if pagina == "🏠 Inicio":
             yaxis_title="Puntaje Promedio",
             template="plotly_white"
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
         
         # Tabla de cambios
         cambio_1_2 = promedios_generales[1] - promedios_generales[0]
@@ -469,7 +724,7 @@ if pagina == "🏠 Inicio":
         })
         cambios_df['Cambio'] = cambios_df['Cambio'].round(2)
         cambios_df['Porcentaje'] = cambios_df['Porcentaje'].round(2).astype(str) + '%'
-        st.dataframe(cambios_df, width="stretch", hide_index=True)
+        st.dataframe(cambios_df, use_container_width=True, hide_index=True)
     
     with col2:
         st.markdown("### 📊 Distribución de Rendimiento por Simulacro")
@@ -498,7 +753,7 @@ if pagina == "🏠 Inicio":
             yaxis_title="Número de Estudiantes",
             template="plotly_white"
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
         
         # Tabla resumen de distribución
         st.markdown("#### 📋 Resumen de Distribución")
@@ -508,7 +763,7 @@ if pagina == "🏠 Inicio":
             'HP2': dist_hp2,
             'AVANCEMOS': dist_prep
         })
-        st.dataframe(dist_df, width="stretch", hide_index=True)
+        st.dataframe(dist_df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
     
@@ -550,7 +805,7 @@ if pagina == "🏠 Inicio":
         height=500,
         title="Comparación de Rendimiento por Materia"
     )
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
     
     # Tabla comparativa detallada
     st.markdown("#### 📊 Tabla Comparativa de Materias")
@@ -561,12 +816,12 @@ if pagina == "🏠 Inicio":
         'AVANCEMOS': promedios_prep,
         'Mayor': [max(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
         'Menor': [min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
-        'Rango-DS': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)]
+        'Rango': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)]
     })
     comp_materias_df = comp_materias_df.round(2)
     st.dataframe(
         comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'AVANCEMOS'], cmap='RdYlGn', vmin=40, vmax=90),
-        width="stretch",
+        use_container_width=True,
         hide_index=True
     )
     
@@ -596,9 +851,9 @@ if pagina == "🏠 Inicio":
             <h4>⚠️ Áreas de Atención Prioritaria</h4>
             <ul>
                 <li><strong>Diferencia General:</strong> {abs(cambio_hp1_hp2):.1f} puntos entre HP1 y HP2 ({abs(cambio_hp1_hp2/promedios_generales[0]*100):.1f}%)</li>
-                <li><strong>Materia con Mayor Diferencia:</strong> {mat_mayor_caida} ({cambios_materias[mat_mayor_caida]:.1f} puntos)</li>
-                <li><strong>Materia con >DS:</strong> {mat_variable} (σ = {variabilidades[mat_variable]:.1f})</li>
-                <li><strong>Puntaje Promedio inferior:</strong> {menor_materia} ({min(promedios_hp1):.1f} puntos)</li>
+                <li><strong>Materia con Mayor Caída:</strong> {mat_mayor_caida} ({cambios_materias[mat_mayor_caida]:.1f} puntos)</li>
+                <li><strong>Materia con Mayor Variabilidad:</strong> {mat_variable} (σ = {variabilidades[mat_variable]:.1f})</li>
+                <li><strong>Puntaje Promedio Más Bajo:</strong> {menor_materia} ({min(promedios_hp1):.1f} puntos)</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -609,10 +864,10 @@ if pagina == "🏠 Inicio":
             <h4>✅ Fortalezas y Oportunidades</h4>
             <ul>
                 <li><strong>Mejor Materia:</strong> {mejor_materia} ({max(promedios_hp1):.1f} puntos promedio)</li>
-                <li><strong>Materia consistente:</strong> {mat_mayor_mejora} (+{cambios_materias[mat_mayor_mejora]:.1f} puntos)</li>
+                <li><strong>Mayor Mejora:</strong> {mat_mayor_mejora} (+{cambios_materias[mat_mayor_mejora]:.1f} puntos)</li>
                 <li><strong>Estudiantes Destacados:</strong> {len(hp1[hp1['PROMEDIO PONDERADO'] >= 350])} con puntaje ≥350</li>
-                <li><strong>Mejor desempeño:</strong> {materias[np.argmin([hp1[m].std() for m in materias])]} es la más consistente</li>
-                <li><strong>Potencial de Mejora:</strong> Identificados {len(hp1[(hp1['PROMEDIO PONDERADO'] >= 250) & (hp1['PROMEDIO PONDERADO'] < 300)])} estudiantes en rango medio</li>
+                <li><strong>Mejor Consistencia:</strong> {materias[np.argmin([hp1[m].std() for m in materias])]} es la más consistente</li>
+                <li><strong>Potencial de Mejora:</strong> {len(hp1[(hp1['PROMEDIO PONDERADO'] >= 250) & (hp1['PROMEDIO PONDERADO'] < 300)])} estudiantes en rango medio</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -621,7 +876,7 @@ if pagina == "🏠 Inicio":
     
     # Recomendaciones estratégicas
     st.markdown("<h2 class='section-header'>💡 Recomendaciones Estratégicas</h2>", unsafe_allow_html=True)
-    st.markdown(f"""<div></div>""", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -699,7 +954,7 @@ elif pagina == "📊 Reporte General":
     with col1:
         st.markdown("### 📈 Medidas de Tendencia Central")
         medidas_df = pd.DataFrame({
-            'Estadístico': ['Promedio', 'Mediana', 'Moda', 'Rango-DS'],
+            'Estadístico': ['Promedio', 'Mediana', 'Moda', 'Rango'],
             'Valor': [
                 datos_actual['PROMEDIO PONDERADO'].mean(),
                 datos_actual['PROMEDIO PONDERADO'].median(),
@@ -708,9 +963,9 @@ elif pagina == "📊 Reporte General":
             ]
         })
         medidas_df['Valor'] = medidas_df['Valor'].apply(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
-        st.dataframe(medidas_df, width="stretch", hide_index=True)
+        st.dataframe(medidas_df, use_container_width=True, hide_index=True)
         
-        st.markdown("### 📊 Distrubción de rendimiento")
+        st.markdown("### 📊 Distribución de Rendimiento")
         rangos = {
             'Excelente (≥350)': len(datos_actual[datos_actual['PROMEDIO PONDERADO'] >= 350]),
             'Sobresaliente (300-349)': len(datos_actual[(datos_actual['PROMEDIO PONDERADO'] >= 300) & (datos_actual['PROMEDIO PONDERADO'] < 350)]),
@@ -723,11 +978,10 @@ elif pagina == "📊 Reporte General":
             'Cantidad': list(rangos.values()),
             'Porcentaje': [f"{(v/len(datos_actual)*100):.1f}%" for v in rangos.values()]
         })
-        st.dataframe(rangos_df, width="stretch", hide_index=True)
+        st.dataframe(rangos_df, use_container_width=True, hide_index=True)
     
     with col2:
         st.markdown("### 🎯 Distribución por Rangos de Puntaje")
-        
         
         fig = go.Figure(data=[go.Pie(
             labels=list(rangos.keys()),
@@ -737,14 +991,11 @@ elif pagina == "📊 Reporte General":
         )])
         fig.update_traces(textposition='inside', textinfo='percent+label')
         fig.update_layout(height=400, title="Distribución del Rendimiento")
-        st.plotly_chart(fig, width="stretch")
-        
-        # Tabla de distribución
-        
+        st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")
     
-    # Gráfica de promedios por materia con más detalle
+    # Gráfica de promedios por materia
     st.markdown("<h2 class='section-header'>📚 Análisis Detallado por Materia</h2>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
@@ -771,10 +1022,10 @@ elif pagina == "📊 Reporte General":
             height=450,
             template="plotly_white"
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Calcular desempeño relativo (comparado con el promedio de todas las materias)
+        # Calcular desempeño relativo
         promedio_general_materias = np.mean(promedios_materias)
         desempeno_relativo = [(p - promedio_general_materias) for p in promedios_materias]
         
@@ -792,10 +1043,10 @@ elif pagina == "📊 Reporte General":
             title="Diferencia vs Promedio General",
             xaxis_title="Materia",
             yaxis_title="Puntos sobre/bajo el promedio",
-            height=550,
+            height=450,
             template="plotly_white"
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")
     
@@ -826,7 +1077,7 @@ elif pagina == "📊 Reporte General":
         )
         fig.update_layout(height=400, showlegend=False, 
                          xaxis_title="Puntaje", yaxis_title="Frecuencia")
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.markdown("### 📈 Boxplot Comparativo")
@@ -839,7 +1090,7 @@ elif pagina == "📊 Reporte General":
                 boxmean='sd'
             ))
         fig.update_layout(height=400, showlegend=True, yaxis_title="Puntaje")
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")
     
@@ -855,19 +1106,19 @@ elif pagina == "📊 Reporte General":
         'Q1': [datos_actual[m].quantile(0.25) for m in materias],
         'Q3': [datos_actual[m].quantile(0.75) for m in materias],
         'Máximo': [datos_actual[m].max() for m in materias],
-        'Rango-DS': [datos_actual[m].max() - datos_actual[m].min() for m in materias],
+        'Rango': [datos_actual[m].max() - datos_actual[m].min() for m in materias],
         'CV (%)': [(datos_actual[m].std() / datos_actual[m].mean() * 100) for m in materias]
     })
     stats_df = stats_df.round(2)
     st.dataframe(
         stats_df.style.background_gradient(subset=['Promedio', 'Mediana'], cmap='RdYlGn', vmin=40, vmax=90),
-        width="stretch",
+        use_container_width=True,
         hide_index=True
     )
     
     st.markdown("---")
     
-    # Análisis de correlación dentro del simulacro
+    # Análisis de correlación
     st.markdown("<h2 class='section-header'>🔗 Matriz de Correlación entre Materias</h2>", unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
@@ -885,7 +1136,7 @@ elif pagina == "📊 Reporte General":
             labels=dict(color="Correlación")
         )
         fig.update_layout(height=500, title="Correlación entre Materias")
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.markdown("### 🔍 Interpretación")
@@ -893,14 +1144,14 @@ elif pagina == "📊 Reporte General":
         **Correlación Alta (>0.7)**  
         Fuerte relación entre materias
         
-        **Correlación Promedio (0.4-0.7)**  
+        **Correlación Media (0.4-0.7)**  
         Relación moderada
         
         **Correlación Baja (<0.4)**  
         Independencia relativa
         """)
         
-        # Encontrar la correlación más alta (excluyendo diagonal)
+        # Encontrar la correlación más alta
         corr_values = correlacion.values
         np.fill_diagonal(corr_values, -1)
         max_corr_idx = np.unravel_index(corr_values.argmax(), corr_values.shape)
@@ -936,7 +1187,7 @@ elif pagina == "🔄 Comparación Simulacros":
         yaxis_title="Puntaje Promedio",
         template="plotly_white"
     )
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")
     
@@ -953,10 +1204,9 @@ elif pagina == "🔄 Comparación Simulacros":
     })
     comp_df = comp_df.round(2)
     
-    # Estilo condicional
     st.dataframe(
         comp_df.style.background_gradient(subset=['Cambio HP1→HP2', 'Cambio HP2→Prep'], cmap='RdYlGn', vmin=-20, vmax=20),
-        width="stretch"
+        use_container_width=True
     )
     
     st.markdown("---")
@@ -989,7 +1239,7 @@ elif pagina == "🔄 Comparación Simulacros":
             height=400,
             template="plotly_white"
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         cambio_1_2 = promedios_generales[1] - promedios_generales[0]
@@ -1003,7 +1253,7 @@ elif pagina == "🔄 Comparación Simulacros":
             <p>puntos</p>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown(f"""<div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div style='margin: 1rem 0;'></div>""", unsafe_allow_html=True)
         st.markdown(f"""
         <div class='stats-box' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);'>
             <h4>HP2 → AVANCEMOS</h4>
@@ -1081,7 +1331,7 @@ elif pagina == "👤 Análisis Individual":
             height=450,
             title="Comparación con el Promedio del Grupo"
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         fig = go.Figure()
@@ -1108,7 +1358,7 @@ elif pagina == "👤 Análisis Individual":
             height=450,
             template="plotly_white"
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     # Tabla de puntajes
     st.markdown("<h2 class='section-header'>📋 Detalle de Puntajes</h2>", unsafe_allow_html=True)
@@ -1123,10 +1373,10 @@ elif pagina == "👤 Análisis Individual":
     
     st.dataframe(
         detalle_df.style.background_gradient(subset=['Diferencia'], cmap='RdYlGn', vmin=-20, vmax=20),
-        width="stretch"
+        use_container_width=True
     )
 
-# ==================== Avance ====================
+# ==================== AVANCE ====================
 elif pagina == "📈 Avance":
     st.markdown("<h1 class='header-title'>📈 Análisis de Avance</h1>", unsafe_allow_html=True)
     
@@ -1176,33 +1426,33 @@ elif pagina == "📈 Avance":
     
     st.markdown("---")
     
-    # Gráfica de Avance individual
-    st.markdown("<h2 class='section-header'>📊 Avance Individual</h2>", unsafe_allow_html=True)
+    # Gráfica de Avance individual HP1 → HP2
+    st.markdown("<h2 class='section-header'>📊 Avance Individual (HP1 → HP2)</h2>", unsafe_allow_html=True)
     
-    progresion_sorted = progresion.sort_values('CAMBIO_TOTAL')
+    progresion_sorted = progresion.sort_values('CAMBIO_HP1_HP2')
     
     fig = go.Figure()
     
-    colores = ['#27ae60' if c > 0 else '#e74c3c' for c in progresion_sorted['CAMBIO_TOTAL']]
+    colores = ['#27ae60' if c > 0 else '#e74c3c' for c in progresion_sorted['CAMBIO_HP1_HP2']]
     
     fig.add_trace(go.Bar(
         y=progresion_sorted['ESTUDIANTE'].str.split().str[0],
-        x=progresion_sorted['CAMBIO_TOTAL'],
+        x=progresion_sorted['CAMBIO_HP1_HP2'],
         orientation='h',
         marker_color=colores,
-        text=[f'{c:.1f}' for c in progresion_sorted['CAMBIO_TOTAL']],
+        text=[f'{c:.1f}' for c in progresion_sorted['CAMBIO_HP1_HP2']],
         textposition='outside'
     ))
     
     fig.update_layout(
-        title="Cambio Total (HP1 → AVANCEMOS)",
+        title="Cambio de Rendimiento: Helmer Pardo 1 → Helmer Pardo 2",
         xaxis_title="Cambio en Promedio Ponderado",
         yaxis_title="Estudiante",
         height=800,
         template="plotly_white"
     )
     fig.add_vline(x=0, line_dash="dash", line_color="black")
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")
     
@@ -1237,7 +1487,7 @@ elif pagina == "📈 Avance":
             template="plotly_white",
             hovermode='x unified'
         )
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")
     
@@ -1256,7 +1506,7 @@ elif pagina == "📈 Avance":
             vmin=-50, 
             vmax=50
         ),
-        width="stretch",
+        use_container_width=True,
         height=600
     )
 
@@ -1285,7 +1535,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                     zmax=1
                 )
                 fig.update_layout(height=400)
-                st.plotly_chart(fig, width="stretch")
+                st.plotly_chart(fig, use_container_width=True)
         
         st.markdown("---")
         st.markdown("### 📊 Interpretación de Correlaciones")
@@ -1294,7 +1544,7 @@ elif pagina == "📉 Estadísticas Detalladas":
         **Correlación alta (>0.7):** Las materias están fuertemente relacionadas. 
         Un buen desempeño en una suele indicar buen desempeño en la otra.
         
-        **Correlación Promedio (0.4-0.7):** Relación moderada entre las materias.
+        **Correlación Media (0.4-0.7):** Relación moderada entre las materias.
         
         **Correlación baja (<0.4):** Las materias son relativamente independientes.
         """)
@@ -1313,7 +1563,7 @@ elif pagina == "📉 Estadísticas Detalladas":
         if 'GRADO' in datos_grado.columns:
             grados_disponibles = datos_grado['GRADO'].dropna().unique()
             
-            # Convertir todos los grados a string para evitar problemas de tipo
+            # Convertir todos los grados a string
             grados_disponibles = [str(g) for g in grados_disponibles]
             
             # Comparación de promedios por grado
@@ -1339,7 +1589,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                 height=500,
                 template="plotly_white"
             )
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
             
             st.markdown("---")
             
@@ -1359,7 +1609,7 @@ elif pagina == "📉 Estadísticas Detalladas":
             st.markdown("#### 📊 Tabla de Promedios por Grado")
             st.dataframe(
                 df_grados.style.background_gradient(cmap='YlGnBu', subset=materias + ['Promedio General']),
-                width="stretch"
+                use_container_width=True
             )
         else:
             st.warning("No hay información de grado disponible en este simulacro.")
@@ -1402,7 +1652,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                     showlegend=False,
                     yaxis={'categoryorder': 'total ascending'}
                 )
-                st.plotly_chart(fig, width="stretch")
+                st.plotly_chart(fig, use_container_width=True)
         
         st.markdown("---")
         
@@ -1422,7 +1672,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                 vmin=40,
                 vmax=100
             ),
-            width="stretch",
+            use_container_width=True,
             height=600
         )
 
@@ -1433,7 +1683,7 @@ st.markdown("""
     <p style='font-size: 0.9rem;'>
         <strong>📊 Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
-        Desarrollado DIN HS JKS SSO usando streamlit, pandas, plotly, numpy y matplotlib
+        Desarrollado con Streamlit, Pandas, Plotly y NumPy
     </p>
 </div>
 """, unsafe_allow_html=True)
