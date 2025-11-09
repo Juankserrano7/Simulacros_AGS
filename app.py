@@ -467,7 +467,6 @@ with st.sidebar:
     st.sidebar.image("Logo.png", use_column_width=True)
     st.markdown("""
     <div style='text-align: center; padding: 1.5rem 0; margin-bottom: 1rem;'>
-        <img src="./Logo.png" alt="logo" style="height:225px;">
         <h2 style='color: white; font-weight: 800; font-size: 1.8rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>
             📊 PreIcfes Dashboard
         </h2>
