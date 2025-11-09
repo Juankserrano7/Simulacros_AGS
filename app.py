@@ -1297,11 +1297,11 @@ elif pagina == "📊 Reporte General":
         fig = go.Figure(data=[go.Pie(
             labels=list(rangos.keys()),
             values=list(rangos.values()),
-            hole=0.9,
+            hole=0.4,
             marker_colors=['#27ae60', '#3498db', '#f39c12', '#e67e22', '#e74c3c']
         )])
         fig.update_traces(textposition='inside', textinfo='percent+label')
-        fig.update_layout(height=400, title="Distribución del Rendimiento")
+        fig.update_layout(height=800, width= 800, title="Distribución del Rendimiento")
         st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")
