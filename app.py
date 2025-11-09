@@ -1230,7 +1230,7 @@ elif pagina == "🎖️ Rankings":
     st.markdown("---")
     
 # ==================== REPORTE GENERAL ====================
-elif pagina == "📣 Reporte General":
+elif pagina == "📊 Reporte General":
     st.markdown(f"<h1 class='header-title'>📊 Reporte General - {simulacro_seleccionado}</h1>", unsafe_allow_html=True)
     
     # Métricas principales expandidas
