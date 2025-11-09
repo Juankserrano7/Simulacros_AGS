@@ -7,7 +7,7 @@ import numpy as np
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Dashboard Simulacros ICFES",
+    page_title="Dashboard Simulacros PreIcfes",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -289,7 +289,7 @@ with st.sidebar:
     st.markdown("""
     <div style='text-align: center; padding: 1.5rem 0; margin-bottom: 1rem;'>
         <h2 style='color: white; font-weight: 800; font-size: 1.8rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>
-            📊 ICFES Dashboard
+            📊 PreIcfes Dashboard
         </h2>
         <p style='color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-top: 0.5rem; letter-spacing: 1px;'>
             SISTEMA DE ANÁLISIS
@@ -304,7 +304,7 @@ with st.sidebar:
     pagina = st.radio(
         "Navegación",
         ["🏠 Inicio", "📊 Reporte General", "🔄 Comparación Simulacros", 
-         "👤 Análisis Individual", "📈 Progresión", "📉 Estadísticas Detalladas"],
+         "👤 Análisis Individual", "📈 Avance", "📉 Estadísticas Detalladas"],
         label_visibility="collapsed"
     )
     
@@ -329,7 +329,7 @@ with st.sidebar:
             GRADO 11
         </h4>
         <p style='color: rgba(255,255,255,0.7); font-size: 0.85rem; margin: 0;'>
-            Período 2024/2025
+            Período 2026/2026
         </p>
         <div style='margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);'>
             <p style='color: rgba(255,255,255,0.6); font-size: 0.75rem; margin: 0;'>
@@ -367,7 +367,7 @@ datos_actual = simulacros_map[simulacro_seleccionado]
 
 # ==================== PÁGINA INICIO ====================
 if pagina == "🏠 Inicio":
-    st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros ICFES</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
     
     # Métricas principales con más información
@@ -397,7 +397,7 @@ if pagina == "🏠 Inicio":
         <div class='metric-card'>
             <h3 style='color: #667eea;'>📚 Áreas</h3>
             <h2 style='font-size: 3rem; color: #764ba2;'>5</h2>
-            <p style='color: #6c757d;'>Materias ICFES</p>
+            <p style='color: #6c757d;'>Materias PreIcfes</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -700,7 +700,7 @@ elif pagina == "📊 Reporte General":
     with col1:
         st.markdown("### 📈 Medidas de Tendencia Central")
         medidas_df = pd.DataFrame({
-            'Estadístico': ['Media', 'Mediana', 'Moda', 'Rango-DS'],
+            'Estadístico': ['Promedio', 'Mediana', 'Moda', 'Rango-DS'],
             'Valor': [
                 datos_actual['PROMEDIO PONDERADO'].mean(),
                 datos_actual['PROMEDIO PONDERADO'].median(),
@@ -828,7 +828,7 @@ elif pagina == "📊 Reporte General":
             x=datos_actual['PROMEDIO PONDERADO'].mean(),
             line_dash="dash",
             line_color="red",
-            annotation_text=f"Media: {datos_actual['PROMEDIO PONDERADO'].mean():.1f}"
+            annotation_text=f"Promedio: {datos_actual['PROMEDIO PONDERADO'].mean():.1f}"
         )
         fig.add_vline(
             x=datos_actual['PROMEDIO PONDERADO'].median(),
@@ -860,7 +860,7 @@ elif pagina == "📊 Reporte General":
     
     stats_df = pd.DataFrame({
         'Materia': materias,
-        'Media': [datos_actual[m].mean() for m in materias],
+        'Promedio': [datos_actual[m].mean() for m in materias],
         'Mediana': [datos_actual[m].median() for m in materias],
         'Desv. Est.': [datos_actual[m].std() for m in materias],
         'Mínimo': [datos_actual[m].min() for m in materias],
@@ -872,7 +872,7 @@ elif pagina == "📊 Reporte General":
     })
     stats_df = stats_df.round(2)
     st.dataframe(
-        stats_df.style.background_gradient(subset=['Media', 'Mediana'], cmap='RdYlGn', vmin=40, vmax=90),
+        stats_df.style.background_gradient(subset=['Promedio', 'Mediana'], cmap='RdYlGn', vmin=40, vmax=90),
         width="stretch",
         hide_index=True
     )
@@ -905,7 +905,7 @@ elif pagina == "📊 Reporte General":
         **Correlación Alta (>0.7)**  
         Fuerte relación entre materias
         
-        **Correlación Media (0.4-0.7)**  
+        **Correlación Promedio (0.4-0.7)**  
         Relación moderada
         
         **Correlación Baja (<0.4)**  
@@ -1138,11 +1138,11 @@ elif pagina == "👤 Análisis Individual":
         width="stretch"
     )
 
-# ==================== PROGRESIÓN ====================
-elif pagina == "📈 Progresión":
-    st.markdown("<h1 class='header-title'>📈 Análisis de Progresión</h1>", unsafe_allow_html=True)
+# ==================== Avance ====================
+elif pagina == "📈 Avance":
+    st.markdown("<h1 class='header-title'>📈 Análisis de Avance</h1>", unsafe_allow_html=True)
     
-    # Preparar datos de progresión
+    # Preparar datos de Avance
     hp1_temp = hp1.copy()
     hp2_temp = hp2.copy()
     prep_temp = prep.copy()
@@ -1171,7 +1171,7 @@ elif pagina == "📈 Progresión":
     
     st.markdown(f"**Estudiantes encontrados en los 3 simulacros:** {len(progresion)}")
     
-    # Métricas de progresión
+    # Métricas de Avance
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -1188,8 +1188,8 @@ elif pagina == "📈 Progresión":
     
     st.markdown("---")
     
-    # Gráfica de progresión individual
-    st.markdown("<h2 class='section-header'>📊 Progresión Individual</h2>", unsafe_allow_html=True)
+    # Gráfica de Avance individual
+    st.markdown("<h2 class='section-header'>📊 Avance Individual</h2>", unsafe_allow_html=True)
     
     progresion_sorted = progresion.sort_values('CAMBIO_TOTAL')
     
@@ -1253,8 +1253,8 @@ elif pagina == "📈 Progresión":
     
     st.markdown("---")
     
-    # Tabla de progresión
-    st.markdown("<h2 class='section-header'>📋 Tabla de Progresión Completa</h2>", unsafe_allow_html=True)
+    # Tabla de Avance
+    st.markdown("<h2 class='section-header'>📋 Tabla de Avance Completa</h2>", unsafe_allow_html=True)
     
     tabla_progresion = progresion[['ESTUDIANTE', 'HP1', 'HP2', 'Avancemos', 
                                      'CAMBIO_HP1_HP2', 'CAMBIO_HP2_PREP', 'CAMBIO_TOTAL']]
@@ -1306,7 +1306,7 @@ elif pagina == "📉 Estadísticas Detalladas":
         **Correlación alta (>0.7):** Las materias están fuertemente relacionadas. 
         Un buen desempeño en una suele indicar buen desempeño en la otra.
         
-        **Correlación media (0.4-0.7):** Relación moderada entre las materias.
+        **Correlación Promedio (0.4-0.7):** Relación moderada entre las materias.
         
         **Correlación baja (<0.4):** Las materias son relativamente independientes.
         """)
@@ -1443,7 +1443,7 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #6c757d; padding: 2rem;'>
     <p style='font-size: 0.9rem;'>
-        <strong>📊 Dashboard de Análisis de Simulacros ICFES</strong><br>
+        <strong>📊 Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
         Desarrollado con ❤️ usando Streamlit y Plotly
     </p>
