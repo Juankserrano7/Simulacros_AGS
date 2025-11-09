@@ -1977,13 +1977,26 @@ elif pagina == "📉 Estadísticas Detalladas":
                 top_materia = top_materia.reset_index(drop=True)
                 top_materia.index = top_materia.index + 1
                 
+                custom_colorscale = [
+                        [0.0, "#E74C3C"],   # 0 → rojo
+                    [0.4, "#D35400"],   # ~200 → terracota
+                    [0.68, "#3498DB"],  # ~340 → azul
+                    [0.8, "#2ECC71"],   # ~400 → verde
+                    [1.0, "#27AE60"]    # >500 → verde oscuro (opcional)
+                ]
+                
                 fig = px.bar(
                     top_materia,
                     x=materia,
                     y='ESTUDIANTE',
                     orientation='h',
+                    marker=dict(
                     color=materia,
-                    color_continuous_scale='Viridis',
+                    colorscale=custom_colorscale,
+                    cmin=0,
+                    cmax=500,
+                    showscale=True,
+                    colorbar=dict(title="Puntaje")),
                     text=materia
                 )
                 fig.update_traces(texttemplate='%{text:.1f}', textposition='outside')
