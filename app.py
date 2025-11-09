@@ -697,7 +697,7 @@ if pagina == "🏠 Inicio":
     
     st.markdown("---")
     
-    # ========== TABLA COMPLETA DE TODOS LOS PROMEDIOS GLOBALES ==========
+        # ========== TABLA COMPLETA DE TODOS LOS PROMEDIOS GLOBALES ==========
     st.markdown("<h2 class='section-header'>📋 Tabla Completa - Ranking Global por Estudiante</h2>", unsafe_allow_html=True)
 
     try:
@@ -720,13 +720,13 @@ if pagina == "🏠 Inicio":
         tabla_completa = hp1_completo.merge(hp2_completo, on='ESTUDIANTE', how='outer')
         tabla_completa = tabla_completa.merge(prep_completo, on='ESTUDIANTE', how='outer')
         
+        # CORREGIDO: Calcular promedio ponderado general (promedio de los 3 promedios ponderados)
+        tabla_completa['PROMEDIO_PONDERADO_GENERAL'] = tabla_completa[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].mean(axis=1, skipna=True)
+        
         # Calcular promedios generales por materia (promedio de los 3 simulacros)
         for mat in materias:
             cols_materia = [f'{mat}_HP1', f'{mat}_HP2', f'{mat}_PREP']
             tabla_completa[f'{mat}_PROMEDIO_GENERAL'] = tabla_completa[cols_materia].mean(axis=1, skipna=True)
-        
-        # Calcular promedio ponderado general (promedio de los 3 promedios ponderados)
-        tabla_completa['PROMEDIO_PONDERADO_GENERAL'] = tabla_completa[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].mean(axis=1, skipna=True)
         
         # Calcular número de simulacros presentados
         tabla_completa['SIMULACROS_PRESENTADOS'] = tabla_completa[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].notna().sum(axis=1)
@@ -734,7 +734,7 @@ if pagina == "🏠 Inicio":
         # ========== CONTROLES INTERACTIVOS ==========
         st.markdown("### 🎯 Controles de Visualización")
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             # Selector de métrica para ordenar
@@ -746,14 +746,6 @@ if pagina == "🏠 Inicio":
             )
         
         with col2:
-            # Filtro por número de simulacros presentados
-            min_simulacros = st.selectbox(
-                "🎓 Mínimo de simulacros presentados:",
-                options=[1, 2, 3],
-                index=0
-            )
-        
-        with col3:
             # Filtro de rango de puntaje
             min_puntaje = st.number_input(
                 "📉 Puntaje mínimo:",
@@ -763,7 +755,7 @@ if pagina == "🏠 Inicio":
                 step=10.0
             )
         
-        with col4:
+        with col3:
             max_puntaje = st.number_input(
                 "📈 Puntaje máximo:",
                 min_value=0.0,
@@ -793,9 +785,6 @@ if pagina == "🏠 Inicio":
         # ========== APLICAR FILTROS ==========
         tabla_filtrada = tabla_completa.copy()
         
-        # Filtrar por número de simulacros
-        tabla_filtrada = tabla_filtrada[tabla_filtrada['SIMULACROS_PRESENTADOS'] >= min_simulacros]
-        
         # Filtrar por rango de puntaje de la métrica seleccionada
         tabla_filtrada = tabla_filtrada[
             (tabla_filtrada[metrica_ordenar] >= min_puntaje) &
@@ -812,21 +801,27 @@ if pagina == "🏠 Inicio":
         # Agregar columna de ranking
         tabla_filtrada.insert(0, 'RANKING', range(1, len(tabla_filtrada) + 1))
         
-        # ========== SELECCIONAR COLUMNAS A MOSTRAR ==========
+        # ========== SELECCIONAR COLUMNAS A MOSTRAR (PROMEDIO PRIMERO) ==========
         columnas_mostrar = ['RANKING', 'ESTUDIANTE']
+        
+        # PRIMERO agregar el promedio ponderado general
+        columnas_mostrar.append('PROMEDIO_PONDERADO_GENERAL')
         
         # Agregar columnas según los simulacros seleccionados
         if 'Helmer Pardo 1' in simulacros_mostrar:
-            columnas_mostrar.extend([f'{mat}_HP1' for mat in materias] + ['PROMEDIO_HP1'])
+            columnas_mostrar.append('PROMEDIO_HP1')
+            columnas_mostrar.extend([f'{mat}_HP1' for mat in materias])
         
         if 'Helmer Pardo 2' in simulacros_mostrar:
-            columnas_mostrar.extend([f'{mat}_HP2' for mat in materias] + ['PROMEDIO_HP2'])
+            columnas_mostrar.append('PROMEDIO_HP2')
+            columnas_mostrar.extend([f'{mat}_HP2' for mat in materias])
         
         if 'AVANCEMOS' in simulacros_mostrar:
-            columnas_mostrar.extend([f'{mat}_PREP' for mat in materias] + ['PROMEDIO_PREP'])
+            columnas_mostrar.append('PROMEDIO_PREP')
+            columnas_mostrar.extend([f'{mat}_PREP' for mat in materias])
         
-        # Agregar promedios generales
-        columnas_mostrar.extend([f'{mat}_PROMEDIO_GENERAL' for mat in materias] + ['PROMEDIO_PONDERADO_GENERAL', 'SIMULACROS_PRESENTADOS'])
+        # Agregar promedios generales de materias
+        columnas_mostrar.extend([f'{mat}_PROMEDIO_GENERAL' for mat in materias])
         
         # Filtrar solo columnas existentes
         columnas_mostrar = [col for col in columnas_mostrar if col in tabla_filtrada.columns]
@@ -839,7 +834,7 @@ if pagina == "🏠 Inicio":
         # ========== ESTADÍSTICAS RESUMEN ==========
         st.markdown("### 📊 Estadísticas del Ranking Filtrado")
         
-        col1, col2, col3, col4, col5 = st.columns(5)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             st.metric("👥 Total Estudiantes", len(tabla_filtrada))
@@ -856,10 +851,6 @@ if pagina == "🏠 Inicio":
             minimo = tabla_filtrada[metrica_ordenar].min()
             st.metric("📉 Mínimo", f"{minimo:.2f}")
         
-        with col5:
-            desviacion = tabla_filtrada[metrica_ordenar].std()
-            st.metric("📊 Desv. Est.", f"{desviacion:.2f}")
-        
         st.markdown("---")
         
         # ========== VISUALIZACIÓN ==========
@@ -874,13 +865,13 @@ if pagina == "🏠 Inicio":
             rename_dict = {}
             for col in tabla_display.columns:
                 if '_HP1' in col and col != 'PROMEDIO_HP1':
-                    rename_dict[col] = col.replace('_HP1', ' (HP1)')
+                    rename_dict[col] = col.replace('_HP1', ' (HP1)').replace('_', ' ')
                 elif '_HP2' in col and col != 'PROMEDIO_HP2':
-                    rename_dict[col] = col.replace('_HP2', ' (HP2)')
+                    rename_dict[col] = col.replace('_HP2', ' (HP2)').replace('_', ' ')
                 elif '_PREP' in col and col != 'PROMEDIO_PREP':
-                    rename_dict[col] = col.replace('_PREP', ' (PREP)')
+                    rename_dict[col] = col.replace('_PREP', ' (PREP)').replace('_', ' ')
                 elif '_PROMEDIO_GENERAL' in col:
-                    rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)')
+                    rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)').replace('_', ' ')
                 elif col == 'PROMEDIO_HP1':
                     rename_dict[col] = 'PROM. HP1'
                 elif col == 'PROMEDIO_HP2':
@@ -889,13 +880,11 @@ if pagina == "🏠 Inicio":
                     rename_dict[col] = 'PROM. PREP'
                 elif col == 'PROMEDIO_PONDERADO_GENERAL':
                     rename_dict[col] = 'PROMEDIO GENERAL'
-                elif col == 'SIMULACROS_PRESENTADOS':
-                    rename_dict[col] = 'SIMULACROS'
             
             tabla_display = tabla_display.rename(columns=rename_dict)
             
             # Aplicar estilo con gradiente
-            columnas_para_gradiente = [col for col in tabla_display.columns if col not in ['RANKING', 'ESTUDIANTE', 'SIMULACROS']]
+            columnas_para_gradiente = [col for col in tabla_display.columns if col not in ['RANKING', 'ESTUDIANTE']]
             
             st.dataframe(
                 tabla_display.style.background_gradient(
@@ -911,25 +900,25 @@ if pagina == "🏠 Inicio":
         with tab2:
             st.markdown("#### 📊 Top Estudiantes")
             
-            top_20 = tabla_filtrada.head(30)
+            top_30 = tabla_filtrada.head(30)
             
             fig = go.Figure()
             fig.add_trace(go.Bar(
-                y=top_20['ESTUDIANTE'],
-                x=top_20[metrica_ordenar],
+                y=top_30['ESTUDIANTE'],
+                x=top_30[metrica_ordenar],
                 orientation='h',
                 marker=dict(
-                    color=top_20[metrica_ordenar],
+                    color=top_30[metrica_ordenar],
                     colorscale='Viridis',
                     showscale=True,
                     colorbar=dict(title="Puntaje")
                 ),
-                text=top_20[metrica_ordenar].round(2),
+                text=top_30[metrica_ordenar].round(2),
                 textposition='outside'
             ))
             
             fig.update_layout(
-                title=f"Top - {metrica_ordenar.replace('_', ' ')}",
+                title=f"Top 30 - {metrica_ordenar.replace('_', ' ')}",
                 xaxis_title="Puntaje",
                 yaxis_title="Estudiante",
                 height=800,
@@ -1017,7 +1006,7 @@ if pagina == "🏠 Inicio":
         import traceback
         st.code(traceback.format_exc())
 
-    st.markdown("---")   
+    st.markdown("---")
 
     # ========== MÉTRICAS PRINCIPALES ==========
     try:
