@@ -664,9 +664,7 @@ if pagina == "🏠 Inicio":
                         </div>
                         <div style="flex: 1;">
                             <div style="font-weight: 600; font-size: 1rem; color: #2c3e50; margin-bottom: 0.3rem;" title="{nombre_completo}">{nombre_corto}</div>
-                            <span style="background-color: {color_sim}; color: white; padding: 0.2rem 0.6rem; border-radius: 15px; font-size: 0.7rem; font-weight: 600;">
-                                {estudiante['MEJOR_SIMULACRO']}
-                            </span>
+
                         </div>
                         <div style="font-size: 1.5rem; font-weight: 800; color: #667eea; margin-right: 1rem;">
                             {estudiante['PROMEDIO_PONDERADO_GENERAL']:.1f}
