@@ -901,8 +901,8 @@ elif pagina == "🎖️ Rankings":
         # Eliminar filas sin promedio
         ranking_global = ranking_global.dropna(subset=['PROMEDIO_PONDERADO_GENERAL'])
         
-        # Ordenar y obtener top 10
-        ranking_global = ranking_global.sort_values('PROMEDIO_PONDERADO_GENERAL', ascending=False).head(10).reset_index(drop=True)
+        # Ordenar y obtener top
+        ranking_global = ranking_global.sort_values('PROMEDIO_PONDERADO_GENERAL', ascending=False).head(30).reset_index(drop=True)
         
         # Verificar que tenemos datos
         if len(ranking_global) == 0:
@@ -959,9 +959,6 @@ elif pagina == "🎖️ Rankings":
                         </div>
                         <div style="flex: 1;">
                             <div style="font-weight: 600; font-size: 1rem; color: #2c3e50; margin-bottom: 0.3rem;" title="{nombre_completo}">{nombre_corto}</div>
-                            <span style="background-color: {color_sim}; color: white; padding: 0.2rem 0.6rem; border-radius: 15px; font-size: 0.7rem; font-weight: 600;">
-                                {estudiante['MEJOR_SIMULACRO']}
-                            </span>
                         </div>
                         <div style="font-size: 1.5rem; font-weight: 800; color: #667eea; margin-right: 1rem;">
                             {estudiante['PROMEDIO_PONDERADO_GENERAL']:.1f}
@@ -1231,8 +1228,6 @@ elif pagina == "🎖️ Rankings":
         import traceback
         st.code(traceback.format_exc())
     st.markdown("---")
-    st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros ICFES</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
     
 # ==================== REPORTE GENERAL ====================
 elif pagina == "📊 Reporte General":
