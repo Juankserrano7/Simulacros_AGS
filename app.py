@@ -1108,20 +1108,36 @@ elif pagina == "🎖️ Rankings":
                     rename_dict[col] = 'PROM. PREP'
                 elif col == 'PROMEDIO_PONDERADO_GENERAL':
                     rename_dict[col] = 'PROMEDIO GENERAL'
-                        
+                            
             tabla_display = tabla_display.rename(columns=rename_dict)
             columnas_para_gradiente = [col for col in tabla_display.columns if col not in ['RANKING', 'ESTUDIANTE']]
-            
-            st.dataframe(
-                tabla_display.style.background_gradient(
+
+            # === 🎨 FUNCIÓN para resaltar la columna PROMEDIO GENERAL en azul
+            def resaltar_promedio(col):
+                if col.name == 'PROMEDIO GENERAL':
+                    return ['background-color: #007BFF; color: white; font-weight: bold'] * len(col)
+                else:
+                    return [''] * len(col)
+
+            # === 🌈 Aplicar estilo: primero gradiente, luego color azul en la columna
+            tabla_estilo = (
+                tabla_display.style
+                .background_gradient(
                     subset=columnas_para_gradiente,
                     cmap='RdYlGn',
                     vmin=0,
                     vmax=100
-                ).format({col: '{:.2f}' for col in columnas_para_gradiente}),
+                )
+                .apply(resaltar_promedio)
+                .format({col: '{:.2f}' for col in columnas_para_gradiente})
+            )
+
+            st.dataframe(
+                tabla_estilo,
                 use_container_width=True,
                 height=600
             )
+
             
         with tab2:
             st.markdown("#### 📊 Top 30 Estudiantes")
@@ -1231,7 +1247,7 @@ elif pagina == "🎖️ Rankings":
     
 # ==================== REPORTE GENERAL ====================
 elif pagina == "📊 Reporte General":
-    st.markdown(f"<h1 class='header-title'>📊 Reporte General - {simulacro_seleccionado}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 class='header-title'> Reporte General - {simulacro_seleccionado}</h1>", unsafe_allow_html=True)
     
     # Métricas principales expandidas
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -1689,7 +1705,7 @@ elif pagina == "👤 Análisis Individual":
 
 # ==================== AVANCE ====================
 elif pagina == "📈 Avance":
-    st.markdown("<h1 class='header-title'>📋 Análisis de Avance</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>Análisis de Avance</h1>", unsafe_allow_html=True)
     
     # Preparar datos de Avance
     hp1_temp = hp1.copy()
@@ -1823,7 +1839,7 @@ elif pagina == "📈 Avance":
 
 # ==================== ESTADÍSTICAS DETALLADAS ====================
 elif pagina == "📉 Estadísticas Detalladas":
-    st.markdown("<h1 class='header-title'>📈 Estadísticas Detalladas</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'> Estadísticas Detalladas</h1>", unsafe_allow_html=True)
     
     tab1, tab2, tab3 = st.tabs(["📊 Correlaciones", "📈 Análisis por Grado", "🎯 Top Performers"])
     
@@ -1992,7 +2008,7 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #6c757d; padding: 2rem;'>
     <p style='font-size: 0.9rem;'>
-        <strong>🎓 Dashboard de Análisis de Simulacros PreIcfes</strong><br>
+        <strong> Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
         DNI HS JKS SSO Desarrallado con Streamlit, Pandas, Plotly y NumPy
     </p>
