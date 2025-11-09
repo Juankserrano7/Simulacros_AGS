@@ -909,9 +909,9 @@ if pagina == "🏠 Inicio":
             )
         
         with tab2:
-            st.markdown("#### 📊 Top 20 Estudiantes")
+            st.markdown("#### 📊 Top Estudiantes")
             
-            top_20 = tabla_filtrada.head(20)
+            top_20 = tabla_filtrada.head(30)
             
             fig = go.Figure()
             fig.add_trace(go.Bar(
