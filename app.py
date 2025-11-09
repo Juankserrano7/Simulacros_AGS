@@ -1994,7 +1994,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                     orientation='h',
                     color=materia,
                     color_continuous_scale=custom_colorscale,  # ← espersonalizada
-                    range_color=(0, 500),                      # ← mismo rango de valores
+                    range_color=(0, 100),                      # ← mismo rango de valores
                     text=materia
                 )
 
