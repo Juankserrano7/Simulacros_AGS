@@ -245,7 +245,7 @@ def cargar_datos():
     try:
         hp1 = pd.read_csv('HELMER_PARDO1.csv', skiprows=1)
         hp2 = pd.read_csv('HELMER_PARDO2.csv', skiprows=1)
-        prep = pd.read_csv('PREPARATE.csv', skiprows=1)
+        prep = pd.read_csv('Avancemos.csv', skiprows=1)
         
         # Limpiar nombres de columnas
         for df in [hp1, hp2, prep]:
@@ -1165,10 +1165,10 @@ elif pagina == "📈 Progresión":
         on='ESTUDIANTE'
     )
     
-    progresion.columns = ['ESTUDIANTE', 'HP1', 'HP2', 'PREPARATE']
+    progresion.columns = ['ESTUDIANTE', 'HP1', 'HP2', 'Avancemos']
     progresion['CAMBIO_HP1_HP2'] = progresion['HP2'] - progresion['HP1']
-    progresion['CAMBIO_HP2_PREP'] = progresion['PREPARATE'] - progresion['HP2']
-    progresion['CAMBIO_TOTAL'] = progresion['PREPARATE'] - progresion['HP1']
+    progresion['CAMBIO_HP2_PREP'] = progresion['Avancemos'] - progresion['HP2']
+    progresion['CAMBIO_TOTAL'] = progresion['Avancemos'] - progresion['HP1']
     
     st.markdown(f"**Estudiantes encontrados en los 3 simulacros:** {len(progresion)}")
     
@@ -1225,7 +1225,7 @@ elif pagina == "📈 Progresión":
     estudiantes_mostrar = st.multiselect(
         "Seleccionar estudiantes para comparar",
         progresion['ESTUDIANTE'].tolist(),
-        default=progresion.nlargest(5, 'PREPARATE')['ESTUDIANTE'].tolist()[:5]
+        default=progresion.nlargest(5, 'Avancemos')['ESTUDIANTE'].tolist()[:5]
     )
     
     if estudiantes_mostrar:
@@ -1235,7 +1235,7 @@ elif pagina == "📈 Progresión":
             datos_est = progresion[progresion['ESTUDIANTE'] == estudiante].iloc[0]
             fig.add_trace(go.Scatter(
                 x=['HP1', 'HP2', 'Prepárate'],
-                y=[datos_est['HP1'], datos_est['HP2'], datos_est['PREPARATE']],
+                y=[datos_est['HP1'], datos_est['HP2'], datos_est['Avancemos']],
                 mode='lines+markers',
                 name=estudiante.split()[0],
                 line=dict(width=3),
@@ -1257,7 +1257,7 @@ elif pagina == "📈 Progresión":
     # Tabla de progresión
     st.markdown("<h2 class='section-header'>📋 Tabla de Progresión Completa</h2>", unsafe_allow_html=True)
     
-    tabla_progresion = progresion[['ESTUDIANTE', 'HP1', 'HP2', 'PREPARATE', 
+    tabla_progresion = progresion[['ESTUDIANTE', 'HP1', 'HP2', 'Avancemos', 
                                      'CAMBIO_HP1_HP2', 'CAMBIO_HP2_PREP', 'CAMBIO_TOTAL']]
     tabla_progresion = tabla_progresion.sort_values('CAMBIO_TOTAL', ascending=False)
     tabla_progresion = tabla_progresion.round(2)
