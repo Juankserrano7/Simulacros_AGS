@@ -464,6 +464,7 @@ materias = ['LECTURA CRÍTICA', 'MATEMÁTICAS', 'SOCIALES Y CIUDADANAS',
 # Sidebar con diseño Bootstrap 5
 with st.sidebar:
     # Header del Sidebar
+    st.sidebar.image("Logo.png", use_column_width=True)
     st.markdown("""
     <div style='text-align: center; padding: 1.5rem 0; margin-bottom: 1rem;'>
         <img src="./Logo.png" alt="logo" style="height:225px;">
