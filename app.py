@@ -621,7 +621,7 @@ if pagina == "🏠 Inicio":
     
     # Recomendaciones estratégicas
     st.markdown("<h2 class='section-header'>💡 Recomendaciones Estratégicas</h2>", unsafe_allow_html=True)
-    
+    st.markdown(f"""<div></div>""", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     
     with col1:
