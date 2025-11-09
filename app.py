@@ -892,7 +892,7 @@ elif pagina == "🎖️ Rankings":
         st.stop()
         
     # ========== RANKING GLOBAL TOP 10 ==========
-    st.markdown("<h2 class='section-header'>🏆 Top 10 Global - Mejores Promedios</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>🏆 Top Global</h2>", unsafe_allow_html=True)
     
     try:
         # Usar el dataset unificado para el ranking
@@ -1547,7 +1547,7 @@ elif pagina == "🔄 Comparación Simulacros":
         fig.update_layout(
             title="Tendencia del Promedio Ponderado",
             yaxis_title="Promedio Ponderado",
-            height=400,
+            height=600,
             template="plotly_white"
         )
         st.plotly_chart(fig, use_container_width=True)
