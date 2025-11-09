@@ -1230,7 +1230,7 @@ elif pagina == "🎖️ Rankings":
     st.markdown("---")
     
 # ==================== REPORTE GENERAL ====================
-elif pagina == "📊 Reporte General":
+elif pagina == "📣 Reporte General":
     st.markdown(f"<h1 class='header-title'>📊 Reporte General - {simulacro_seleccionado}</h1>", unsafe_allow_html=True)
     
     # Métricas principales expandidas
@@ -1476,7 +1476,7 @@ elif pagina == "📊 Reporte General":
 
 # ==================== COMPARACIÓN SIMULACROS ====================
 elif pagina == "🔄 Comparación Simulacros":
-    st.markdown("<h1 class='header-title'>🔄 Comparación entre Simulacros</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>🔬 Comparación entre Simulacros</h1>", unsafe_allow_html=True)
     
     # Comparación de promedios
     st.markdown("<h2 class='section-header'>📊 Comparación de Promedios por Materia</h2>", unsafe_allow_html=True)
@@ -1689,7 +1689,7 @@ elif pagina == "👤 Análisis Individual":
 
 # ==================== AVANCE ====================
 elif pagina == "📈 Avance":
-    st.markdown("<h1 class='header-title'>📈 Análisis de Avance</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>📋 Análisis de Avance</h1>", unsafe_allow_html=True)
     
     # Preparar datos de Avance
     hp1_temp = hp1.copy()
@@ -1823,7 +1823,7 @@ elif pagina == "📈 Avance":
 
 # ==================== ESTADÍSTICAS DETALLADAS ====================
 elif pagina == "📉 Estadísticas Detalladas":
-    st.markdown("<h1 class='header-title'>📉 Estadísticas Detalladas</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>📈 Estadísticas Detalladas</h1>", unsafe_allow_html=True)
     
     tab1, tab2, tab3 = st.tabs(["📊 Correlaciones", "📈 Análisis por Grado", "🎯 Top Performers"])
     
@@ -1992,7 +1992,7 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #6c757d; padding: 2rem;'>
     <p style='font-size: 0.9rem;'>
-        <strong>📊 Dashboard de Análisis de Simulacros PreIcfes</strong><br>
+        <strong>🎓 Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
         Desarrollado con Streamlit, Pandas, Plotly y NumPy
     </p>
