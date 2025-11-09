@@ -550,7 +550,7 @@ if pagina == "🏠 Inicio":
     
     # ========== RANKING GLOBAL TOP 10 ==========
     st.markdown("<h2 class='section-header'>🏆 Top 10 Global - Mejores Promedios</h2>", unsafe_allow_html=True)
-    st.markdown("<div></div>", unsafe_allow_html=True)
+    
     try:
         # Crear dataset combinado con todos los simulacros
         hp1_ranking = hp1[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
@@ -582,7 +582,6 @@ if pagina == "🏠 Inicio":
             st.warning("⚠️ No se encontraron datos válidos para el ranking global.")
         else:
             # Colores para medallas y podio
-            medallas = {0: '🥇', 1: '🥈', 2: '🥉'}
             colores_simulacro = {
                 'Helmer Pardo 1': '#3498db', 
                 'Helmer Pardo 2': '#2ecc71', 
@@ -613,12 +612,11 @@ if pagina == "🏠 Inicio":
                 color2 = colores_simulacro.get(segundo_lugar['SIMULACRO'], '#666666')
                 color3 = colores_simulacro.get(tercer_lugar['SIMULACRO'], '#666666')
                 
-                # HTML del podio horizontal
-                st.markdown(f"""
+                # HTML del podio horizontal - TODO EN UNA SOLA CADENA
+                podio_html = f"""
                 <div class="ranking-container" style="padding: 2rem 1rem;">
                     <div style="display: flex; justify-content: center; align-items: flex-end; gap: 2rem; max-width: 1000px; margin: 0 auto;">
                         
-                        <!-- SEGUNDO LUGAR -->
                         <div class="podium-place podium-second" style="flex: 1; max-width: 250px; text-align: center;">
                             <div class="podium-avatar" style="width: 100px; height: 100px; margin: 0 auto 1rem;">
                                 <span class="trophy-icon" style="font-size: 2.5rem;">🥈</span>
@@ -632,7 +630,6 @@ if pagina == "🏠 Inicio":
                             </div>
                         </div>
                         
-                        <!-- PRIMER LUGAR -->
                         <div class="podium-place podium-first" style="flex: 1; max-width: 280px; text-align: center;">
                             <div class="podium-avatar" style="width: 130px; height: 130px; margin: 0 auto 1rem;">
                                 <span class="trophy-icon" style="font-size: 3.5rem;">🥇</span>
@@ -646,7 +643,6 @@ if pagina == "🏠 Inicio":
                             </div>
                         </div>
                         
-                        <!-- TERCER LUGAR -->
                         <div class="podium-place podium-third" style="flex: 1; max-width: 240px; text-align: center;">
                             <div class="podium-avatar" style="width: 90px; height: 90px; margin: 0 auto 1rem;">
                                 <span class="trophy-icon" style="font-size: 2.2rem;">🥉</span>
@@ -662,15 +658,17 @@ if pagina == "🏠 Inicio":
                         
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """
+                
+                # Renderizar el HTML
+                st.markdown(podio_html, unsafe_allow_html=True)
             
             elif len(ranking_global) > 0:
                 st.info(f"ℹ️ Solo hay {len(ranking_global)} estudiante(s) en el ranking.")
             
             # Mostrar posiciones 4-10 (sin espacio extra)
             if len(ranking_global) > 3:
-                st.markdown('<div class="ranking-container" style="background: white; margin-top: 0; padding-top: 1.5rem;">', unsafe_allow_html=True)
-                st.markdown('<h3 style="text-align: center; color: #667eea; margin-bottom: 1.5rem;">Posiciones 4-10</h3>', unsafe_allow_html=True)
+                st.markdown('<div class="ranking-container" style="background: white; margin-top: 0; padding-top: 1.5rem;"><h3 style="text-align: center; color: #667eea; margin-bottom: 1.5rem;">Posiciones 4-10</h3>', unsafe_allow_html=True)
                 
                 for idx in range(3, len(ranking_global)):
                     estudiante = ranking_global.iloc[idx]
@@ -698,6 +696,160 @@ if pagina == "🏠 Inicio":
     except Exception as e:
         st.error(f"❌ Error al generar el ranking global: {str(e)}")
         st.info("Verifica que los archivos CSV contengan la columna 'PROMEDIO PONDERADO' con valores numéricos válidos.")
+    
+    st.markdown("---")
+    
+    # ========== TABLA COMPLETA DE TODOS LOS PROMEDIOS GLOBALES ==========
+    st.markdown("<h2 class='section-header'>📋 Tabla Completa - Todos los Estudiantes</h2>", unsafe_allow_html=True)
+    
+    try:
+        # Crear dataset completo con todos los simulacros
+        hp1_completo = hp1[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
+        hp1_completo['SIMULACRO'] = 'Helmer Pardo 1'
+        
+        hp2_completo = hp2[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
+        hp2_completo['SIMULACRO'] = 'Helmer Pardo 2'
+        
+        prep_completo = prep[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
+        prep_completo['SIMULACRO'] = 'AVANCEMOS'
+        
+        # Combinar todos
+        tabla_completa = pd.concat([hp1_completo, hp2_completo, prep_completo], ignore_index=True)
+        
+        # Limpiar datos
+        tabla_completa = tabla_completa.dropna(subset=['PROMEDIO PONDERADO'])
+        tabla_completa['PROMEDIO PONDERADO'] = pd.to_numeric(tabla_completa['PROMEDIO PONDERADO'], errors='coerce')
+        tabla_completa = tabla_completa.dropna(subset=['PROMEDIO PONDERADO'])
+        
+        # Ordenar por promedio descendente
+        tabla_completa = tabla_completa.sort_values('PROMEDIO PONDERADO', ascending=False).reset_index(drop=True)
+        
+        # Agregar columna de ranking
+        tabla_completa.insert(0, 'RANKING', range(1, len(tabla_completa) + 1))
+        
+        # Redondear promedios
+        tabla_completa['PROMEDIO PONDERADO'] = tabla_completa['PROMEDIO PONDERADO'].round(2)
+        
+        # Filtros interactivos
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            simulacro_filtro = st.multiselect(
+                "Filtrar por Simulacro",
+                options=tabla_completa['SIMULACRO'].unique().tolist(),
+                default=tabla_completa['SIMULACRO'].unique().tolist()
+            )
+        
+        with col2:
+            min_puntaje = st.number_input(
+                "Puntaje mínimo",
+                min_value=0.0,
+                max_value=500.0,
+                value=0.0,
+                step=10.0
+            )
+        
+        with col3:
+            max_puntaje = st.number_input(
+                "Puntaje máximo",
+                min_value=0.0,
+                max_value=500.0,
+                value=500.0,
+                step=10.0
+            )
+        
+        # Aplicar filtros
+        tabla_filtrada = tabla_completa[
+            (tabla_completa['SIMULACRO'].isin(simulacro_filtro)) &
+            (tabla_completa['PROMEDIO PONDERADO'] >= min_puntaje) &
+            (tabla_completa['PROMEDIO PONDERADO'] <= max_puntaje)
+        ]
+        
+        # Mostrar estadísticas
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("📊 Total Registros", len(tabla_filtrada))
+        with col2:
+            st.metric("📈 Promedio", f"{tabla_filtrada['PROMEDIO PONDERADO'].mean():.2f}")
+        with col3:
+            st.metric("🏆 Máximo", f"{tabla_filtrada['PROMEDIO PONDERADO'].max():.2f}")
+        with col4:
+            st.metric("📉 Mínimo", f"{tabla_filtrada['PROMEDIO PONDERADO'].min():.2f}")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Mostrar tabla con estilo
+        st.dataframe(
+            tabla_filtrada.style.background_gradient(
+                subset=['PROMEDIO PONDERADO'], 
+                cmap='RdYlGn', 
+                vmin=0, 
+                vmax=500
+            ).format({
+                'PROMEDIO PONDERADO': '{:.2f}'
+            }),
+            use_container_width=True,
+            height=600
+        )
+        
+        # Botón de descarga
+        csv = tabla_filtrada.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Descargar tabla como CSV",
+            data=csv,
+            file_name="ranking_global_completo.csv",
+            mime="text/csv",
+        )
+        
+    except Exception as e:
+        st.error(f"❌ Error al generar la tabla completa: {str(e)}")
+    
+    st.markdown("---")
+    
+    # ========== MÉTRICAS PRINCIPALES ==========
+    try:
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown("""
+            <div class='metric-card'>
+                <h3 style='color: #667eea;'>📋 Simulacros</h3>
+                <h2 style='font-size: 3rem; color: #764ba2;'>3</h2>
+                <p style='color: #6c757d;'>HP1, HP2, AVANCEMOS</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            total_estudiantes = len(hp1)
+            st.markdown(f"""
+            <div class='metric-card'>
+                <h3 style='color: #667eea;'>👥 Estudiantes</h3>
+                <h2 style='font-size: 3rem; color: #764ba2;'>{total_estudiantes}</h2>
+                <p style='color: #6c757d;'>Evaluados</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+            <div class='metric-card'>
+                <h3 style='color: #667eea;'>📚 Áreas</h3>
+                <h2 style='font-size: 3rem; color: #764ba2;'>5</h2>
+                <p style='color: #6c757d;'>Materias PreIcfes</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            total_datos = len(hp1) + len(hp2) + len(prep)
+            st.markdown(f"""
+            <div class='metric-card'>
+                <h3 style='color: #667eea;'>📋 Registros</h3>
+                <h2 style='font-size: 3rem; color: #764ba2;'>{total_datos}</h2>
+                <p style='color: #6c757d;'>Datos totales</p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    except Exception as e:
+        st.error(f"❌ Error al generar las métricas: {str(e)}")
     
     st.markdown("---")
     
