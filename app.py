@@ -245,7 +245,7 @@ def cargar_datos():
     try:
         hp1 = pd.read_csv('HELMER_PARDO1.csv', skiprows=1)
         hp2 = pd.read_csv('HELMER_PARDO2.csv', skiprows=1)
-        prep = pd.read_csv('Avancemos.csv', skiprows=1)
+        prep = pd.read_csv('PREPARATE.csv', skiprows=1)
         
         # Limpiar nombres de columnas
         for df in [hp1, hp2, prep]:
