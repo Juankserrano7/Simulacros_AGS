@@ -450,7 +450,7 @@ if pagina == "🏠 Inicio":
             yaxis_title="Puntaje Promedio",
             template="plotly_white"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Tabla de cambios
         cambio_1_2 = promedios_generales[1] - promedios_generales[0]
@@ -469,7 +469,7 @@ if pagina == "🏠 Inicio":
         })
         cambios_df['Cambio'] = cambios_df['Cambio'].round(2)
         cambios_df['Porcentaje'] = cambios_df['Porcentaje'].round(2).astype(str) + '%'
-        st.dataframe(cambios_df, use_container_width=True, hide_index=True)
+        st.dataframe(cambios_df, width="stretch", hide_index=True)
     
     with col2:
         st.markdown("### 📊 Distribución de Rendimiento por Simulacro")
@@ -498,7 +498,7 @@ if pagina == "🏠 Inicio":
             yaxis_title="Número de Estudiantes",
             template="plotly_white"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Tabla resumen de distribución
         st.markdown("#### 📋 Resumen de Distribución")
@@ -508,7 +508,7 @@ if pagina == "🏠 Inicio":
             'HP2': dist_hp2,
             'Prepárate': dist_prep
         })
-        st.dataframe(dist_df, use_container_width=True, hide_index=True)
+        st.dataframe(dist_df, width="stretch", hide_index=True)
     
     st.markdown("---")
     
@@ -550,7 +550,7 @@ if pagina == "🏠 Inicio":
         height=500,
         title="Comparación de Rendimiento por Materia"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     
     # Tabla comparativa detallada
     st.markdown("#### 📊 Tabla Comparativa de Materias")
@@ -566,7 +566,7 @@ if pagina == "🏠 Inicio":
     comp_materias_df = comp_materias_df.round(2)
     st.dataframe(
         comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'Prepárate'], cmap='RdYlGn', vmin=40, vmax=90),
-        use_container_width=True,
+        width="stretch",
         hide_index=True
     )
     
@@ -710,7 +710,7 @@ elif pagina == "📊 Reporte General":
             ]
         })
         medidas_df['Valor'] = medidas_df['Valor'].apply(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
-        st.dataframe(medidas_df, use_container_width=True, hide_index=True)
+        st.dataframe(medidas_df, width="stretch", hide_index=True)
         
         st.markdown("### 📊 Percentiles")
         percentiles_df = pd.DataFrame({
@@ -724,7 +724,7 @@ elif pagina == "📊 Reporte General":
             ]
         })
         percentiles_df['Puntaje'] = percentiles_df['Puntaje'].round(2)
-        st.dataframe(percentiles_df, use_container_width=True, hide_index=True)
+        st.dataframe(percentiles_df, width="stretch", hide_index=True)
     
     with col2:
         st.markdown("### 🎯 Distribución por Rangos de Puntaje")
@@ -744,7 +744,7 @@ elif pagina == "📊 Reporte General":
         )])
         fig.update_traces(textposition='inside', textinfo='percent+label')
         fig.update_layout(height=400, title="Distribución del Rendimiento")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Tabla de distribución
         rangos_df = pd.DataFrame({
@@ -752,7 +752,7 @@ elif pagina == "📊 Reporte General":
             'Cantidad': list(rangos.values()),
             'Porcentaje': [f"{(v/len(datos_actual)*100):.1f}%" for v in rangos.values()]
         })
-        st.dataframe(rangos_df, use_container_width=True, hide_index=True)
+        st.dataframe(rangos_df, width="stretch", hide_index=True)
     
     st.markdown("---")
     
@@ -783,7 +783,7 @@ elif pagina == "📊 Reporte General":
             height=450,
             template="plotly_white"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         st.markdown("### 🎯 Desempeño Relativo")
@@ -808,7 +808,7 @@ elif pagina == "📊 Reporte General":
             height=450,
             template="plotly_white"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     st.markdown("---")
     
@@ -839,7 +839,7 @@ elif pagina == "📊 Reporte General":
         )
         fig.update_layout(height=400, showlegend=False, 
                          xaxis_title="Puntaje", yaxis_title="Frecuencia")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         st.markdown("### 📈 Boxplot Comparativo")
@@ -852,7 +852,7 @@ elif pagina == "📊 Reporte General":
                 boxmean='sd'
             ))
         fig.update_layout(height=400, showlegend=True, yaxis_title="Puntaje")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     st.markdown("---")
     
@@ -874,7 +874,7 @@ elif pagina == "📊 Reporte General":
     stats_df = stats_df.round(2)
     st.dataframe(
         stats_df.style.background_gradient(subset=['Media', 'Mediana'], cmap='RdYlGn', vmin=40, vmax=90),
-        use_container_width=True,
+        width="stretch",
         hide_index=True
     )
     
@@ -898,7 +898,7 @@ elif pagina == "📊 Reporte General":
             labels=dict(color="Correlación")
         )
         fig.update_layout(height=500, title="Correlación entre Materias")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         st.markdown("### 🔍 Interpretación")
@@ -949,7 +949,7 @@ elif pagina == "🔄 Comparación Simulacros":
         yaxis_title="Puntaje Promedio",
         template="plotly_white"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     
     st.markdown("---")
     
@@ -969,7 +969,7 @@ elif pagina == "🔄 Comparación Simulacros":
     # Estilo condicional
     st.dataframe(
         comp_df.style.background_gradient(subset=['Cambio HP1→HP2', 'Cambio HP2→Prep'], cmap='RdYlGn', vmin=-20, vmax=20),
-        use_container_width=True
+        width="stretch"
     )
     
     st.markdown("---")
@@ -1002,7 +1002,7 @@ elif pagina == "🔄 Comparación Simulacros":
             height=400,
             template="plotly_white"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         cambio_1_2 = promedios_generales[1] - promedios_generales[0]
@@ -1094,7 +1094,7 @@ elif pagina == "👤 Análisis Individual":
             height=450,
             title="Comparación con el Promedio del Grupo"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         fig = go.Figure()
@@ -1121,7 +1121,7 @@ elif pagina == "👤 Análisis Individual":
             height=450,
             template="plotly_white"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     # Tabla de puntajes
     st.markdown("<h2 class='section-header'>📋 Detalle de Puntajes</h2>", unsafe_allow_html=True)
@@ -1136,7 +1136,7 @@ elif pagina == "👤 Análisis Individual":
     
     st.dataframe(
         detalle_df.style.background_gradient(subset=['Diferencia'], cmap='RdYlGn', vmin=-20, vmax=20),
-        use_container_width=True
+        width="stretch"
     )
 
 # ==================== PROGRESIÓN ====================
@@ -1215,7 +1215,7 @@ elif pagina == "📈 Progresión":
         template="plotly_white"
     )
     fig.add_vline(x=0, line_dash="dash", line_color="black")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     
     st.markdown("---")
     
@@ -1250,7 +1250,7 @@ elif pagina == "📈 Progresión":
             template="plotly_white",
             hovermode='x unified'
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     st.markdown("---")
     
@@ -1269,7 +1269,7 @@ elif pagina == "📈 Progresión":
             vmin=-50, 
             vmax=50
         ),
-        use_container_width=True,
+        width="stretch",
         height=600
     )
 
@@ -1298,7 +1298,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                     zmax=1
                 )
                 fig.update_layout(height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
         
         st.markdown("---")
         st.markdown("### 📊 Interpretación de Correlaciones")
@@ -1352,7 +1352,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                 height=500,
                 template="plotly_white"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             st.markdown("---")
             
@@ -1372,7 +1372,7 @@ elif pagina == "📉 Estadísticas Detalladas":
             st.markdown("#### 📊 Tabla de Promedios por Grado")
             st.dataframe(
                 df_grados.style.background_gradient(cmap='YlGnBu', subset=materias + ['Promedio General']),
-                use_container_width=True
+                width="stretch"
             )
         else:
             st.warning("No hay información de grado disponible en este simulacro.")
@@ -1415,7 +1415,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                     showlegend=False,
                     yaxis={'categoryorder': 'total ascending'}
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
         
         st.markdown("---")
         
@@ -1435,7 +1435,7 @@ elif pagina == "📉 Estadísticas Detalladas":
                 vmin=40,
                 vmax=100
             ),
-            use_container_width=True,
+            width="stretch",
             height=600
         )
 
