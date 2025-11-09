@@ -595,11 +595,10 @@ if pagina == "🏠 Inicio":
         <div class='alert-warning'>
             <h4>⚠️ Áreas de Atención Prioritaria</h4>
             <ul>
-                <li><strong>Caída General:</strong> {abs(cambio_hp1_hp2):.1f} puntos entre HP1 y HP2 ({abs(cambio_hp1_hp2/promedios_generales[0]*100):.1f}%)</li>
-                <li><strong>Materia con Mayor Caída:</strong> {mat_mayor_caida} ({cambios_materias[mat_mayor_caida]:.1f} puntos)</li>
-                <li><strong>Materia más Variable:</strong> {mat_variable} (σ = {variabilidades[mat_variable]:.1f})</li>
-                <li><strong>Puntaje Promedio más Bajo:</strong> {menor_materia} ({min(promedios_hp1):.1f} puntos)</li>
-                <li><strong>Estudiantes en Riesgo:</strong> {len(hp1[hp1['PROMEDIO PONDERADO'] < 250])} ({len(hp1[hp1['PROMEDIO PONDERADO'] < 250])/len(hp1)*100:.1f}%)</li>
+                <li><strong>Diferencia General:</strong> {abs(cambio_hp1_hp2):.1f} puntos entre HP1 y HP2 ({abs(cambio_hp1_hp2/promedios_generales[0]*100):.1f}%)</li>
+                <li><strong>Materia con Mayor Diferencia:</strong> {mat_mayor_caida} ({cambios_materias[mat_mayor_caida]:.1f} puntos)</li>
+                <li><strong>Materia con >DS:</strong> {mat_variable} (σ = {variabilidades[mat_variable]:.1f})</li>
+                <li><strong>Puntaje Promedio inferior:</strong> {menor_materia} ({min(promedios_hp1):.1f} puntos)</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -610,9 +609,9 @@ if pagina == "🏠 Inicio":
             <h4>✅ Fortalezas y Oportunidades</h4>
             <ul>
                 <li><strong>Mejor Materia:</strong> {mejor_materia} ({max(promedios_hp1):.1f} puntos promedio)</li>
-                <li><strong>Materia con Mayor Mejora:</strong> {mat_mayor_mejora} (+{cambios_materias[mat_mayor_mejora]:.1f} puntos)</li>
+                <li><strong>Materia consistente:</strong> {mat_mayor_mejora} (+{cambios_materias[mat_mayor_mejora]:.1f} puntos)</li>
                 <li><strong>Estudiantes Destacados:</strong> {len(hp1[hp1['PROMEDIO PONDERADO'] >= 350])} con puntaje ≥350</li>
-                <li><strong>Consistencia:</strong> {materias[np.argmin([hp1[m].std() for m in materias])]} es la más consistente</li>
+                <li><strong>Mejor desempeño:</strong> {materias[np.argmin([hp1[m].std() for m in materias])]} es la más consistente</li>
                 <li><strong>Potencial de Mejora:</strong> Identificados {len(hp1[(hp1['PROMEDIO PONDERADO'] >= 250) & (hp1['PROMEDIO PONDERADO'] < 300)])} estudiantes en rango medio</li>
             </ul>
         </div>
