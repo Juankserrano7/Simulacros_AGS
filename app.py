@@ -929,7 +929,7 @@ if pagina == "🏠 Inicio":
             ))
             
             fig.update_layout(
-                title=f"Top 20 - {metrica_ordenar.replace('_', ' ')}",
+                title=f"Top - {metrica_ordenar.replace('_', ' ')}",
                 xaxis_title="Puntaje",
                 yaxis_title="Estudiante",
                 height=800,
