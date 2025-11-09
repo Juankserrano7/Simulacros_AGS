@@ -481,7 +481,7 @@ with st.sidebar:
     st.markdown("### 🧭 NAVEGACIÓN")
     pagina = st.radio(
         "Navegación",
-        ["🏠 Inicio", "📊 Reporte General", "🔄 Comparación Simulacros", 
+        ["🏠 Inicio", "🎖️ Rankings","📊 Reporte General", "🔄 Comparación Simulacros", 
          "👤 Análisis Individual", "📈 Avance", "📉 Estadísticas Detalladas"],
         label_visibility="collapsed"
     )
@@ -547,393 +547,6 @@ datos_actual = simulacros_map[simulacro_seleccionado]
 if pagina == "🏠 Inicio":
     st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
-    
-    # ========== PREPARAR DATASET UNIFICADO (UNA SOLA VEZ) ==========
-    try:
-        # Preparar datos completos de cada simulacro
-        hp1_completo = hp1[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
-        hp1_completo.columns = ['ESTUDIANTE'] + [f'{mat}_HP1' for mat in materias] + ['PROMEDIO_HP1']
-        
-        hp2_completo = hp2[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
-        hp2_completo.columns = ['ESTUDIANTE'] + [f'{mat}_HP2' for mat in materias] + ['PROMEDIO_HP2']
-        
-        prep_completo = prep[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
-        prep_completo.columns = ['ESTUDIANTE'] + [f'{mat}_PREP' for mat in materias] + ['PROMEDIO_PREP']
-        
-        # Normalizar nombres de estudiantes
-        hp1_completo['ESTUDIANTE'] = hp1_completo['ESTUDIANTE'].str.strip().str.upper()
-        hp2_completo['ESTUDIANTE'] = hp2_completo['ESTUDIANTE'].str.strip().str.upper()
-        prep_completo['ESTUDIANTE'] = prep_completo['ESTUDIANTE'].str.strip().str.upper()
-        
-        # Combinar todos los datos por estudiante (DATASET UNIFICADO)
-        datos_unificados = hp1_completo.merge(hp2_completo, on='ESTUDIANTE', how='outer')
-        datos_unificados = datos_unificados.merge(prep_completo, on='ESTUDIANTE', how='outer')
-        
-        # Calcular promedio ponderado general (promedio de los 3 promedios ponderados)
-        datos_unificados['PROMEDIO_PONDERADO_GENERAL'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].mean(axis=1, skipna=True)
-        
-        # Calcular promedios generales por materia
-        for mat in materias:
-            cols_materia = [f'{mat}_HP1', f'{mat}_HP2', f'{mat}_PREP']
-            datos_unificados[f'{mat}_PROMEDIO_GENERAL'] = datos_unificados[cols_materia].mean(axis=1, skipna=True)
-            
-        # Calcular número de simulacros presentados
-        datos_unificados['SIMULACROS_PRESENTADOS'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].notna().sum(axis=1)
-        
-        # Agregar información del mejor simulacro
-        datos_unificados['MEJOR_SIMULACRO'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].idxmax(axis=1)
-        datos_unificados['MEJOR_PUNTAJE'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].max(axis=1)
-        
-        # Mapear nombres de simulacros
-        simulacro_map = {
-            'PROMEDIO_HP1': 'Helmer Pardo 1',
-            'PROMEDIO_HP2': 'Helmer Pardo 2',
-            'PROMEDIO_PREP': 'AVANCEMOS'
-        }
-        datos_unificados['MEJOR_SIMULACRO'] = datos_unificados['MEJOR_SIMULACRO'].map(simulacro_map)
-    
-    except Exception as e:
-        st.error(f"❌ Error al preparar el dataset unificado: {str(e)}")
-        st.stop()
-        
-    # ========== RANKING GLOBAL TOP 10 ==========
-    st.markdown("<h2 class='section-header'>🏆 Top 10 Global - Mejores Promedios</h2>", unsafe_allow_html=True)
-    
-    try:
-        # Usar el dataset unificado para el ranking
-        ranking_global = datos_unificados[['ESTUDIANTE', 'PROMEDIO_PONDERADO_GENERAL', 'MEJOR_SIMULACRO', 'MEJOR_PUNTAJE']].copy()
-        
-        # Eliminar filas sin promedio
-        ranking_global = ranking_global.dropna(subset=['PROMEDIO_PONDERADO_GENERAL'])
-        
-        # Ordenar y obtener top 10
-        ranking_global = ranking_global.sort_values('PROMEDIO_PONDERADO_GENERAL', ascending=False).head(10).reset_index(drop=True)
-        
-        # Verificar que tenemos datos
-        if len(ranking_global) == 0:
-            st.warning("⚠️ No se encontraron datos válidos para el ranking global.")
-        else:
-            # Colores para simulacros
-            colores_simulacro = {
-                'Helmer Pardo 1': '#3498db', 
-                'Helmer Pardo 2': '#2ecc71', 
-                'AVANCEMOS': '#e74c3c'
-            }
-
-            # ========== INICIO: RANKING UNIFICADO (POSICIONES 1-10) ==========
-            # Se eliminó el bloque del podio (Top 3)
-            
-            # El bloque "POSICIONES 4-10" ahora maneja todo el ranking (1-10)
-            if len(ranking_global) > 0:
-                st.markdown('''
-                <div class="ranking-container" style="background: white; margin-top: 0; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                ''', unsafe_allow_html=True) # Se eliminó el H3 "Posiciones 4-10"
-                
-                # Bucle modificado: ahora itera de 0 a len(ranking_global)
-                for idx in range(len(ranking_global)):
-                    estudiante = ranking_global.iloc[idx]
-                    nombre_completo = str(estudiante['ESTUDIANTE']).strip()
-                    nombre_partes = nombre_completo.split()
-                    nombre_corto = ' '.join(nombre_partes[:2]) if len(nombre_partes) > 1 else nombre_completo
-                                        
-                    color_sim = colores_simulacro.get(estudiante['MEJOR_SIMULACRO'], '#666666')
-                    
-                    # --- Lógica para destacar el Top 3 con medallas y colores ---
-                    posicion_display = f"{idx + 1}"
-                    background_color = "linear-gradient(135deg, #667eea, #764ba2)" # Color por defecto
-                    font_size = "1.2rem"
-                    
-                    if idx == 0: # 1er Puesto
-                        posicion_display = "🥇"
-                        background_color = "linear-gradient(135deg, #FFD700, #FFA500)" # Oro
-                        font_size = "1.5rem"
-                    elif idx == 1: # 2do Puesto
-                        posicion_display = "🥈"
-                        background_color = "linear-gradient(135deg, #C0C0C0, #E8E8E8)" # Plata
-                        font_size = "1.4rem"
-                    elif idx == 2: # 3er Puesto
-                        posicion_display = "🥉"
-                        background_color = "linear-gradient(135deg, #CD7F32, #E8C39E)" # Bronce
-                        font_size = "1.3rem"
-                    # --- Fin de la lógica de destaque ---
-
-                    st.markdown(f"""
-                    <div style="display: flex; align-items: center; padding: 1rem; margin-bottom: 0.5rem; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; transition: transform 0.2s;">
-                        <div style="width: 50px; height: 50px; background: {background_color}; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: {font_size}; color: white; margin-right: 1rem;">
-                            {posicion_display}
-                        </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; font-size: 1rem; color: #2c3e50; margin-bottom: 0.3rem;" title="{nombre_completo}">{nombre_corto}</div>
-                        </div>
-                        <div style="font-size: 1.5rem; font-weight: 800; color: #667eea; margin-right: 1rem;">
-                            {estudiante['PROMEDIO_PONDERADO_GENERAL']:.1f}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                                
-                st.markdown('</div>', unsafe_allow_html=True)
-            # ========== FIN: RANKING UNIFICADO ==========
-            
-    except Exception as e:
-        st.error(f"❌ Error al generar el ranking global: {str(e)}")
-        import traceback
-        st.code(traceback.format_exc())
-        
-    st.markdown("---")
-    
-    # ========== TABLA COMPLETA (USA EL MISMO DATASET UNIFICADO) ==========
-    st.markdown("<h2 class='section-header'>📋 Tabla Completa - Ranking Global por Estudiante</h2>", unsafe_allow_html=True)
-    try:
-        # ========== CONTROLES INTERACTIVOS ==========
-        st.markdown("### 🎯 Controles de Visualización")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            metrica_ordenar = st.selectbox(
-                "📊 Ordenar por:",
-                options=['PROMEDIO_PONDERADO_GENERAL'] + [f'{mat}_PROMEDIO_GENERAL' for mat in materias],
-                format_func=lambda x: 'Promedio Ponderado General' if x == 'PROMEDIO_PONDERADO_GENERAL' else x.replace('_PROMEDIO_GENERAL', '').replace('_', ' '),
-                index=0
-            )
-        
-        with col2:
-            min_puntaje = st.number_input(
-                "📉 Puntaje mínimo:",
-                min_value=0.0,
-                max_value=500.0,
-                value=0.0,
-                step=10.0
-            )
-        
-        with col3:
-            max_puntaje = st.number_input(
-                "📈 Puntaje máximo:",
-                min_value=0.0,
-                max_value=500.0,
-                value=500.0,
-                step=10.0
-            )
-            
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            simulacros_mostrar = st.multiselect(
-                "📋 Mostrar columnas de simulacros:",
-                options=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS'],
-                default=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS']
-            )
-        
-        with col2:
-            buscar_nombre = st.text_input(
-                "🔍 Buscar estudiante por nombre:",
-                placeholder="Escribe el nombre..."
-            )
-            
-        # ========== APLICAR FILTROS ==========
-        tabla_filtrada = datos_unificados.copy()
-        
-        tabla_filtrada = tabla_filtrada[
-            (tabla_filtrada[metrica_ordenar] >= min_puntaje) &
-            (tabla_filtrada[metrica_ordenar] <= max_puntaje)
-        ]
-        
-        if buscar_nombre:
-            tabla_filtrada = tabla_filtrada[tabla_filtrada['ESTUDIANTE'].str.contains(buscar_nombre.upper(), na=False)]
-            
-        tabla_filtrada = tabla_filtrada.sort_values(metrica_ordenar, ascending=False).reset_index(drop=True)
-        tabla_filtrada.insert(0, 'RANKING', range(1, len(tabla_filtrada) + 1))
-        
-        # ========== SELECCIONAR COLUMNAS ==========
-        columnas_mostrar = ['RANKING', 'ESTUDIANTE', 'PROMEDIO_PONDERADO_GENERAL']
-        
-        if 'Helmer Pardo 1' in simulacros_mostrar:
-            columnas_mostrar.append('PROMEDIO_HP1')
-            columnas_mostrar.extend([f'{mat}_HP1' for mat in materias])
-        
-        if 'Helmer Pardo 2' in simulacros_mostrar:
-            columnas_mostrar.append('PROMEDIO_HP2')
-            columnas_mostrar.extend([f'{mat}_HP2' for mat in materias])
-            
-        if 'AVANCEMOS' in simulacros_mostrar:
-            columnas_mostrar.append('PROMEDIO_PREP')
-            columnas_mostrar.extend([f'{mat}_PREP' for mat in materias])
-            
-        columnas_mostrar.extend([f'{mat}_PROMEDIO_GENERAL' for mat in materias])
-        columnas_mostrar = [col for col in columnas_mostrar if col in tabla_filtrada.columns]
-        tabla_mostrar = tabla_filtrada[columnas_mostrar].copy()
-        
-        columnas_numericas = tabla_mostrar.select_dtypes(include=[np.number]).columns
-        tabla_mostrar[columnas_numericas] = tabla_mostrar[columnas_numericas].round(2)
-        
-        # ========== ESTADÍSTICAS RESUMEN ==========
-        st.markdown("### 📊 Estadísticas del Ranking Filtrado")
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("👥 Total Estudiantes", len(tabla_filtrada))
-        
-        with col2:
-            promedio_general = tabla_filtrada[metrica_ordenar].mean()
-            st.metric("📈 Promedio", f"{promedio_general:.2f}")
-        
-        with col3:
-            maximo = tabla_filtrada[metrica_ordenar].max()
-            st.metric("🏆 Máximo", f"{maximo:.2f}")
-        
-        with col4:
-            minimo = tabla_filtrada[metrica_ordenar].min()
-            st.metric("📉 Mínimo", f"{minimo:.2f}")
-            
-        st.markdown("---")
-        
-        # ========== VISUALIZACIÓN ==========
-        tab1, tab2, tab3 = st.tabs(["📋 Tabla Completa", "📊 Gráfica de Ranking", "📈 Distribución"])
-        
-        with tab1:
-            st.markdown("#### 📋 Ranking Completo")
-            
-            tabla_display = tabla_mostrar.copy()
-            rename_dict = {}
-            for col in tabla_display.columns:
-                if '_HP1' in col and col != 'PROMEDIO_HP1':
-                    rename_dict[col] = col.replace('_HP1', ' (HP1)').replace('_', ' ')
-                elif '_HP2' in col and col != 'PROMEDIO_HP2':
-                    rename_dict[col] = col.replace('_HP2', ' (HP2)').replace('_', ' ')
-                elif '_PREP' in col and col != 'PROMEDIO_PREP':
-                    rename_dict[col] = col.replace('_PREP', ' (PREP)').replace('_', ' ')
-                elif '_PROMEDIO_GENERAL' in col:
-                    rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)').replace('_', ' ')
-                elif col == 'PROMEDIO_HP1':
-                    rename_dict[col] = 'PROM. HP1'
-                elif col == 'PROMEDIO_HP2':
-                    rename_dict[col] = 'PROM. HP2'
-                elif col == 'PROMEDIO_PREP':
-                    rename_dict[col] = 'PROM. PREP'
-                elif col == 'PROMEDIO_PONDERADO_GENERAL':
-                    rename_dict[col] = 'PROMEDIO GENERAL'
-                        
-            tabla_display = tabla_display.rename(columns=rename_dict)
-            columnas_para_gradiente = [col for col in tabla_display.columns if col not in ['RANKING', 'ESTUDIANTE']]
-            
-            st.dataframe(
-                tabla_display.style.background_gradient(
-                    subset=columnas_para_gradiente,
-                    cmap='RdYlGn',
-                    vmin=0,
-                    vmax=100
-                ).format({col: '{:.2f}' for col in columnas_para_gradiente}),
-                use_container_width=True,
-                height=600
-            )
-            
-        with tab2:
-            st.markdown("#### 📊 Top 30 Estudiantes")
-            
-            top_30 = tabla_filtrada.head(30)
-            
-            fig = go.Figure()
-            fig.add_trace(go.Bar(
-                y=top_30['ESTUDIANTE'],
-                x=top_30[metrica_ordenar],
-                orientation='h',
-                marker=dict(
-                    color=top_30[metrica_ordenar],
-                    colorscale='Viridis',
-                    showscale=True,
-                    colorbar=dict(title="Puntaje")
-                ),
-                text=top_30[metrica_ordenar].round(2),
-                textposition='outside'
-            ))
-            
-            fig.update_layout(
-                title=f"Top 30 - {metrica_ordenar.replace('_', ' ')}",
-                xaxis_title="Puntaje",
-                yaxis_title="Estudiante",
-                height=800,
-                yaxis={'categoryorder': 'total ascending'},
-                template="plotly_white"
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-            
-        with tab3:
-            st.markdown("#### 📈 Distribución de Puntajes")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                fig = go.Figure()
-                fig.add_trace(go.Histogram(
-                    x=tabla_filtrada[metrica_ordenar],
-                    nbinsx=30,
-                    marker_color='#667eea',
-                    name='Frecuencia'
-                ))
-                fig.add_vline(
-                    x=tabla_filtrada[metrica_ordenar].mean(),
-                    line_dash="dash",
-                    line_color="red",
-                    annotation_text=f"Promedio: {tabla_filtrada[metrica_ordenar].mean():.2f}"
-                )
-                fig.update_layout(
-                    title="Distribución de Puntajes",
-                    xaxis_title="Puntaje",
-                    yaxis_title="Frecuencia",
-                    height=400,
-                    template="plotly_white"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-                
-            with col2:
-                fig = go.Figure()
-                fig.add_trace(go.Box(
-                    y=tabla_filtrada[metrica_ordenar],
-                    name='Puntajes',
-                    marker_color='#667eea',
-                    boxmean='sd'
-                ))
-                fig.update_layout(
-                    title="Estadísticas de Puntajes",
-                    yaxis_title="Puntaje",
-                    height=400,
-                    template="plotly_white"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-                
-        st.markdown("---")
-        
-        # ========== OPCIONES DE DESCARGA ==========
-        st.markdown("### 💾 Descargar Datos")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            csv = tabla_mostrar.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Descargar Tabla Filtrada (CSV)",
-                data=csv,
-                file_name="ranking_filtrado.csv",
-                mime="text/csv",
-            )
-        
-        with col2:
-            csv_completo = datos_unificados.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Descargar Datos Completos (CSV)",
-                data=csv_completo,
-                file_name="datos_completos_todos_simulacros.csv",
-                mime="text/csv",
-            )
-            
-    except Exception as e:
-        st.error(f"❌ Error al generar la tabla completa: {str(e)}")
-        import traceback
-        st.code(traceback.format_exc())
-    st.markdown("---")
-    
     
   # Métricas principales con más información
     col1, col2, col3, col4 = st.columns(4)
@@ -1229,7 +842,398 @@ if pagina == "🏠 Inicio":
         </div>
         """, unsafe_allow_html=True)
 
+elif pagina == "🎖️ Rankings":
+    # ========== PREPARAR DATASET UNIFICADO (UNA SOLA VEZ) ==========
+    try:
+        # Preparar datos completos de cada simulacro
+        hp1_completo = hp1[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
+        hp1_completo.columns = ['ESTUDIANTE'] + [f'{mat}_HP1' for mat in materias] + ['PROMEDIO_HP1']
+        
+        hp2_completo = hp2[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
+        hp2_completo.columns = ['ESTUDIANTE'] + [f'{mat}_HP2' for mat in materias] + ['PROMEDIO_HP2']
+        
+        prep_completo = prep[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
+        prep_completo.columns = ['ESTUDIANTE'] + [f'{mat}_PREP' for mat in materias] + ['PROMEDIO_PREP']
+        
+        # Normalizar nombres de estudiantes
+        hp1_completo['ESTUDIANTE'] = hp1_completo['ESTUDIANTE'].str.strip().str.upper()
+        hp2_completo['ESTUDIANTE'] = hp2_completo['ESTUDIANTE'].str.strip().str.upper()
+        prep_completo['ESTUDIANTE'] = prep_completo['ESTUDIANTE'].str.strip().str.upper()
+        
+        # Combinar todos los datos por estudiante (DATASET UNIFICADO)
+        datos_unificados = hp1_completo.merge(hp2_completo, on='ESTUDIANTE', how='outer')
+        datos_unificados = datos_unificados.merge(prep_completo, on='ESTUDIANTE', how='outer')
+        
+        # Calcular promedio ponderado general (promedio de los 3 promedios ponderados)
+        datos_unificados['PROMEDIO_PONDERADO_GENERAL'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].mean(axis=1, skipna=True)
+        
+        # Calcular promedios generales por materia
+        for mat in materias:
+            cols_materia = [f'{mat}_HP1', f'{mat}_HP2', f'{mat}_PREP']
+            datos_unificados[f'{mat}_PROMEDIO_GENERAL'] = datos_unificados[cols_materia].mean(axis=1, skipna=True)
+            
+        # Calcular número de simulacros presentados
+        datos_unificados['SIMULACROS_PRESENTADOS'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].notna().sum(axis=1)
+        
+        # Agregar información del mejor simulacro
+        datos_unificados['MEJOR_SIMULACRO'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].idxmax(axis=1)
+        datos_unificados['MEJOR_PUNTAJE'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].max(axis=1)
+        
+        # Mapear nombres de simulacros
+        simulacro_map = {
+            'PROMEDIO_HP1': 'Helmer Pardo 1',
+            'PROMEDIO_HP2': 'Helmer Pardo 2',
+            'PROMEDIO_PREP': 'AVANCEMOS'
+        }
+        datos_unificados['MEJOR_SIMULACRO'] = datos_unificados['MEJOR_SIMULACRO'].map(simulacro_map)
+    
+    except Exception as e:
+        st.error(f"❌ Error al preparar el dataset unificado: {str(e)}")
+        st.stop()
+        
+    # ========== RANKING GLOBAL TOP 10 ==========
+    st.markdown("<h2 class='section-header'>🏆 Top 10 Global - Mejores Promedios</h2>", unsafe_allow_html=True)
+    
+    try:
+        # Usar el dataset unificado para el ranking
+        ranking_global = datos_unificados[['ESTUDIANTE', 'PROMEDIO_PONDERADO_GENERAL', 'MEJOR_SIMULACRO', 'MEJOR_PUNTAJE']].copy()
+        
+        # Eliminar filas sin promedio
+        ranking_global = ranking_global.dropna(subset=['PROMEDIO_PONDERADO_GENERAL'])
+        
+        # Ordenar y obtener top 10
+        ranking_global = ranking_global.sort_values('PROMEDIO_PONDERADO_GENERAL', ascending=False).head(10).reset_index(drop=True)
+        
+        # Verificar que tenemos datos
+        if len(ranking_global) == 0:
+            st.warning("⚠️ No se encontraron datos válidos para el ranking global.")
+        else:
+            # Colores para simulacros
+            colores_simulacro = {
+                'Helmer Pardo 1': '#3498db', 
+                'Helmer Pardo 2': '#2ecc71', 
+                'AVANCEMOS': '#e74c3c'
+            }
 
+            # ========== INICIO: RANKING UNIFICADO (POSICIONES 1-10) ==========
+            # Se eliminó el bloque del podio (Top 3)
+            
+            # El bloque "POSICIONES 4-10" ahora maneja todo el ranking (1-10)
+            if len(ranking_global) > 0:
+                st.markdown('''
+                <div class="ranking-container" style="background: white; margin-top: 0; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                ''', unsafe_allow_html=True) # Se eliminó el H3 "Posiciones 4-10"
+                
+                # Bucle modificado: ahora itera de 0 a len(ranking_global)
+                for idx in range(len(ranking_global)):
+                    estudiante = ranking_global.iloc[idx]
+                    nombre_completo = str(estudiante['ESTUDIANTE']).strip()
+                    nombre_partes = nombre_completo.split()
+                    nombre_corto = ' '.join(nombre_partes[:2]) if len(nombre_partes) > 1 else nombre_completo
+                                        
+                    color_sim = colores_simulacro.get(estudiante['MEJOR_SIMULACRO'], '#666666')
+                    
+                    # --- Lógica para destacar el Top 3 con medallas y colores ---
+                    posicion_display = f"{idx + 1}"
+                    background_color = "linear-gradient(135deg, #667eea, #764ba2)" # Color por defecto
+                    font_size = "1.2rem"
+                    
+                    if idx == 0: # 1er Puesto
+                        posicion_display = "🥇"
+                        background_color = "linear-gradient(135deg, #FFD700, #FFA500)" # Oro
+                        font_size = "1.5rem"
+                    elif idx == 1: # 2do Puesto
+                        posicion_display = "🥈"
+                        background_color = "linear-gradient(135deg, #C0C0C0, #E8E8E8)" # Plata
+                        font_size = "1.4rem"
+                    elif idx == 2: # 3er Puesto
+                        posicion_display = "🥉"
+                        background_color = "linear-gradient(135deg, #CD7F32, #E8C39E)" # Bronce
+                        font_size = "1.3rem"
+                    # --- Fin de la lógica de destaque ---
+
+                    st.markdown(f"""
+                    <div style="display: flex; align-items: center; padding: 1rem; margin-bottom: 0.5rem; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; transition: transform 0.2s;">
+                        <div style="width: 50px; height: 50px; background: {background_color}; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: {font_size}; color: white; margin-right: 1rem;">
+                            {posicion_display}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 1rem; color: #2c3e50; margin-bottom: 0.3rem;" title="{nombre_completo}">{nombre_corto}</div>
+                            <span style="background-color: {color_sim}; color: white; padding: 0.2rem 0.6rem; border-radius: 15px; font-size: 0.7rem; font-weight: 600;">
+                                {estudiante['MEJOR_SIMULACRO']}
+                            </span>
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #667eea; margin-right: 1rem;">
+                            {estudiante['PROMEDIO_PONDERADO_GENERAL']:.1f}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                                
+                st.markdown('</div>', unsafe_allow_html=True)
+            # ========== FIN: RANKING UNIFICADO ==========
+            
+    except Exception as e:
+        st.error(f"❌ Error al generar el ranking global: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
+        
+    st.markdown("---")
+    
+    # ========== TABLA COMPLETA (USA EL MISMO DATASET UNIFICADO) ==========
+    st.markdown("<h2 class='section-header'>📋 Tabla Completa - Ranking Global por Estudiante</h2>", unsafe_allow_html=True)
+    try:
+        # ========== CONTROLES INTERACTIVOS ==========
+        st.markdown("### 🎯 Controles de Visualización")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            metrica_ordenar = st.selectbox(
+                "📊 Ordenar por:",
+                options=['PROMEDIO_PONDERADO_GENERAL'] + [f'{mat}_PROMEDIO_GENERAL' for mat in materias],
+                format_func=lambda x: 'Promedio Ponderado General' if x == 'PROMEDIO_PONDERADO_GENERAL' else x.replace('_PROMEDIO_GENERAL', '').replace('_', ' '),
+                index=0
+            )
+        
+        with col2:
+            min_puntaje = st.number_input(
+                "📉 Puntaje mínimo:",
+                min_value=0.0,
+                max_value=500.0,
+                value=0.0,
+                step=10.0
+            )
+        
+        with col3:
+            max_puntaje = st.number_input(
+                "📈 Puntaje máximo:",
+                min_value=0.0,
+                max_value=500.0,
+                value=500.0,
+                step=10.0
+            )
+            
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            simulacros_mostrar = st.multiselect(
+                "📋 Mostrar columnas de simulacros:",
+                options=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS'],
+                default=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS']
+            )
+        
+        with col2:
+            buscar_nombre = st.text_input(
+                "🔍 Buscar estudiante por nombre:",
+                placeholder="Escribe el nombre..."
+            )
+            
+        # ========== APLICAR FILTROS ==========
+        tabla_filtrada = datos_unificados.copy()
+        
+        tabla_filtrada = tabla_filtrada[
+            (tabla_filtrada[metrica_ordenar] >= min_puntaje) &
+            (tabla_filtrada[metrica_ordenar] <= max_puntaje)
+        ]
+        
+        if buscar_nombre:
+            tabla_filtrada = tabla_filtrada[tabla_filtrada['ESTUDIANTE'].str.contains(buscar_nombre.upper(), na=False)]
+            
+        tabla_filtrada = tabla_filtrada.sort_values(metrica_ordenar, ascending=False).reset_index(drop=True)
+        tabla_filtrada.insert(0, 'RANKING', range(1, len(tabla_filtrada) + 1))
+        
+        # ========== SELECCIONAR COLUMNAS ==========
+        columnas_mostrar = ['RANKING', 'ESTUDIANTE', 'PROMEDIO_PONDERADO_GENERAL']
+        
+        if 'Helmer Pardo 1' in simulacros_mostrar:
+            columnas_mostrar.append('PROMEDIO_HP1')
+            columnas_mostrar.extend([f'{mat}_HP1' for mat in materias])
+        
+        if 'Helmer Pardo 2' in simulacros_mostrar:
+            columnas_mostrar.append('PROMEDIO_HP2')
+            columnas_mostrar.extend([f'{mat}_HP2' for mat in materias])
+            
+        if 'AVANCEMOS' in simulacros_mostrar:
+            columnas_mostrar.append('PROMEDIO_PREP')
+            columnas_mostrar.extend([f'{mat}_PREP' for mat in materias])
+            
+        columnas_mostrar.extend([f'{mat}_PROMEDIO_GENERAL' for mat in materias])
+        columnas_mostrar = [col for col in columnas_mostrar if col in tabla_filtrada.columns]
+        tabla_mostrar = tabla_filtrada[columnas_mostrar].copy()
+        
+        columnas_numericas = tabla_mostrar.select_dtypes(include=[np.number]).columns
+        tabla_mostrar[columnas_numericas] = tabla_mostrar[columnas_numericas].round(2)
+        
+        # ========== ESTADÍSTICAS RESUMEN ==========
+        st.markdown("### 📊 Estadísticas del Ranking Filtrado")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("👥 Total Estudiantes", len(tabla_filtrada))
+        
+        with col2:
+            promedio_general = tabla_filtrada[metrica_ordenar].mean()
+            st.metric("📈 Promedio", f"{promedio_general:.2f}")
+        
+        with col3:
+            maximo = tabla_filtrada[metrica_ordenar].max()
+            st.metric("🏆 Máximo", f"{maximo:.2f}")
+        
+        with col4:
+            minimo = tabla_filtrada[metrica_ordenar].min()
+            st.metric("📉 Mínimo", f"{minimo:.2f}")
+            
+        st.markdown("---")
+        
+        # ========== VISUALIZACIÓN ==========
+        tab1, tab2, tab3 = st.tabs(["📋 Tabla Completa", "📊 Gráfica de Ranking", "📈 Distribución"])
+        
+        with tab1:
+            st.markdown("#### 📋 Ranking Completo")
+            
+            tabla_display = tabla_mostrar.copy()
+            rename_dict = {}
+            for col in tabla_display.columns:
+                if '_HP1' in col and col != 'PROMEDIO_HP1':
+                    rename_dict[col] = col.replace('_HP1', ' (HP1)').replace('_', ' ')
+                elif '_HP2' in col and col != 'PROMEDIO_HP2':
+                    rename_dict[col] = col.replace('_HP2', ' (HP2)').replace('_', ' ')
+                elif '_PREP' in col and col != 'PROMEDIO_PREP':
+                    rename_dict[col] = col.replace('_PREP', ' (PREP)').replace('_', ' ')
+                elif '_PROMEDIO_GENERAL' in col:
+                    rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)').replace('_', ' ')
+                elif col == 'PROMEDIO_HP1':
+                    rename_dict[col] = 'PROM. HP1'
+                elif col == 'PROMEDIO_HP2':
+                    rename_dict[col] = 'PROM. HP2'
+                elif col == 'PROMEDIO_PREP':
+                    rename_dict[col] = 'PROM. PREP'
+                elif col == 'PROMEDIO_PONDERADO_GENERAL':
+                    rename_dict[col] = 'PROMEDIO GENERAL'
+                        
+            tabla_display = tabla_display.rename(columns=rename_dict)
+            columnas_para_gradiente = [col for col in tabla_display.columns if col not in ['RANKING', 'ESTUDIANTE']]
+            
+            st.dataframe(
+                tabla_display.style.background_gradient(
+                    subset=columnas_para_gradiente,
+                    cmap='RdYlGn',
+                    vmin=0,
+                    vmax=100
+                ).format({col: '{:.2f}' for col in columnas_para_gradiente}),
+                use_container_width=True,
+                height=600
+            )
+            
+        with tab2:
+            st.markdown("#### 📊 Top 30 Estudiantes")
+            
+            top_30 = tabla_filtrada.head(30)
+            
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                y=top_30['ESTUDIANTE'],
+                x=top_30[metrica_ordenar],
+                orientation='h',
+                marker=dict(
+                    color=top_30[metrica_ordenar],
+                    colorscale='Viridis',
+                    showscale=True,
+                    colorbar=dict(title="Puntaje")
+                ),
+                text=top_30[metrica_ordenar].round(2),
+                textposition='outside'
+            ))
+            
+            fig.update_layout(
+                title=f"Top 30 - {metrica_ordenar.replace('_', ' ')}",
+                xaxis_title="Puntaje",
+                yaxis_title="Estudiante",
+                height=800,
+                yaxis={'categoryorder': 'total ascending'},
+                template="plotly_white"
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+        with tab3:
+            st.markdown("#### 📈 Distribución de Puntajes")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                fig = go.Figure()
+                fig.add_trace(go.Histogram(
+                    x=tabla_filtrada[metrica_ordenar],
+                    nbinsx=30,
+                    marker_color='#667eea',
+                    name='Frecuencia'
+                ))
+                fig.add_vline(
+                    x=tabla_filtrada[metrica_ordenar].mean(),
+                    line_dash="dash",
+                    line_color="red",
+                    annotation_text=f"Promedio: {tabla_filtrada[metrica_ordenar].mean():.2f}"
+                )
+                fig.update_layout(
+                    title="Distribución de Puntajes",
+                    xaxis_title="Puntaje",
+                    yaxis_title="Frecuencia",
+                    height=400,
+                    template="plotly_white"
+                )
+                st.plotly_chart(fig, use_container_width=True)
+                
+            with col2:
+                fig = go.Figure()
+                fig.add_trace(go.Box(
+                    y=tabla_filtrada[metrica_ordenar],
+                    name='Puntajes',
+                    marker_color='#667eea',
+                    boxmean='sd'
+                ))
+                fig.update_layout(
+                    title="Estadísticas de Puntajes",
+                    yaxis_title="Puntaje",
+                    height=400,
+                    template="plotly_white"
+                )
+                st.plotly_chart(fig, use_container_width=True)
+                
+        st.markdown("---")
+        
+        # ========== OPCIONES DE DESCARGA ==========
+        st.markdown("### 💾 Descargar Datos")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            csv = tabla_mostrar.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descargar Tabla Filtrada (CSV)",
+                data=csv,
+                file_name="ranking_filtrado.csv",
+                mime="text/csv",
+            )
+        
+        with col2:
+            csv_completo = datos_unificados.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descargar Datos Completos (CSV)",
+                data=csv_completo,
+                file_name="datos_completos_todos_simulacros.csv",
+                mime="text/csv",
+            )
+            
+    except Exception as e:
+        st.error(f"❌ Error al generar la tabla completa: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
+    st.markdown("---")
+    st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros ICFES</h1>", unsafe_allow_html=True)
+    st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
+    
 # ==================== REPORTE GENERAL ====================
 elif pagina == "📊 Reporte General":
     st.markdown(f"<h1 class='header-title'>📊 Reporte General - {simulacro_seleccionado}</h1>", unsafe_allow_html=True)
