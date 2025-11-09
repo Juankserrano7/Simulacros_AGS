@@ -466,7 +466,7 @@ with st.sidebar:
     # Header del Sidebar
     st.markdown("""
     <div style='text-align: center; padding: 1.5rem 0; margin-bottom: 1rem;'>
-        img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.instagram.com%2Faspaensaucara%2F&psig=AOvVaw0Fht6ElH_w9ykRjKUSeXJf&ust=1762799630458000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMCEucDa5ZADFQAAAAAdAAAAABAE" alt="logo" style="height:64px;">
+        <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.instagram.com%2Faspaensaucara%2F&psig=AOvVaw0Fht6ElH_w9ykRjKUSeXJf&ust=1762799630458000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMCEucDa5ZADFQAAAAAdAAAAABAE" alt="logo" style="height:64px;">
         <h2 style='color: white; font-weight: 800; font-size: 1.8rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>
             📊 PreIcfes Dashboard
         </h2>
