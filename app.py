@@ -445,7 +445,7 @@ if pagina == "🏠 Inicio":
             name='Promedio'
         ))
         fig.update_layout(
-            height=400,
+            height=500,
             showlegend=False,
             yaxis_title="Puntaje Promedio",
             template="plotly_white"
@@ -1386,7 +1386,7 @@ elif pagina == "📉 Estadísticas Detalladas":
         
         datos_top = simulacros_map[simulacro_top]
         
-        n_top = st.slider("Número de estudiantes a mostrar", 5, 20, 10)
+        n_top = st.slider("Número de estudiantes a mostrar", 5, 30, 15)
         
         cols = st.columns(2)
         
@@ -1418,9 +1418,9 @@ elif pagina == "📉 Estadísticas Detalladas":
         st.markdown("---")
         
         # Ranking general
-        st.markdown("### 🏆 Ranking General - Top 20")
+        st.markdown("### 🏆 Ranking General")
         
-        ranking_general = datos_top.nlargest(20, 'PROMEDIO PONDERADO')[
+        ranking_general = datos_top.nlargest(30, 'PROMEDIO PONDERADO')[
             ['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']
         ].reset_index(drop=True)
         ranking_general.index = ranking_general.index + 1
@@ -1444,7 +1444,7 @@ st.markdown("""
     <p style='font-size: 0.9rem;'>
         <strong>📊 Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
-        Desarrollado DIN HS JKS usando 
+        Desarrollado DIN HS JKS SSO usando streamlit, pandas, plotly, numpy y matplotlib
     </p>
 </div>
 """, unsafe_allow_html=True)
