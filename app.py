@@ -445,7 +445,7 @@ if pagina == "🏠 Inicio":
             name='Promedio'
         ))
         fig.update_layout(
-            height=450,
+            height=500,
             showlegend=False,
             yaxis_title="Puntaje Promedio",
             template="plotly_white"
@@ -494,7 +494,7 @@ if pagina == "🏠 Inicio":
         
         fig.update_layout(
             barmode='group',
-            height=400,
+            height=425,
             yaxis_title="Número de Estudiantes",
             template="plotly_white"
         )
