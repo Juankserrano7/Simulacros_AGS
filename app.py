@@ -719,7 +719,7 @@ if pagina == "🏠 Inicio":
         r=promedios_prep,
         theta=materias,
         fill='toself',
-        name='Prepárate',
+        name='Avancemos',
         line_color='#e74c3c',
         opacity=0.7
     ))
