@@ -329,7 +329,7 @@ with st.sidebar:
             GRADO 11
         </h4>
         <p style='color: rgba(255,255,255,0.7); font-size: 0.85rem; margin: 0;'>
-            Período 2026/2026
+            Período 2025/2026
         </p>
         <div style='margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);'>
             <p style='color: rgba(255,255,255,0.6); font-size: 0.75rem; margin: 0;'>
@@ -559,7 +559,7 @@ if pagina == "🏠 Inicio":
         'HP1': promedios_hp1,
         'HP2': promedios_hp2,
         'AVANCEMOS': promedios_prep,
-        'Mejor': [max(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
+        'Mayor': [max(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
         'Menor': [min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
         'Rango-DS': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)]
     })
@@ -1444,7 +1444,7 @@ st.markdown("""
     <p style='font-size: 0.9rem;'>
         <strong>📊 Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
-        Desarrollado con ❤️ usando Streamlit y Plotly
+        Desarrollado DIN HS JKS usando 
     </p>
 </div>
 """, unsafe_allow_html=True)
