@@ -547,11 +547,7 @@ datos_actual = simulacros_map[simulacro_seleccionado]
 if pagina == "🏠 Inicio":
     st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
-    
-    # ==================== PÁGINA INICIO ====================
-if pagina == "🏠 Inicio":
-    st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
+
     
     # ========== RANKING GLOBAL TOP 10 ==========
     st.markdown("<h2 class='section-header'>🏆 Top 10 Global - Mejores Promedios</h2>", unsafe_allow_html=True)
@@ -594,7 +590,7 @@ if pagina == "🏠 Inicio":
                 'AVANCEMOS': '#e74c3c'
             }
             
-            # Crear el podio (Top 3)
+            # Mostrar podio (top 3)
             if len(ranking_global) >= 3:
                 st.markdown('<div class="ranking-container">', unsafe_allow_html=True)
                 st.markdown('<div class="podium-container">', unsafe_allow_html=True)
@@ -628,7 +624,6 @@ if pagina == "🏠 Inicio":
                         </div>
                         """, unsafe_allow_html=True)
                 
-                st.markdown('</div>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
             
             # Mostrar posiciones 4-10
