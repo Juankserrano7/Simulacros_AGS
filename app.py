@@ -494,7 +494,7 @@ if pagina == "🏠 Inicio":
         
         fig.update_layout(
             barmode='group',
-            height=425,
+            height=475,
             yaxis_title="Número de Estudiantes",
             template="plotly_white"
         )
@@ -710,22 +710,7 @@ elif pagina == "📊 Reporte General":
         medidas_df['Valor'] = medidas_df['Valor'].apply(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
         st.dataframe(medidas_df, width="stretch", hide_index=True)
         
-        st.markdown("### 📊 Percentiles")
-        percentiles_df = pd.DataFrame({
-            'Percentil': ['P10', 'P25', 'P50 (Mediana)', 'P75', 'P90'],
-            'Puntaje': [
-                datos_actual['PROMEDIO PONDERADO'].quantile(0.10),
-                datos_actual['PROMEDIO PONDERADO'].quantile(0.25),
-                datos_actual['PROMEDIO PONDERADO'].quantile(0.50),
-                datos_actual['PROMEDIO PONDERADO'].quantile(0.75),
-                datos_actual['PROMEDIO PONDERADO'].quantile(0.90)
-            ]
-        })
-        percentiles_df['Puntaje'] = percentiles_df['Puntaje'].round(2)
-        st.dataframe(percentiles_df, width="stretch", hide_index=True)
-    
-    with col2:
-        st.markdown("### 🎯 Distribución por Rangos de Puntaje")
+        st.markdown("### 📊 Distrubción de rendimiento")
         rangos = {
             'Excelente (≥350)': len(datos_actual[datos_actual['PROMEDIO PONDERADO'] >= 350]),
             'Sobresaliente (300-349)': len(datos_actual[(datos_actual['PROMEDIO PONDERADO'] >= 300) & (datos_actual['PROMEDIO PONDERADO'] < 350)]),
@@ -733,6 +718,16 @@ elif pagina == "📊 Reporte General":
             'Básico (200-249)': len(datos_actual[(datos_actual['PROMEDIO PONDERADO'] >= 200) & (datos_actual['PROMEDIO PONDERADO'] < 250)]),
             'Bajo (<200)': len(datos_actual[datos_actual['PROMEDIO PONDERADO'] < 200])
         }
+        rangos_df = pd.DataFrame({
+            'Categoría': list(rangos.keys()),
+            'Cantidad': list(rangos.values()),
+            'Porcentaje': [f"{(v/len(datos_actual)*100):.1f}%" for v in rangos.values()]
+        })
+        st.dataframe(rangos_df, width="stretch", hide_index=True)
+    
+    with col2:
+        st.markdown("### 🎯 Distribución por Rangos de Puntaje")
+        
         
         fig = go.Figure(data=[go.Pie(
             labels=list(rangos.keys()),
@@ -745,12 +740,7 @@ elif pagina == "📊 Reporte General":
         st.plotly_chart(fig, width="stretch")
         
         # Tabla de distribución
-        rangos_df = pd.DataFrame({
-            'Categoría': list(rangos.keys()),
-            'Cantidad': list(rangos.values()),
-            'Porcentaje': [f"{(v/len(datos_actual)*100):.1f}%" for v in rangos.values()]
-        })
-        st.dataframe(rangos_df, width="stretch", hide_index=True)
+        
     
     st.markdown("---")
     
