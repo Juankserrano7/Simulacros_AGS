@@ -550,7 +550,7 @@ if pagina == "🏠 Inicio":
     
     # ========== RANKING GLOBAL TOP 10 ==========
     st.markdown("<h2 class='section-header'>🏆 Top 10 Global - Mejores Promedios</h2>", unsafe_allow_html=True)
-    
+    st.markdown("<div>", unsafe_allow_html=True)
     try:
         # Crear dataset combinado con todos los simulacros
         hp1_ranking = hp1[['ESTUDIANTE', 'PROMEDIO PONDERADO']].copy()
@@ -1276,7 +1276,7 @@ if pagina == "🏠 Inicio":
     
     # Recomendaciones estratégicas
     st.markdown("<h2 class='section-header'>💡 Recomendaciones Estratégicas</h2>", unsafe_allow_html=True)
-    
+    st.markdown("<div'></div>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     
     with col1:
