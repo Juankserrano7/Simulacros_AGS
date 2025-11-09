@@ -774,7 +774,6 @@ elif pagina == "📊 Reporte General":
         st.plotly_chart(fig, width="stretch")
     
     with col2:
-        st.markdown("### 🎯 Desempeño Relativo")
         # Calcular desempeño relativo (comparado con el promedio de todas las materias)
         promedio_general_materias = np.mean(promedios_materias)
         desempeno_relativo = [(p - promedio_general_materias) for p in promedios_materias]
@@ -793,7 +792,7 @@ elif pagina == "📊 Reporte General":
             title="Diferencia vs Promedio General",
             xaxis_title="Materia",
             yaxis_title="Puntos sobre/bajo el promedio",
-            height=450,
+            height=550,
             template="plotly_white"
         )
         st.plotly_chart(fig, width="stretch")
