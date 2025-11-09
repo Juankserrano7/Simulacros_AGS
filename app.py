@@ -280,8 +280,8 @@ hp1, hp2, prep = cargar_datos()
 if hp1 is None or hp2 is None or prep is None:
     st.stop()
 
-materias = ['LECTURA CRITICA', 'MATEMATICAS', 'SOCIALES Y CIUDADANAS', 
-            'CIENCIAS NATURALES', 'INGLES']
+materias = ['LECTURA CRÍTICA', 'MATEMÁTICAS', 'SOCIALES Y CIUDADANAS', 
+            'CIENCIAS NATURALES', 'INGLÉS']
 
 # Sidebar con diseño Bootstrap 5
 with st.sidebar:
@@ -314,7 +314,7 @@ with st.sidebar:
     st.markdown("### 🎯 FILTROS")
     simulacro_seleccionado = st.selectbox(
         "📋 Simulacro Activo",
-        ["Helmer Pardo 1", "Helmer Pardo 2", "Prepárate"]
+        ["Helmer Pardo 1", "Helmer Pardo 2", "AVANCEMOS"]
     )
     
     st.markdown("<hr style='margin: 1.5rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
@@ -354,13 +354,13 @@ with st.sidebar:
     with st.expander("🔍 Diagnóstico de Datos"):
         st.write(f"**HP1:** {len(hp1)} estudiantes")
         st.write(f"**HP2:** {len(hp2)} estudiantes")
-        st.write(f"**Prepárate:** {len(prep)} estudiantes")
+        st.write(f"**AVANCEMOS:** {len(prep)} estudiantes")
 
 # Mapeo de simulacros
 simulacros_map = {
     "Helmer Pardo 1": hp1,
     "Helmer Pardo 2": hp2,
-    "Prepárate": prep
+    "AVANCEMOS": prep
 }
 
 datos_actual = simulacros_map[simulacro_seleccionado]
@@ -378,7 +378,7 @@ if pagina == "🏠 Inicio":
         <div class='metric-card'>
             <h3 style='color: #667eea;'>📝 Simulacros</h3>
             <h2 style='font-size: 3rem; color: #764ba2;'>3</h2>
-            <p style='color: #6c757d;'>HP1, HP2, Prepárate</p>
+            <p style='color: #6c757d;'>HP1, HP2, AVANCEMOS</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -428,7 +428,7 @@ if pagina == "🏠 Inicio":
         st.markdown("### 📈 Evolución de Promedios")
         
         promedios_data = pd.DataFrame({
-            'Simulacro': ['Helmer Pardo 1', 'Helmer Pardo 2', 'Prepárate'],
+            'Simulacro': ['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS'],
             'Promedio': promedios_generales,
             'Desv. Est.': [hp1['PROMEDIO PONDERADO'].std(), 
                           hp2['PROMEDIO PONDERADO'].std(), 
@@ -506,7 +506,7 @@ if pagina == "🏠 Inicio":
             'Nivel': categorias,
             'HP1': dist_hp1,
             'HP2': dist_hp2,
-            'Prepárate': dist_prep
+            'AVANCEMOS': dist_prep
         })
         st.dataframe(dist_df, width="stretch", hide_index=True)
     
@@ -540,7 +540,7 @@ if pagina == "🏠 Inicio":
         r=promedios_prep,
         theta=materias,
         fill='toself',
-        name='Prepárate',
+        name='AVANCEMOS',
         line_color='#e74c3c',
         opacity=0.7
     ))
@@ -558,14 +558,14 @@ if pagina == "🏠 Inicio":
         'Materia': materias,
         'HP1': promedios_hp1,
         'HP2': promedios_hp2,
-        'Prepárate': promedios_prep,
+        'AVANCEMOS': promedios_prep,
         'Mejor': [max(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
-        'Peor': [min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
-        'Rango': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)]
+        'Menor': [min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
+        'Rango-DS': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)]
     })
     comp_materias_df = comp_materias_df.round(2)
     st.dataframe(
-        comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'Prepárate'], cmap='RdYlGn', vmin=40, vmax=90),
+        comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'AVANCEMOS'], cmap='RdYlGn', vmin=40, vmax=90),
         width="stretch",
         hide_index=True
     )
@@ -579,7 +579,7 @@ if pagina == "🏠 Inicio":
     
     cambio_hp1_hp2 = hp2['PROMEDIO PONDERADO'].mean() - hp1['PROMEDIO PONDERADO'].mean()
     mejor_materia = max(materias, key=lambda m: hp1[m].mean())
-    peor_materia = min(materias, key=lambda m: hp1[m].mean())
+    menor_materia = min(materias, key=lambda m: hp1[m].mean())
     
     # Calcular materia con mayor variabilidad
     variabilidades = {mat: hp1[mat].std() for mat in materias}
@@ -598,7 +598,7 @@ if pagina == "🏠 Inicio":
                 <li><strong>Caída General:</strong> {abs(cambio_hp1_hp2):.1f} puntos entre HP1 y HP2 ({abs(cambio_hp1_hp2/promedios_generales[0]*100):.1f}%)</li>
                 <li><strong>Materia con Mayor Caída:</strong> {mat_mayor_caida} ({cambios_materias[mat_mayor_caida]:.1f} puntos)</li>
                 <li><strong>Materia más Variable:</strong> {mat_variable} (σ = {variabilidades[mat_variable]:.1f})</li>
-                <li><strong>Puntaje Promedio más Bajo:</strong> {peor_materia} ({min(promedios_hp1):.1f} puntos)</li>
+                <li><strong>Puntaje Promedio más Bajo:</strong> {menor_materia} ({min(promedios_hp1):.1f} puntos)</li>
                 <li><strong>Estudiantes en Riesgo:</strong> {len(hp1[hp1['PROMEDIO PONDERADO'] < 250])} ({len(hp1[hp1['PROMEDIO PONDERADO'] < 250])/len(hp1)*100:.1f}%)</li>
             </ul>
         </div>
@@ -683,8 +683,8 @@ elif pagina == "📊 Reporte General":
         st.metric("🏆 Máximo", f"{mejor:.1f}")
     
     with col4:
-        peor = datos_actual['PROMEDIO PONDERADO'].min()
-        st.metric("📉 Mínimo", f"{peor:.1f}")
+        menor = datos_actual['PROMEDIO PONDERADO'].min()
+        st.metric("📉 Mínimo", f"{menor:.1f}")
     
     with col5:
         desv = datos_actual['PROMEDIO PONDERADO'].std()
@@ -700,13 +700,12 @@ elif pagina == "📊 Reporte General":
     with col1:
         st.markdown("### 📈 Medidas de Tendencia Central")
         medidas_df = pd.DataFrame({
-            'Estadístico': ['Media', 'Mediana', 'Moda', 'Rango', 'Rango Intercuartílico'],
+            'Estadístico': ['Media', 'Mediana', 'Moda', 'Rango-DS'],
             'Valor': [
                 datos_actual['PROMEDIO PONDERADO'].mean(),
                 datos_actual['PROMEDIO PONDERADO'].median(),
                 datos_actual['PROMEDIO PONDERADO'].mode().values[0] if len(datos_actual['PROMEDIO PONDERADO'].mode()) > 0 else 'N/A',
-                datos_actual['PROMEDIO PONDERADO'].max() - datos_actual['PROMEDIO PONDERADO'].min(),
-                datos_actual['PROMEDIO PONDERADO'].quantile(0.75) - datos_actual['PROMEDIO PONDERADO'].quantile(0.25)
+                datos_actual['PROMEDIO PONDERADO'].max() - datos_actual['PROMEDIO PONDERADO'].min()
             ]
         })
         medidas_df['Valor'] = medidas_df['Valor'].apply(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
@@ -868,7 +867,7 @@ elif pagina == "📊 Reporte General":
         'Q1': [datos_actual[m].quantile(0.25) for m in materias],
         'Q3': [datos_actual[m].quantile(0.75) for m in materias],
         'Máximo': [datos_actual[m].max() for m in materias],
-        'Rango': [datos_actual[m].max() - datos_actual[m].min() for m in materias],
+        'Rango-DS': [datos_actual[m].max() - datos_actual[m].min() for m in materias],
         'CV (%)': [(datos_actual[m].std() / datos_actual[m].mean() * 100) for m in materias]
     })
     stats_df = stats_df.round(2)
@@ -939,7 +938,7 @@ elif pagina == "🔄 Comparación Simulacros":
     fig = go.Figure()
     fig.add_trace(go.Bar(name='Helmer Pardo 1', x=materias, y=promedios_hp1, marker_color='#3498db'))
     fig.add_trace(go.Bar(name='Helmer Pardo 2', x=materias, y=promedios_hp2, marker_color='#2ecc71'))
-    fig.add_trace(go.Bar(name='Prepárate', x=materias, y=promedios_prep, marker_color='#e74c3c'))
+    fig.add_trace(go.Bar(name='AVANCEMOS', x=materias, y=promedios_prep, marker_color='#e74c3c'))
     
     fig.update_layout(
         barmode='group',
@@ -960,7 +959,7 @@ elif pagina == "🔄 Comparación Simulacros":
         'Materia': materias,
         'HP1': promedios_hp1,
         'HP2': promedios_hp2,
-        'Prepárate': promedios_prep,
+        'AVANCEMOS': promedios_prep,
         'Cambio HP1→HP2': [hp2-hp1 for hp1, hp2 in zip(promedios_hp1, promedios_hp2)],
         'Cambio HP2→Prep': [prep-hp2 for hp2, prep in zip(promedios_hp2, promedios_prep)]
     })
@@ -988,7 +987,7 @@ elif pagina == "🔄 Comparación Simulacros":
     with col1:
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=['Helmer Pardo 1', 'Helmer Pardo 2', 'Prepárate'],
+            x=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS'],
             y=promedios_generales,
             mode='lines+markers+text',
             text=[f'{p:.2f}' for p in promedios_generales],
@@ -1208,7 +1207,7 @@ elif pagina == "📈 Progresión":
     ))
     
     fig.update_layout(
-        title="Cambio Total (HP1 → Prepárate)",
+        title="Cambio Total (HP1 → AVANCEMOS)",
         xaxis_title="Cambio en Promedio Ponderado",
         yaxis_title="Estudiante",
         height=800,
@@ -1234,7 +1233,7 @@ elif pagina == "📈 Progresión":
         for estudiante in estudiantes_mostrar:
             datos_est = progresion[progresion['ESTUDIANTE'] == estudiante].iloc[0]
             fig.add_trace(go.Scatter(
-                x=['HP1', 'HP2', 'Prepárate'],
+                x=['HP1', 'HP2', 'AVANCEMOS'],
                 y=[datos_est['HP1'], datos_est['HP2'], datos_est['Avancemos']],
                 mode='lines+markers',
                 name=estudiante.split()[0],
@@ -1317,7 +1316,7 @@ elif pagina == "📉 Estadísticas Detalladas":
         
         simulacro_analisis = st.selectbox(
             "Seleccionar simulacro para análisis por grado",
-            ["Helmer Pardo 1", "Helmer Pardo 2", "Prepárate"],
+            ["Helmer Pardo 1", "Helmer Pardo 2", "AVANCEMOS"],
             key="grado_select"
         )
         
@@ -1382,7 +1381,7 @@ elif pagina == "📉 Estadísticas Detalladas":
         
         simulacro_top = st.selectbox(
             "Seleccionar simulacro",
-            ["Helmer Pardo 1", "Helmer Pardo 2", "Prepárate"],
+            ["Helmer Pardo 1", "Helmer Pardo 2", "AVANCEMOS"],
             key="top_select"
         )
         
