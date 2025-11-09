@@ -1013,7 +1013,7 @@ if pagina == "🏠 Inicio":
             name='Promedio'
         ))
         fig.update_layout(
-            height=400,
+            height=500,
             showlegend=False,
             yaxis_title="Puntaje Promedio",
             template="plotly_white"
@@ -1062,7 +1062,7 @@ if pagina == "🏠 Inicio":
         
         fig.update_layout(
             barmode='group',
-            height=400,
+            height=475,
             yaxis_title="Número de Estudiantes",
             template="plotly_white"
         )
@@ -1190,7 +1190,7 @@ if pagina == "🏠 Inicio":
     
     # Recomendaciones estratégicas
     st.markdown("<h2 class='section-header'>💡 Recomendaciones Estratégicas</h2>", unsafe_allow_html=True)
-    
+    st.markdown("<div></div>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     
     with col1:
