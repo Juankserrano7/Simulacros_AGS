@@ -466,6 +466,7 @@ with st.sidebar:
     # Header del Sidebar
     st.markdown("""
     <div style='text-align: center; padding: 1.5rem 0; margin-bottom: 1rem;'>
+        img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.instagram.com%2Faspaensaucara%2F&psig=AOvVaw0Fht6ElH_w9ykRjKUSeXJf&ust=1762799630458000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMCEucDa5ZADFQAAAAAdAAAAABAE" alt="logo" style="height:64px;">
         <h2 style='color: white; font-weight: 800; font-size: 1.8rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>
             📊 PreIcfes Dashboard
         </h2>
@@ -545,7 +546,7 @@ datos_actual = simulacros_map[simulacro_seleccionado]
 
 # ==================== PÁGINA INICIO ====================
 if pagina == "🏠 Inicio":
-    st.markdown("<h1 class='header-title'>📊 Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'> Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
     
   # Métricas principales con más información
