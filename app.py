@@ -1278,7 +1278,7 @@ elif pagina == "📊 Reporte General":
         
         st.markdown("### 📊 Distribución de Rendimiento")
         rangos = {
-            'Excelente (≥350)': len(datos_actual[datos_actual['PROMEDIO PONDERADO'] >= 350]),
+            'Sobresaliente (≥350)': len(datos_actual[datos_actual['PROMEDIO PONDERADO'] >= 350]),
             'Satisfactorio (300-349)': len(datos_actual[(datos_actual['PROMEDIO PONDERADO'] >= 300) & (datos_actual['PROMEDIO PONDERADO'] < 350)]),
             'Medio (250-299)': len(datos_actual[(datos_actual['PROMEDIO PONDERADO'] >= 250) & (datos_actual['PROMEDIO PONDERADO'] < 300)]),
             'Básico (200-249)': len(datos_actual[(datos_actual['PROMEDIO PONDERADO'] >= 200) & (datos_actual['PROMEDIO PONDERADO'] < 250)]),
@@ -1297,7 +1297,7 @@ elif pagina == "📊 Reporte General":
         fig = go.Figure(data=[go.Pie(
             labels=list(rangos.keys()),
             values=list(rangos.values()),
-            hole=0.4,
+            hole=10,
             marker_colors=['#27ae60', '#3498db', '#f39c12', '#e67e22', '#e74c3c']
         )])
         fig.update_traces(textposition='inside', textinfo='percent+label')
