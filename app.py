@@ -612,8 +612,9 @@ if pagina == "🏠 Inicio":
                 color2 = colores_simulacro.get(segundo_lugar['SIMULACRO'], '#666666')
                 color3 = colores_simulacro.get(tercer_lugar['SIMULACRO'], '#666666')
                 
-                # HTML del podio horizontal - TODO EN UNA SOLA CADENA
-                podio_html = f"""
+                
+                # Renderizar el HTML
+                st.markdown(f"""
                 <div class="ranking-container" style="padding: 2rem 1rem;">
                     <div style="display: flex; justify-content: center; align-items: flex-end; gap: 2rem; max-width: 1000px; margin: 0 auto;">
                         
@@ -658,10 +659,7 @@ if pagina == "🏠 Inicio":
                         
                     </div>
                 </div>
-                """
-                
-                # Renderizar el HTML
-                st.markdown(podio_html, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
             
             elif len(ranking_global) > 0:
                 st.info(f"ℹ️ Solo hay {len(ranking_global)} estudiante(s) en el ranking.")
@@ -1276,7 +1274,7 @@ if pagina == "🏠 Inicio":
     
     # Recomendaciones estratégicas
     st.markdown("<h2 class='section-header'>💡 Recomendaciones Estratégicas</h2>", unsafe_allow_html=True)
-    st.markdown("<div'></div>", unsafe_allow_html=True)
+    st.markdown("<div></div>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     
     with col1:
