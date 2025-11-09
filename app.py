@@ -607,7 +607,7 @@ if pagina == "🏠 Inicio":
         st.markdown("### 📈 Evolución de Promedios")
         
         promedios_data = pd.DataFrame({
-            'Simulacro': ['Helmer Pardo 1', 'Helmer Pardo 2', 'Prepárate'],
+            'Simulacro': ['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS'],
             'Promedio': promedios_generales,
             'Desv. Est.': [hp1['PROMEDIO PONDERADO'].std(), 
                           hp2['PROMEDIO PONDERADO'].std(), 
@@ -638,7 +638,7 @@ if pagina == "🏠 Inicio":
         
         st.markdown("#### 📉 Variaciones Detectadas")
         cambios_df = pd.DataFrame({
-            'Transición': ['HP1 → HP2', 'HP2 → Prep', 'HP1 → Prep'],
+            'Transición': ['HP1 → HP2', 'HP2 → Avan', 'HP1 → Avan'],
             'Cambio': [cambio_1_2, cambio_2_3, cambio_total],
             'Porcentaje': [
                 (cambio_1_2/promedios_generales[0]*100),
@@ -669,7 +669,7 @@ if pagina == "🏠 Inicio":
         
         fig.add_trace(go.Bar(name='HP1', x=categorias, y=dist_hp1, marker_color='#27ae60'))
         fig.add_trace(go.Bar(name='HP2', x=categorias, y=dist_hp2, marker_color='#f39c12'))
-        fig.add_trace(go.Bar(name='Prep', x=categorias, y=dist_prep, marker_color='#e74c3c'))
+        fig.add_trace(go.Bar(name='AVAN', x=categorias, y=dist_prep, marker_color='#e74c3c'))
         
         fig.update_layout(
             barmode='group',
@@ -1145,6 +1145,15 @@ elif pagina == "🎖️ Rankings":
             
             top_30 = tabla_filtrada.head(30)
             
+            # Escala de colores personalizada
+            custom_colorscale = [
+                [0.0, "#E74C3C"],   # 0 → rojo
+                [0.4, "#D35400"],   # ~200 → terracota
+                [0.68, "#3498DB"],  # ~340 → azul
+                [0.8, "#2ECC71"],   # ~400 → verde
+                [1.0, "#27AE60"]    # >500 → verde oscuro (opcional)
+            ]
+            
             fig = go.Figure()
             fig.add_trace(go.Bar(
                 y=top_30['ESTUDIANTE'],
@@ -1152,7 +1161,9 @@ elif pagina == "🎖️ Rankings":
                 orientation='h',
                 marker=dict(
                     color=top_30[metrica_ordenar],
-                    colorscale='Viridis',
+                    colorscale=custom_colorscale,
+                    cmin=0,
+                    cmax=500,
                     showscale=True,
                     colorbar=dict(title="Puntaje")
                 ),
@@ -1170,6 +1181,7 @@ elif pagina == "🎖️ Rankings":
             )
             
             st.plotly_chart(fig, use_container_width=True)
+
             
         with tab3:
             st.markdown("#### 📈 Distribución de Puntajes")
