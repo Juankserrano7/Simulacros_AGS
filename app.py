@@ -554,9 +554,9 @@ if pagina == "🏠 Inicio":
     with col1:
         st.markdown("""
         <div class='metric-card'>
-            <h3 style='color: #667eea;'>📝 Simulacros</h3>
+            <h3 style='color: #667eea;'>📝Simulacros</h3>
             <h2 style='font-size: 3rem; color: #764ba2;'>3</h2>
-            <p style='color: #6c757d;'>HP1, HP2, Prepárate</p>
+            <p style='color: #6c757d;'>HP1, HP2, AVANCEMOS</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -564,7 +564,7 @@ if pagina == "🏠 Inicio":
         total_estudiantes = len(hp1)
         st.markdown(f"""
         <div class='metric-card'>
-            <h3 style='color: #667eea;'>👥 Estudiantes</h3>
+            <h3 style='color: #667eea;'>👥Estudiantes</h3>
             <h2 style='font-size: 3rem; color: #764ba2;'>{total_estudiantes}</h2>
             <p style='color: #6c757d;'>Evaluados</p>
         </div>
@@ -573,7 +573,7 @@ if pagina == "🏠 Inicio":
     with col3:
         st.markdown(f"""
         <div class='metric-card'>
-            <h3 style='color: #667eea;'>📚 Áreas</h3>
+            <h3 style='color: #667eea;'>📚Áreas</h3>
             <h2 style='font-size: 3rem; color: #764ba2;'>5</h2>
             <p style='color: #6c757d;'>Materias ICFES</p>
         </div>
@@ -583,7 +583,7 @@ if pagina == "🏠 Inicio":
         total_datos = len(hp1) + len(hp2) + len(prep)
         st.markdown(f"""
         <div class='metric-card'>
-            <h3 style='color: #667eea;'>📋 Registros</h3>
+            <h3 style='color: #667eea;'>📋Registros</h3>
             <h2 style='font-size: 3rem; color: #764ba2;'>{total_datos}</h2>
             <p style='color: #6c757d;'>Datos totales</p>
         </div>
