@@ -1892,11 +1892,7 @@ elif pagina == "📉 Estadísticas Detalladas":
     with tab2:
         st.markdown("### 📚 Análisis Comparativo por Grado")
         
-        simulacro_analisis = st.selectbox(
-            "Seleccionar simulacro para análisis por grado",
-            ["Helmer Pardo 1", "Helmer Pardo 2", "AVANCEMOS"],
-            key="grado_select"
-        )
+        simulacro_analisis = simulacro_seleccionado
         
         datos_grado = simulacros_map[simulacro_analisis]
         
@@ -1957,11 +1953,7 @@ elif pagina == "📉 Estadísticas Detalladas":
     with tab3:
         st.markdown("### 🏆 Top Performers por Materia")
         
-        simulacro_top = st.selectbox(
-            "Seleccionar simulacro",
-            ["Helmer Pardo 1", "Helmer Pardo 2", "AVANCEMOS"],
-            key="top_select"
-        )
+        simulacro_top = simulacro_seleccionado
         
         datos_top = simulacros_map[simulacro_top]
         
