@@ -589,6 +589,7 @@ if pagina == "🏠 Inicio":
             <p style='color: #6c757d;'>Datos totales</p>
         </div>
         """, unsafe_allow_html=True)
+        
     
     st.markdown("---")
     
