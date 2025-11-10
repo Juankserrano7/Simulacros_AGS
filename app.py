@@ -590,7 +590,6 @@ if pagina == "🏠 Inicio":
         </div>
         """, unsafe_allow_html=True)
         
-    
     st.markdown("---")
     
     # Análisis de Promedios Generales con más detalle
@@ -663,14 +662,14 @@ if pagina == "🏠 Inicio":
         
         dist_hp1 = calcular_distribucion(hp1)
         dist_hp2 = calcular_distribucion(hp2)
-        dist_prep = calcular_distribucion(prep)
+        distAVAN = calcular_distribucion(prep)
         
         fig = go.Figure()
         categorias = ['Alto (≥300)', 'Medio (250-299)', 'Bajo (<250)']
         
         fig.add_trace(go.Bar(name='HP1', x=categorias, y=dist_hp1, marker_color='#27ae60'))
         fig.add_trace(go.Bar(name='HP2', x=categorias, y=dist_hp2, marker_color='#f39c12'))
-        fig.add_trace(go.Bar(name='AVAN', x=categorias, y=dist_prep, marker_color='#e74c3c'))
+        fig.add_trace(go.Bar(name='AVAN', x=categorias, y=distAVAN, marker_color='#e74c3c'))
         
         fig.update_layout(
             barmode='group',
@@ -686,7 +685,7 @@ if pagina == "🏠 Inicio":
             'Nivel': categorias,
             'HP1': dist_hp1,
             'HP2': dist_hp2,
-            'Prepárate': dist_prep
+            'Avancemos': distAVAN
         })
         st.dataframe(dist_df, use_container_width=True, hide_index=True)
     
@@ -698,7 +697,7 @@ if pagina == "🏠 Inicio":
     # Comparación de materias entre simulacros
     promedios_hp1 = [hp1[mat].mean() for mat in materias]
     promedios_hp2 = [hp2[mat].mean() for mat in materias]
-    promedios_prep = [prep[mat].mean() for mat in materias]
+    promediosAVAN = [prep[mat].mean() for mat in materias]
     
     fig = go.Figure()
     fig.add_trace(go.Scatterpolar(
@@ -717,7 +716,7 @@ if pagina == "🏠 Inicio":
         opacity=0.7
     ))
     fig.add_trace(go.Scatterpolar(
-        r=promedios_prep,
+        r=promediosAVAN,
         theta=materias,
         fill='toself',
         name='Avancemos',
@@ -738,14 +737,14 @@ if pagina == "🏠 Inicio":
         'Materia': materias,
         'HP1': promedios_hp1,
         'HP2': promedios_hp2,
-        'Prepárate': promedios_prep,
-        'Mejor': [max(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
-        'Peor': [min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)],
-        'Rango': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promedios_prep)]
+        'Avancemos': promediosAVAN,
+        'Mejor': [max(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promediosAVAN)],
+        'Menor': [min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promediosAVAN)],
+        'Rango': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promediosAVAN)]
     })
     comp_materias_df = comp_materias_df.round(2)
     st.dataframe(
-        comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'Prepárate'], cmap='RdYlGn', vmin=40, vmax=90),
+        comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'Avancemos'], cmap='RdYlGn', vmin=40, vmax=90),
         use_container_width=True,
         hide_index=True
     )
@@ -855,7 +854,7 @@ elif pagina == "🎖️ Rankings":
         hp2_completo.columns = ['ESTUDIANTE'] + [f'{mat}_HP2' for mat in materias] + ['PROMEDIO_HP2']
         
         prep_completo = prep[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
-        prep_completo.columns = ['ESTUDIANTE'] + [f'{mat}_PREP' for mat in materias] + ['PROMEDIO_PREP']
+        prep_completo.columns = ['ESTUDIANTE'] + [f'{mat}AVAN' for mat in materias] + ['PROMEDIOAVAN']
         
         # Normalizar nombres de estudiantes
         hp1_completo['ESTUDIANTE'] = hp1_completo['ESTUDIANTE'].str.strip().str.upper()
@@ -867,25 +866,25 @@ elif pagina == "🎖️ Rankings":
         datos_unificados = datos_unificados.merge(prep_completo, on='ESTUDIANTE', how='outer')
         
         # Calcular promedio ponderado general (promedio de los 3 promedios ponderados)
-        datos_unificados['PROMEDIO_PONDERADO_GENERAL'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].mean(axis=1, skipna=True)
+        datos_unificados['PROMEDIO_PONDERADO_GENERAL'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIOAVAN']].mean(axis=1, skipna=True)
         
         # Calcular promedios generales por materia
         for mat in materias:
-            cols_materia = [f'{mat}_HP1', f'{mat}_HP2', f'{mat}_PREP']
+            cols_materia = [f'{mat}_HP1', f'{mat}_HP2', f'{mat}AVAN']
             datos_unificados[f'{mat}_PROMEDIO_GENERAL'] = datos_unificados[cols_materia].mean(axis=1, skipna=True)
             
         # Calcular número de simulacros presentados
-        datos_unificados['SIMULACROS_PRESENTADOS'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].notna().sum(axis=1)
+        datos_unificados['SIMULACROS_PRESENTADOS'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIOAVAN']].notna().sum(axis=1)
         
         # Agregar información del mejor simulacro
-        datos_unificados['MEJOR_SIMULACRO'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].idxmax(axis=1)
-        datos_unificados['MEJOR_PUNTAJE'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIO_PREP']].max(axis=1)
+        datos_unificados['MEJOR_SIMULACRO'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIOAVAN']].idxmax(axis=1)
+        datos_unificados['MEJOR_PUNTAJE'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIOAVAN']].max(axis=1)
         
         # Mapear nombres de simulacros
         simulacro_map = {
             'PROMEDIO_HP1': 'Helmer Pardo 1',
             'PROMEDIO_HP2': 'Helmer Pardo 2',
-            'PROMEDIO_PREP': 'AVANCEMOS'
+            'PROMEDIOAVAN': 'AVANCEMOS'
         }
         datos_unificados['MEJOR_SIMULACRO'] = datos_unificados['MEJOR_SIMULACRO'].map(simulacro_map)
     
@@ -1053,8 +1052,8 @@ elif pagina == "🎖️ Rankings":
             columnas_mostrar.extend([f'{mat}_HP2' for mat in materias])
             
         if 'AVANCEMOS' in simulacros_mostrar:
-            columnas_mostrar.append('PROMEDIO_PREP')
-            columnas_mostrar.extend([f'{mat}_PREP' for mat in materias])
+            columnas_mostrar.append('PROMEDIOAVAN')
+            columnas_mostrar.extend([f'{mat}AVAN' for mat in materias])
             
         columnas_mostrar.extend([f'{mat}_PROMEDIO_GENERAL' for mat in materias])
         columnas_mostrar = [col for col in columnas_mostrar if col in tabla_filtrada.columns]
@@ -1098,15 +1097,15 @@ elif pagina == "🎖️ Rankings":
                     rename_dict[col] = col.replace('_HP1', ' (HP1)').replace('_', ' ')
                 elif '_HP2' in col and col != 'PROMEDIO_HP2':
                     rename_dict[col] = col.replace('_HP2', ' (HP2)').replace('_', ' ')
-                elif '_PREP' in col and col != 'PROMEDIO_PREP':
-                    rename_dict[col] = col.replace('_PREP', ' (PREP)').replace('_', ' ')
+                elif 'AVAN' in col and col != 'PROMEDIOAVAN':
+                    rename_dict[col] = col.replace('AVAN', ' (PREP)').replace('_', ' ')
                 elif '_PROMEDIO_GENERAL' in col:
                     rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)').replace('_', ' ')
                 elif col == 'PROMEDIO_HP1':
                     rename_dict[col] = 'PROM. HP1'
                 elif col == 'PROMEDIO_HP2':
                     rename_dict[col] = 'PROM. HP2'
-                elif col == 'PROMEDIO_PREP':
+                elif col == 'PROMEDIOAVAN':
                     rename_dict[col] = 'PROM. PREP'
                 elif col == 'PROMEDIO_PONDERADO_GENERAL':
                     rename_dict[col] = 'PROMEDIO GENERAL'
@@ -1513,12 +1512,12 @@ elif pagina == "🔄 Comparación Simulacros":
     
     promedios_hp1 = [hp1[mat].mean() for mat in materias]
     promedios_hp2 = [hp2[mat].mean() for mat in materias]
-    promedios_prep = [prep[mat].mean() for mat in materias]
+    promediosAVAN = [prep[mat].mean() for mat in materias]
     
     fig = go.Figure()
     fig.add_trace(go.Bar(name='Helmer Pardo 1', x=materias, y=promedios_hp1, marker_color='#3498db'))
     fig.add_trace(go.Bar(name='Helmer Pardo 2', x=materias, y=promedios_hp2, marker_color='#2ecc71'))
-    fig.add_trace(go.Bar(name='AVANCEMOS', x=materias, y=promedios_prep, marker_color='#e74c3c'))
+    fig.add_trace(go.Bar(name='AVANCEMOS', x=materias, y=promediosAVAN, marker_color='#e74c3c'))
     
     fig.update_layout(
         barmode='group',
@@ -1539,9 +1538,9 @@ elif pagina == "🔄 Comparación Simulacros":
         'Materia': materias,
         'HP1': promedios_hp1,
         'HP2': promedios_hp2,
-        'AVANCEMOS': promedios_prep,
+        'AVANCEMOS': promediosAVAN,
         'Cambio HP1→HP2': [hp2-hp1 for hp1, hp2 in zip(promedios_hp1, promedios_hp2)],
-        'Cambio HP2→Prep': [prep-hp2 for hp2, prep in zip(promedios_hp2, promedios_prep)]
+        'Cambio HP2→AVAN': [prep-hp2 for hp2, prep in zip(promedios_hp2, promediosAVAN)]
     })
     comp_df = comp_df.round(2)
     
@@ -1745,7 +1744,7 @@ elif pagina == "📈 Avance":
     
     progresion.columns = ['ESTUDIANTE', 'HP1', 'HP2', 'Avancemos']
     progresion['CAMBIO_HP1_HP2'] = progresion['HP2'] - progresion['HP1']
-    progresion['CAMBIO_HP2_PREP'] = progresion['Avancemos'] - progresion['HP2']
+    progresion['CAMBIO_HP2AVAN'] = progresion['Avancemos'] - progresion['HP2']
     progresion['CAMBIO_TOTAL'] = progresion['Avancemos'] - progresion['HP1']
     
     st.markdown(f"**Estudiantes encontrados en los 3 simulacros:** {len(progresion)}")
@@ -1836,13 +1835,13 @@ elif pagina == "📈 Avance":
     st.markdown("<h2 class='section-header'>📋 Tabla de Avance Completa</h2>", unsafe_allow_html=True)
     
     tabla_progresion = progresion[['ESTUDIANTE', 'HP1', 'HP2', 'Avancemos', 
-                                     'CAMBIO_HP1_HP2', 'CAMBIO_HP2_PREP', 'CAMBIO_TOTAL']]
+                                     'CAMBIO_HP1_HP2', 'CAMBIO_HP2AVAN', 'CAMBIO_TOTAL']]
     tabla_progresion = tabla_progresion.sort_values('CAMBIO_TOTAL', ascending=False)
     tabla_progresion = tabla_progresion.round(2)
     
     st.dataframe(
         tabla_progresion.style.background_gradient(
-            subset=['CAMBIO_HP1_HP2', 'CAMBIO_HP2_PREP', 'CAMBIO_TOTAL'], 
+            subset=['CAMBIO_HP1_HP2', 'CAMBIO_HP2AVAN', 'CAMBIO_TOTAL'], 
             cmap='RdYlGn', 
             vmin=-50, 
             vmax=50
