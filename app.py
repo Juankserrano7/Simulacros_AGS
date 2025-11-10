@@ -1545,7 +1545,7 @@ elif pagina == "🔄 Comparación Simulacros":
     comp_df = comp_df.round(2)
     
     st.dataframe(
-        comp_df.style.background_gradient(subset=['Cambio HP1→HP2', 'Cambio HP2→Prep'], cmap='RdYlGn', vmin=-20, vmax=20),
+        comp_df.style.background_gradient(subset=['Cambio HP1→HP2', 'Cambio HP2→AVAN'], cmap='RdYlGn', vmin=-20, vmax=20),
         use_container_width=True
     )
     
