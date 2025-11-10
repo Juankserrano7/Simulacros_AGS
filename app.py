@@ -1098,7 +1098,7 @@ elif pagina == "🎖️ Rankings":
                 elif '_HP2' in col and col != 'PROMEDIO_HP2':
                     rename_dict[col] = col.replace('_HP2', ' (HP2)').replace('_', ' ')
                 elif 'AVAN' in col and col != 'PROMEDIOAVAN':
-                    rename_dict[col] = col.replace('AVAN', ' AVAN').replace('_', ' ')
+                    rename_dict[col] = col.replace('AVAN', ' (AVAN)').replace('_', ' ')
                 elif '_PROMEDIO_GENERAL' in col:
                     rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)').replace('_', ' ')
                 elif col == 'PROMEDIO_HP1':
@@ -1106,7 +1106,7 @@ elif pagina == "🎖️ Rankings":
                 elif col == 'PROMEDIO_HP2':
                     rename_dict[col] = 'PROM. HP2'
                 elif col == 'PROMEDIOAVAN':
-                    rename_dict[col] = 'PROM. PREP'
+                    rename_dict[col] = 'PROM. AVAN'
                 elif col == 'PROMEDIO_PONDERADO_GENERAL':
                     rename_dict[col] = 'PROMEDIO GENERAL'
                             
