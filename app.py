@@ -981,322 +981,322 @@ elif pagina == "🎖️ Rankings":
     st.markdown("<h2 class='section-header'>📋 Tabla Completa - Ranking Global por Estudiante</h2>", unsafe_allow_html=True)
     try:
         # ========== CONTROLES INTERACTIVOS ==========
-        st.markdown("### 🎯 Controles de Visualización")
+       st.markdown("### 🎯 Controles de Visualización")
 
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            metrica_ordenar = st.selectbox(
-                "📊 Ordenar por:",
-                options=['PROMEDIO_PONDERADO_GENERAL'] + [f'{mat}_PROMEDIO_GENERAL' for mat in materias],
-                format_func=lambda x: 'Promedio Ponderado General' if x == 'PROMEDIO_PONDERADO_GENERAL' else x.replace('_PROMEDIO_GENERAL', '').replace('_', ' '),
-                index=0
-            )
-        
-        with col2:
-            min_puntaje = st.number_input(
-                "📉 Puntaje mínimo:",
-                min_value=0.0,
-                max_value=500.0,
-                value=0.0,
-                step=10.0
-            )
-        
-        with col3:
-            max_puntaje = st.number_input(
-                "📈 Puntaje máximo:",
-                min_value=0.0,
-                max_value=500.0,
-                value=500.0,
-                step=10.0
-            )
-        
-        with col4:
-            # Filtro de grado
-            grados_disponibles = []
-            for df in [hp1, hp2, prep]:
-                if 'GRADO' in df.columns:
-                    grados_disponibles.extend(df['GRADO'].dropna().unique().tolist())
-            
-            grados_disponibles = sorted(list(set([str(g) for g in grados_disponibles])))
-            
-            if grados_disponibles:
-                grado_filtro = st.multiselect(
-                    "🎓 Filtrar por grado:",
-                    options=['Todos'] + grados_disponibles,
-                    default=['Todos']
-                )
-            else:
-                grado_filtro = ['Todos']
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            simulacros_mostrar = st.multiselect(
-                "📋 Mostrar columnas de simulacros:",
-                options=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS'],
-                default=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS']
-            )
-        
-        with col2:
-            buscar_nombre = st.text_input(
-                "🔍 Buscar estudiante por nombre:",
-                placeholder="Escribe el nombre..."
-            )
-        
-        # ========== APLICAR FILTROS ==========
-        tabla_filtrada = datos_unificados.copy()
-        
-        # Filtro de puntaje
-        tabla_filtrada = tabla_filtrada[
-            (tabla_filtrada[metrica_ordenar] >= min_puntaje) &
-            (tabla_filtrada[metrica_ordenar] <= max_puntaje)
-        ]
-        
-        # Filtro de grado (si existe la columna)
-        if 'GRADO' in tabla_filtrada.columns and 'Todos' not in grado_filtro:
-            tabla_filtrada = tabla_filtrada[tabla_filtrada['GRADO'].astype(str).isin(grado_filtro)]
-        
-        # Filtro de nombre
-        if buscar_nombre:
-            tabla_filtrada = tabla_filtrada[tabla_filtrada['ESTUDIANTE'].str.contains(buscar_nombre.upper(), na=False)]
-        
-        tabla_filtrada = tabla_filtrada.sort_values(metrica_ordenar, ascending=False).reset_index(drop=True)
-        tabla_filtrada.insert(0, 'RANKING', range(1, len(tabla_filtrada) + 1))
-        
-        # ========== SELECCIONAR COLUMNAS ==========
-        columnas_mostrar = ['RANKING', 'ESTUDIANTE']
-        
-        # Agregar columna de grado si existe
-        if 'GRADO' in tabla_filtrada.columns:
-            columnas_mostrar.append('GRADO')
-        
-        columnas_mostrar.append('PROMEDIO_PONDERADO_GENERAL')
-        
-        if 'Helmer Pardo 1' in simulacros_mostrar:
-            columnas_mostrar.append('PROMEDIO_HP1')
-            columnas_mostrar.extend([f'{mat}_HP1' for mat in materias])
-        
-        if 'Helmer Pardo 2' in simulacros_mostrar:
-            columnas_mostrar.append('PROMEDIO_HP2')
-            columnas_mostrar.extend([f'{mat}_HP2' for mat in materias])
-        
-        if 'AVANCEMOS' in simulacros_mostrar:
-            columnas_mostrar.append('PROMEDIOAVAN')
-            columnas_mostrar.extend([f'{mat}AVAN' for mat in materias])
-        
-        columnas_mostrar.extend([f'{mat}_PROMEDIO_GENERAL' for mat in materias])
-        columnas_mostrar = [col for col in columnas_mostrar if col in tabla_filtrada.columns]
-        tabla_mostrar = tabla_filtrada[columnas_mostrar].copy()
-        
-        columnas_numericas = tabla_mostrar.select_dtypes(include=[np.number]).columns
-        tabla_mostrar[columnas_numericas] = tabla_mostrar[columnas_numericas].round(2)
-        
-        # ========== ESTADÍSTICAS RESUMEN ==========
-        st.markdown("### 📊 Estadísticas del Ranking Filtrado")
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("👥 Total Estudiantes", len(tabla_filtrada))
-        
-        with col2:
-            promedio_general = tabla_filtrada[metrica_ordenar].mean()
-            st.metric("📈 Promedio", f"{promedio_general:.2f}")
-        
-        with col3:
-            maximo = tabla_filtrada[metrica_ordenar].max()
-            st.metric("🏆 Máximo", f"{maximo:.2f}")
-        
-        with col4:
-            minimo = tabla_filtrada[metrica_ordenar].min()
-            st.metric("📉 Mínimo", f"{minimo:.2f}")
-        
-        st.markdown("---")
-
-# ========== VISUALIZACIÓN ==========
-tab1, tab2, tab3 = st.tabs(["📋 Tabla Completa", "📊 Gráfica de Ranking", "📈 Distribución"])
-
-with tab1:
-    st.markdown("#### 📋 Ranking Completo")
+    col1, col2, col3, col4 = st.columns(4)
     
-    tabla_display = tabla_mostrar.copy()
-    rename_dict = {}
-    for col in tabla_display.columns:
-        if '_HP1' in col and col != 'PROMEDIO_HP1':
-            rename_dict[col] = col.replace('_HP1', ' (HP1)').replace('_', ' ')
-        elif '_HP2' in col and col != 'PROMEDIO_HP2':
-            rename_dict[col] = col.replace('_HP2', ' (HP2)').replace('_', ' ')
-        elif 'AVAN' in col and col != 'PROMEDIOAVAN':
-            rename_dict[col] = col.replace('AVAN', ' (AVAN)').replace('_', ' ')
-        elif '_PROMEDIO_GENERAL' in col:
-            rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)').replace('_', ' ')
-        elif col == 'PROMEDIO_HP1':
-            rename_dict[col] = 'PROM. HP1'
-        elif col == 'PROMEDIO_HP2':
-            rename_dict[col] = 'PROM. HP2'
-        elif col == 'PROMEDIOAVAN':
-            rename_dict[col] = 'PROM. AVAN'
-        elif col == 'PROMEDIO_PONDERADO_GENERAL':
-            rename_dict[col] = 'PROMEDIO GENERAL'
-    
-    tabla_display = tabla_display.rename(columns=rename_dict)
-    columnas_para_gradiente = [col for col in tabla_display.columns if col not in ['RANKING', 'ESTUDIANTE', 'GRADO']]
-
-    # === 🎨 FUNCIÓN para resaltar la columna PROMEDIO GENERAL en azul
-    def resaltar_promedio(col):
-        if col.name == 'PROMEDIO GENERAL':
-            return ['background-color: #007BFF; color: white; font-weight: bold'] * len(col)
-        else:
-            return [''] * len(col)
-
-    # === 🌈 Aplicar estilo: primero gradiente, luego color azul en la columna
-    tabla_estilo = (
-        tabla_display.style
-        .background_gradient(
-            subset=columnas_para_gradiente,
-            cmap='RdYlGn',
-            vmin=0,
-            vmax=100
+    with col1:
+        metrica_ordenar = st.selectbox(
+            "📊 Ordenar por:",
+            options=['PROMEDIO_PONDERADO_GENERAL'] + [f'{mat}_PROMEDIO_GENERAL' for mat in materias],
+            format_func=lambda x: 'Promedio Ponderado General' if x == 'PROMEDIO_PONDERADO_GENERAL' else x.replace('_PROMEDIO_GENERAL', '').replace('_', ' '),
+            index=0
         )
-        .apply(resaltar_promedio)
-        .format({col: '{:.2f}' for col in columnas_para_gradiente})
-    )
-
-    st.dataframe(
-        tabla_estilo,
-        use_container_width=True,
-        height=600
-    )
-
-with tab2:
-    st.markdown("#### 📊 Top 30 Estudiantes")
     
-    top_30 = tabla_filtrada.head(30)
+    with col2:
+        min_puntaje = st.number_input(
+            "📉 Puntaje mínimo:",
+            min_value=0.0,
+            max_value=500.0,
+            value=0.0,
+            step=10.0
+        )
     
-    # Escala de colores personalizada
-    custom_colorscale = [
-        [0.0, "#E74C3C"],   # 0 → rojo
-        [0.4, "#D35400"],   # ~200 → terracota
-        [0.68, "#3498DB"],  # ~340 → azul
-        [0.8, "#2ECC71"],   # ~400 → verde
-        [1.0, "#27AE60"]    # >500 → verde oscuro (opcional)
-    ]
+    with col3:
+        max_puntaje = st.number_input(
+            "📈 Puntaje máximo:",
+            min_value=0.0,
+            max_value=500.0,
+            value=500.0,
+            step=10.0
+        )
     
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        y=top_30['ESTUDIANTE'],
-        x=top_30[metrica_ordenar],
-        orientation='h',
-        marker=dict(
-            color=top_30[metrica_ordenar],
-            colorscale=custom_colorscale,
-            cmin=0,
-            cmax=500,
-            showscale=True,
-            colorbar=dict(title="Puntaje")
-        ),
-        text=top_30[metrica_ordenar].round(2),
-        textposition='outside'
-    ))
-    
-    fig.update_layout(
-        title=f"Top 30 - {metrica_ordenar.replace('_', ' ')}",
-        xaxis_title="Puntaje",
-        yaxis_title="Estudiante",
-        height=800,
-        yaxis={'categoryorder': 'total ascending'},
-        template="plotly_white"
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-
-with tab3:
-    st.markdown("#### 📈 Distribución de Puntajes")
+    with col4:
+        # Filtro de grado
+        grados_disponibles = []
+        for df in [hp1, hp2, prep]:
+            if 'GRADO' in df.columns:
+                grados_disponibles.extend(df['GRADO'].dropna().unique().tolist())
+        
+        grados_disponibles = sorted(list(set([str(g) for g in grados_disponibles])))
+        
+        if grados_disponibles:
+            grado_filtro = st.multiselect(
+                "🎓 Filtrar por grado:",
+                options=['Todos'] + grados_disponibles,
+                default=['Todos']
+            )
+        else:
+            grado_filtro = ['Todos']
     
     col1, col2 = st.columns(2)
     
     with col1:
-        fig = go.Figure()
-        fig.add_trace(go.Histogram(
-            x=tabla_filtrada[metrica_ordenar],
-            nbinsx=30,
-            marker_color='#667eea',
-            name='Frecuencia'
-        ))
-        fig.add_vline(
-            x=tabla_filtrada[metrica_ordenar].mean(),
-            line_dash="dash",
-            line_color="red",
-            annotation_text=f"Promedio: {tabla_filtrada[metrica_ordenar].mean():.2f}"
+        simulacros_mostrar = st.multiselect(
+            "📋 Mostrar columnas de simulacros:",
+            options=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS'],
+            default=['Helmer Pardo 1', 'Helmer Pardo 2', 'AVANCEMOS']
         )
-        fig.update_layout(
-            title="Distribución de Puntajes",
-            xaxis_title="Puntaje",
-            yaxis_title="Frecuencia",
-            height=400,
-            template="plotly_white"
-        )
-        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
+        buscar_nombre = st.text_input(
+            "🔍 Buscar estudiante por nombre:",
+            placeholder="Escribe el nombre..."
+        )
+    
+    # ========== APLICAR FILTROS ==========
+    tabla_filtrada = datos_unificados.copy()
+    
+    # Filtro de puntaje
+    tabla_filtrada = tabla_filtrada[
+        (tabla_filtrada[metrica_ordenar] >= min_puntaje) &
+        (tabla_filtrada[metrica_ordenar] <= max_puntaje)
+    ]
+    
+    # Filtro de grado (si existe la columna)
+    if 'GRADO' in tabla_filtrada.columns and 'Todos' not in grado_filtro:
+        tabla_filtrada = tabla_filtrada[tabla_filtrada['GRADO'].astype(str).isin(grado_filtro)]
+    
+    # Filtro de nombre
+    if buscar_nombre:
+        tabla_filtrada = tabla_filtrada[tabla_filtrada['ESTUDIANTE'].str.contains(buscar_nombre.upper(), na=False)]
+    
+    tabla_filtrada = tabla_filtrada.sort_values(metrica_ordenar, ascending=False).reset_index(drop=True)
+    tabla_filtrada.insert(0, 'RANKING', range(1, len(tabla_filtrada) + 1))
+    
+    # ========== SELECCIONAR COLUMNAS ==========
+    columnas_mostrar = ['RANKING', 'ESTUDIANTE']
+    
+    # Agregar columna de grado si existe
+    if 'GRADO' in tabla_filtrada.columns:
+        columnas_mostrar.append('GRADO')
+    
+    columnas_mostrar.append('PROMEDIO_PONDERADO_GENERAL')
+    
+    if 'Helmer Pardo 1' in simulacros_mostrar:
+        columnas_mostrar.append('PROMEDIO_HP1')
+        columnas_mostrar.extend([f'{mat}_HP1' for mat in materias])
+    
+    if 'Helmer Pardo 2' in simulacros_mostrar:
+        columnas_mostrar.append('PROMEDIO_HP2')
+        columnas_mostrar.extend([f'{mat}_HP2' for mat in materias])
+    
+    if 'AVANCEMOS' in simulacros_mostrar:
+        columnas_mostrar.append('PROMEDIOAVAN')
+        columnas_mostrar.extend([f'{mat}AVAN' for mat in materias])
+    
+    columnas_mostrar.extend([f'{mat}_PROMEDIO_GENERAL' for mat in materias])
+    columnas_mostrar = [col for col in columnas_mostrar if col in tabla_filtrada.columns]
+    tabla_mostrar = tabla_filtrada[columnas_mostrar].copy()
+    
+    columnas_numericas = tabla_mostrar.select_dtypes(include=[np.number]).columns
+    tabla_mostrar[columnas_numericas] = tabla_mostrar[columnas_numericas].round(2)
+    
+    # ========== ESTADÍSTICAS RESUMEN ==========
+    st.markdown("### 📊 Estadísticas del Ranking Filtrado")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("👥 Total Estudiantes", len(tabla_filtrada))
+    
+    with col2:
+        promedio_general = tabla_filtrada[metrica_ordenar].mean()
+        st.metric("📈 Promedio", f"{promedio_general:.2f}")
+    
+    with col3:
+        maximo = tabla_filtrada[metrica_ordenar].max()
+        st.metric("🏆 Máximo", f"{maximo:.2f}")
+    
+    with col4:
+        minimo = tabla_filtrada[metrica_ordenar].min()
+        st.metric("📉 Mínimo", f"{minimo:.2f}")
+    
+    st.markdown("---")
+    
+    # ========== VISUALIZACIÓN ==========
+    tab1, tab2, tab3 = st.tabs(["📋 Tabla Completa", "📊 Gráfica de Ranking", "📈 Distribución"])
+    
+    with tab1:
+        st.markdown("#### 📋 Ranking Completo")
+        
+        tabla_display = tabla_mostrar.copy()
+        rename_dict = {}
+        for col in tabla_display.columns:
+            if '_HP1' in col and col != 'PROMEDIO_HP1':
+                rename_dict[col] = col.replace('_HP1', ' (HP1)').replace('_', ' ')
+            elif '_HP2' in col and col != 'PROMEDIO_HP2':
+                rename_dict[col] = col.replace('_HP2', ' (HP2)').replace('_', ' ')
+            elif 'AVAN' in col and col != 'PROMEDIOAVAN':
+                rename_dict[col] = col.replace('AVAN', ' (AVAN)').replace('_', ' ')
+            elif '_PROMEDIO_GENERAL' in col:
+                rename_dict[col] = col.replace('_PROMEDIO_GENERAL', ' (Promedio)').replace('_', ' ')
+            elif col == 'PROMEDIO_HP1':
+                rename_dict[col] = 'PROM. HP1'
+            elif col == 'PROMEDIO_HP2':
+                rename_dict[col] = 'PROM. HP2'
+            elif col == 'PROMEDIOAVAN':
+                rename_dict[col] = 'PROM. AVAN'
+            elif col == 'PROMEDIO_PONDERADO_GENERAL':
+                rename_dict[col] = 'PROMEDIO GENERAL'
+        
+        tabla_display = tabla_display.rename(columns=rename_dict)
+        columnas_para_gradiente = [col for col in tabla_display.columns if col not in ['RANKING', 'ESTUDIANTE', 'GRADO']]
+    
+        # === 🎨 FUNCIÓN para resaltar la columna PROMEDIO GENERAL en azul
+        def resaltar_promedio(col):
+            if col.name == 'PROMEDIO GENERAL':
+                return ['background-color: #007BFF; color: white; font-weight: bold'] * len(col)
+            else:
+                return [''] * len(col)
+    
+        # === 🌈 Aplicar estilo: primero gradiente, luego color azul en la columna
+        tabla_estilo = (
+            tabla_display.style
+            .background_gradient(
+                subset=columnas_para_gradiente,
+                cmap='RdYlGn',
+                vmin=0,
+                vmax=100
+            )
+            .apply(resaltar_promedio)
+            .format({col: '{:.2f}' for col in columnas_para_gradiente})
+        )
+    
+        st.dataframe(
+            tabla_estilo,
+            use_container_width=True,
+            height=600
+        )
+    
+    with tab2:
+        st.markdown("#### 📊 Top 30 Estudiantes")
+        
+        top_30 = tabla_filtrada.head(30)
+        
+        # Escala de colores personalizada
+        custom_colorscale = [
+            [0.0, "#E74C3C"],   # 0 → rojo
+            [0.4, "#D35400"],   # ~200 → terracota
+            [0.68, "#3498DB"],  # ~340 → azul
+            [0.8, "#2ECC71"],   # ~400 → verde
+            [1.0, "#27AE60"]    # >500 → verde oscuro (opcional)
+        ]
+        
         fig = go.Figure()
-        fig.add_trace(go.Box(
-            y=tabla_filtrada[metrica_ordenar],
-            name='Puntajes',
-            marker_color='#667eea',
-            boxmean='sd'
+        fig.add_trace(go.Bar(
+            y=top_30['ESTUDIANTE'],
+            x=top_30[metrica_ordenar],
+            orientation='h',
+            marker=dict(
+                color=top_30[metrica_ordenar],
+                colorscale=custom_colorscale,
+                cmin=0,
+                cmax=500,
+                showscale=True,
+                colorbar=dict(title="Puntaje")
+            ),
+            text=top_30[metrica_ordenar].round(2),
+            textposition='outside'
         ))
+        
         fig.update_layout(
-            title="Estadísticas de Puntajes",
-            yaxis_title="Puntaje",
-            height=400,
+            title=f"Top 30 - {metrica_ordenar.replace('_', ' ')}",
+            xaxis_title="Puntaje",
+            yaxis_title="Estudiante",
+            height=800,
+            yaxis={'categoryorder': 'total ascending'},
             template="plotly_white"
         )
+        
         st.plotly_chart(fig, use_container_width=True)
-
-st.markdown("---")
-
-# ========== OPCIONES DE DESCARGA EN EXCEL ==========
-st.markdown("### 💾 Descargar Datos")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    from io import BytesIO
     
-    # Crear archivo Excel para tabla filtrada
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        tabla_mostrar.to_excel(writer, index=False, sheet_name='Ranking Filtrado')
-    excel_data = output.getvalue()
+    with tab3:
+        st.markdown("#### 📈 Distribución de Puntajes")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            fig = go.Figure()
+            fig.add_trace(go.Histogram(
+                x=tabla_filtrada[metrica_ordenar],
+                nbinsx=30,
+                marker_color='#667eea',
+                name='Frecuencia'
+            ))
+            fig.add_vline(
+                x=tabla_filtrada[metrica_ordenar].mean(),
+                line_dash="dash",
+                line_color="red",
+                annotation_text=f"Promedio: {tabla_filtrada[metrica_ordenar].mean():.2f}"
+            )
+            fig.update_layout(
+                title="Distribución de Puntajes",
+                xaxis_title="Puntaje",
+                yaxis_title="Frecuencia",
+                height=400,
+                template="plotly_white"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            fig = go.Figure()
+            fig.add_trace(go.Box(
+                y=tabla_filtrada[metrica_ordenar],
+                name='Puntajes',
+                marker_color='#667eea',
+                boxmean='sd'
+            ))
+            fig.update_layout(
+                title="Estadísticas de Puntajes",
+                yaxis_title="Puntaje",
+                height=400,
+                template="plotly_white"
+            )
+            st.plotly_chart(fig, use_container_width=True)
     
-    st.download_button(
-        label="📥 Descargar Tabla Filtrada (Excel)",
-        data=excel_data,
-        file_name="ranking_filtrado.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-with col2:
-    # Crear archivo Excel para datos completos
-    output_completo = BytesIO()
-    with pd.ExcelWriter(output_completo, engine='openpyxl') as writer:
-        datos_unificados.to_excel(writer, index=False, sheet_name='Datos Completos')
-    excel_completo = output_completo.getvalue()
+    st.markdown("---")
     
-    st.download_button(
-        label="📥 Descargar Datos Completos (Excel)",
-        data=excel_completo,
-        file_name="datos_completos_todos_simulacros.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-except Exception as e:
-    st.error(f"❌ Error al generar la tabla completa: {str(e)}")
-    import traceback
-    st.code(traceback.format_exc())
-st.markdown("---")
+    # ========== OPCIONES DE DESCARGA EN EXCEL ==========
+    st.markdown("### 💾 Descargar Datos")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        from io import BytesIO
+        
+        # Crear archivo Excel para tabla filtrada
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            tabla_mostrar.to_excel(writer, index=False, sheet_name='Ranking Filtrado')
+        excel_data = output.getvalue()
+        
+        st.download_button(
+            label="📥 Descargar Tabla Filtrada (Excel)",
+            data=excel_data,
+            file_name="ranking_filtrado.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+    
+    with col2:
+        # Crear archivo Excel para datos completos
+        output_completo = BytesIO()
+        with pd.ExcelWriter(output_completo, engine='openpyxl') as writer:
+            datos_unificados.to_excel(writer, index=False, sheet_name='Datos Completos')
+        excel_completo = output_completo.getvalue()
+        
+        st.download_button(
+            label="📥 Descargar Datos Completos (Excel)",
+            data=excel_completo,
+            file_name="datos_completos_todos_simulacros.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+    
+    except Exception as e:
+        st.error(f"❌ Error al generar la tabla completa: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
+    st.markdown("---")
     
 # ==================== REPORTE GENERAL ====================
 elif pagina == "📊 Reporte General":
