@@ -1276,9 +1276,20 @@ elif pagina == "🎖️ Rankings":
                 st.plotly_chart(fig, use_container_width=True)
         
         st.markdown("---")
-        
+    
+
         # ========== OPCIONES DE DESCARGA EN EXCEL ==========
         st.markdown("### 💾 Descargar Datos")
+
+        # Función para convertir número de columna a letra de Excel
+        def num_to_excel_col(n):
+            """Convierte número a letra de columna Excel (1=A, 27=AA, etc.)"""
+            result = ""
+            while n > 0:
+                n -= 1
+                result = chr(65 + (n % 26)) + result
+                n //= 26
+            return result
 
         col1, col2 = st.columns(2)
 
@@ -1299,8 +1310,12 @@ elif pagina == "🎖️ Rankings":
             for r in dataframe_to_rows(tabla_mostrar, index=False, header=True):
                 ws.append(r)
             
+            # Calcular la última columna correctamente
+            last_col = num_to_excel_col(len(tabla_mostrar.columns))
+            last_row = len(tabla_mostrar) + 1
+            
             # Crear tabla Excel
-            tab = Table(displayName="TablaRanking", ref=f"A1:{chr(64 + len(tabla_mostrar.columns))}{len(tabla_mostrar) + 1}")
+            tab = Table(displayName="TablaRanking", ref=f"A1:{last_col}{last_row}")
             
             # Estilo de tabla
             style = TableStyleInfo(
@@ -1348,10 +1363,14 @@ elif pagina == "🎖️ Rankings":
             for r in dataframe_to_rows(datos_unificados, index=False, header=True):
                 ws_completo.append(r)
             
+            # Calcular la última columna correctamente
+            last_col_completo = num_to_excel_col(len(datos_unificados.columns))
+            last_row_completo = len(datos_unificados) + 1
+            
             # Crear tabla Excel
             tab_completo = Table(
                 displayName="DatosCompletos", 
-                ref=f"A1:{chr(64 + len(datos_unificados.columns))}{len(datos_unificados) + 1}"
+                ref=f"A1:{last_col_completo}{last_row_completo}"
             )
             
             # Estilo de tabla
