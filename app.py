@@ -856,14 +856,34 @@ elif pagina == "🎖️ Rankings":
         prep_completo = prep[['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']].copy()
         prep_completo.columns = ['ESTUDIANTE'] + [f'{mat}AVAN' for mat in materias] + ['PROMEDIOAVAN']
         
+        # Agregar columna GRADO si existe en los dataframes originales
+        if 'GRADO' in hp1.columns:
+            hp1_completo['GRADO'] = hp1['GRADO']
+        elif 'GRADO' in hp2.columns:
+            hp2_completo['GRADO'] = hp2['GRADO']
+        elif 'GRADO' in prep.columns:
+            prep_completo['GRADO'] = prep['GRADO']
+        
         # Normalizar nombres de estudiantes
         hp1_completo['ESTUDIANTE'] = hp1_completo['ESTUDIANTE'].str.strip().str.upper()
         hp2_completo['ESTUDIANTE'] = hp2_completo['ESTUDIANTE'].str.strip().str.upper()
         prep_completo['ESTUDIANTE'] = prep_completo['ESTUDIANTE'].str.strip().str.upper()
         
         # Combinar todos los datos por estudiante (DATASET UNIFICADO)
-        datos_unificados = hp1_completo.merge(hp2_completo, on='ESTUDIANTE', how='outer')
-        datos_unificados = datos_unificados.merge(prep_completo, on='ESTUDIANTE', how='outer')
+        datos_unificados = hp1_completo.merge(hp2_completo, on='ESTUDIANTE', how='outer', suffixes=('', '_y'))
+        datos_unificados = datos_unificados.merge(prep_completo, on='ESTUDIANTE', how='outer', suffixes=('', '_z'))
+        
+        # Consolidar columna GRADO (tomar el primer valor no nulo)
+        grado_cols = [col for col in datos_unificados.columns if 'GRADO' in col]
+        if grado_cols:
+            datos_unificados['GRADO'] = datos_unificados[grado_cols].bfill(axis=1).iloc[:, 0]
+            # Eliminar columnas duplicadas de GRADO
+            for col in grado_cols:
+                if col != 'GRADO':
+                    datos_unificados.drop(col, axis=1, inplace=True, errors='ignore')
+        else:
+            # Si no existe GRADO en ningún dataframe, crear una columna con valor por defecto
+            datos_unificados['GRADO'] = '11'
         
         # Calcular promedio ponderado general (promedio de los 3 promedios ponderados)
         datos_unificados['PROMEDIO_PONDERADO_GENERAL'] = datos_unificados[['PROMEDIO_HP1', 'PROMEDIO_HP2', 'PROMEDIOAVAN']].mean(axis=1, skipna=True)
@@ -887,7 +907,7 @@ elif pagina == "🎖️ Rankings":
             'PROMEDIOAVAN': 'AVANCEMOS'
         }
         datos_unificados['MEJOR_SIMULACRO'] = datos_unificados['MEJOR_SIMULACRO'].map(simulacro_map)
-    
+
     except Exception as e:
         st.error(f"❌ Error al preparar el dataset unificado: {str(e)}")
         st.stop()
@@ -1259,16 +1279,54 @@ elif pagina == "🎖️ Rankings":
         
         # ========== OPCIONES DE DESCARGA EN EXCEL ==========
         st.markdown("### 💾 Descargar Datos")
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             from io import BytesIO
+            from openpyxl.utils.dataframe import dataframe_to_rows
+            from openpyxl import Workbook
+            from openpyxl.worksheet.table import Table, TableStyleInfo
             
-            # Crear archivo Excel para tabla filtrada
+            # Crear archivo Excel para tabla filtrada con formato de tabla
             output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                tabla_mostrar.to_excel(writer, index=False, sheet_name='Ranking Filtrado')
+            
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Ranking Filtrado"
+            
+            # Escribir datos
+            for r in dataframe_to_rows(tabla_mostrar, index=False, header=True):
+                ws.append(r)
+            
+            # Crear tabla Excel
+            tab = Table(displayName="TablaRanking", ref=f"A1:{chr(64 + len(tabla_mostrar.columns))}{len(tabla_mostrar) + 1}")
+            
+            # Estilo de tabla
+            style = TableStyleInfo(
+                name="TableStyleMedium9",
+                showFirstColumn=False,
+                showLastColumn=False,
+                showRowStripes=True,
+                showColumnStripes=False
+            )
+            tab.tableStyleInfo = style
+            ws.add_table(tab)
+            
+            # Ajustar ancho de columnas
+            for column in ws.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                ws.column_dimensions[column_letter].width = adjusted_width
+            
+            wb.save(output)
             excel_data = output.getvalue()
             
             st.download_button(
@@ -1277,12 +1335,50 @@ elif pagina == "🎖️ Rankings":
                 file_name="ranking_filtrado.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
-        
+
         with col2:
-            # Crear archivo Excel para datos completos
+            # Crear archivo Excel para datos completos con formato de tabla
             output_completo = BytesIO()
-            with pd.ExcelWriter(output_completo, engine='openpyxl') as writer:
-                datos_unificados.to_excel(writer, index=False, sheet_name='Datos Completos')
+            
+            wb_completo = Workbook()
+            ws_completo = wb_completo.active
+            ws_completo.title = "Datos Completos"
+            
+            # Escribir datos
+            for r in dataframe_to_rows(datos_unificados, index=False, header=True):
+                ws_completo.append(r)
+            
+            # Crear tabla Excel
+            tab_completo = Table(
+                displayName="DatosCompletos", 
+                ref=f"A1:{chr(64 + len(datos_unificados.columns))}{len(datos_unificados) + 1}"
+            )
+            
+            # Estilo de tabla
+            style_completo = TableStyleInfo(
+                name="TableStyleMedium2",
+                showFirstColumn=False,
+                showLastColumn=False,
+                showRowStripes=True,
+                showColumnStripes=False
+            )
+            tab_completo.tableStyleInfo = style_completo
+            ws_completo.add_table(tab_completo)
+            
+            # Ajustar ancho de columnas
+            for column in ws_completo.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                ws_completo.column_dimensions[column_letter].width = adjusted_width
+            
+            wb_completo.save(output_completo)
             excel_completo = output_completo.getvalue()
             
             st.download_button(
