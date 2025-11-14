@@ -732,24 +732,34 @@ if pagina == "🏠 Inicio":
     st.plotly_chart(fig, use_container_width=True)
     
     # Tabla comparativa detallada
+    # Tabla comparativa detallada
     st.markdown("#### 📊 Tabla Comparativa de Materias")
+
     comp_materias_df = pd.DataFrame({
         'Materia': materias,
         'HP1': promedios_hp1,
         'HP2': promedios_hp2,
         'Avancemos': promediosAVAN,
-        'Mejor': [max(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promediosAVAN)],
-        'Menor': [min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promediosAVAN)],
-        'Rango': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promediosAVAN)]
+        'Mejor': [max(a, b, c) for a, b, c in zip(promedios_hp1, promedios_hp2, promediosAVAN)],
+        'Menor': [min(a, b, c) for a, b, c in zip(promedios_hp1, promedios_hp2, promediosAVAN)],
+        'Rango': [max(a, b, c) - min(a, b, c) for a, b, c in zip(promedios_hp1, promedios_hp2, promediosAVAN)]
     })
+
     comp_materias_df = comp_materias_df.round(2)
 
     comp_materias_df = comp_materias_df.replace(0, '')
+
     st.dataframe(
-        comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'Avancemos'], cmap='RdYlGn', vmin=40, vmax=90),
+        comp_materias_df.style.background_gradient(
+            subset=['HP1', 'HP2', 'Avancemos'],
+            cmap='RdYlGn',
+            vmin=40,
+            vmax=90
+        ),
         use_container_width=True,
         hide_index=True
     )
+
     
     st.markdown("---")
     
