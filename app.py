@@ -745,17 +745,24 @@ if pagina == "🏠 Inicio":
         'Rango': [max(a, b, c) - min(a, b, c) for a, b, c in zip(promedios_hp1, promedios_hp2, promediosAVAN)]
     })
 
+    # Redondear valores numéricos a 2 decimales
     comp_materias_df = comp_materias_df.round(2)
 
+    # Reemplazar ceros por vacío
     comp_materias_df = comp_materias_df.replace(0, '')
 
+    # Identificar columnas numéricas para formateo
+    columnas_numericas = comp_materias_df.select_dtypes(include=['float64', 'int64']).columns
+
     st.dataframe(
-        comp_materias_df.style.background_gradient(
-            subset=['HP1', 'HP2', 'Avancemos'],
-            cmap='RdYlGn',
-            vmin=40,
-            vmax=90
-        ),
+        comp_materias_df.style
+            .format({col: "{:.2f}" for col in columnas_numericas})
+            .background_gradient(
+                subset=['HP1', 'HP2', 'Avancemos'],
+                cmap='RdYlGn',
+                vmin=40,
+                vmax=90
+            ),
         use_container_width=True,
         hide_index=True
     )
