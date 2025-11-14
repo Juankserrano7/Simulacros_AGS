@@ -1610,7 +1610,7 @@ elif pagina == "📊 Reporte General":
     
     # Tabla de estadísticas descriptivas completa
     st.markdown("<h2 class='section-header'>📋 Estadísticas Descriptivas Completas</h2>", unsafe_allow_html=True)
-    
+
     stats_df = pd.DataFrame({
         'Materia': materias,
         'Promedio': [datos_actual[m].mean() for m in materias],
@@ -1623,12 +1623,26 @@ elif pagina == "📊 Reporte General":
         'Rango': [datos_actual[m].max() - datos_actual[m].min() for m in materias],
         'CV (%)': [(datos_actual[m].std() / datos_actual[m].mean() * 100) for m in materias]
     })
+
+    # Redondear valores a 2 decimales
     stats_df = stats_df.round(2)
+
+    # Identificar columnas numéricas para formateo
+    columnas_num = stats_df.select_dtypes(include=['float64', 'int64']).columns
+
     st.dataframe(
-        stats_df.style.background_gradient(subset=['Promedio', 'Mediana'], cmap='RdYlGn', vmin=40, vmax=90),
+        stats_df.style
+            .format({col: "{:.2f}" for col in columnas_num})
+            .background_gradient(
+                subset=['Promedio', 'Mediana'],
+                cmap='RdYlGn',
+                vmin=40,
+                vmax=90
+            ),
         use_container_width=True,
         hide_index=True
     )
+
     
     st.markdown("---")
     
@@ -1705,23 +1719,38 @@ elif pagina == "🔄 Comparación Simulacros":
     
     st.markdown("---")
     
-    # Tabla comparativa
+
+    # 📋 Tabla Comparativa
     st.markdown("<h2 class='section-header'>📋 Tabla Comparativa</h2>", unsafe_allow_html=True)
-    
+
     comp_df = pd.DataFrame({
         'Materia': materias,
         'HP1': promedios_hp1,
         'HP2': promedios_hp2,
         'AVANCEMOS': promediosAVAN,
-        'Cambio HP1→HP2': [hp2-hp1 for hp1, hp2 in zip(promedios_hp1, promedios_hp2)],
-        'Cambio HP2→AVAN': [prep-hp2 for hp2, prep in zip(promedios_hp2, promediosAVAN)]
+        'Cambio HP1→HP2': [hp2 - hp1 for hp1, hp2 in zip(promedios_hp1, promedios_hp2)],
+        'Cambio HP2→AVAN': [prep - hp2 for hp2, prep in zip(promedios_hp2, promediosAVAN)]
     })
+
+    # Redondeo a 2 decimales
     comp_df = comp_df.round(2)
-    
+
+    # Identificar columnas numéricas
+    columnas_numericas = comp_df.select_dtypes(include=['float64', 'int64']).columns
+
     st.dataframe(
-        comp_df.style.background_gradient(subset=['Cambio HP1→HP2', 'Cambio HP2→AVAN'], cmap='RdYlGn', vmin=-20, vmax=20),
-        use_container_width=True
+        comp_df.style
+            .format({col: "{:.2f}" for col in columnas_numericas})
+            .background_gradient(
+                subset=['Cambio HP1→HP2', 'Cambio HP2→AVAN'],
+                cmap='RdYlGn',
+                vmin=-20,
+                vmax=20
+            ),
+        use_container_width=True,
+        hide_index=True
     )
+
     
     st.markdown("---")
     
@@ -1875,20 +1904,34 @@ elif pagina == "👤 Análisis Individual":
         st.plotly_chart(fig, use_container_width=True)
     
     # Tabla de puntajes
+    # 📋 Detalle de Puntajes
     st.markdown("<h2 class='section-header'>📋 Detalle de Puntajes</h2>", unsafe_allow_html=True)
-    
+
     detalle_df = pd.DataFrame({
         'Materia': materias,
         'Puntaje': valores_estudiante,
         'Promedio Grupo': promedios_grupo,
         'Diferencia': [e - g for e, g in zip(valores_estudiante, promedios_grupo)]
     })
+
+    # Redondear a 2 decimales
     detalle_df = detalle_df.round(2)
-    
+
+    # Identificar columnas numéricas
+    columnas_num = detalle_df.select_dtypes(include=['float64', 'int64']).columns
+
     st.dataframe(
-        detalle_df.style.background_gradient(subset=['Diferencia'], cmap='RdYlGn', vmin=-20, vmax=20),
+        detalle_df.style
+            .format({col: "{:.2f}" for col in columnas_num})
+            .background_gradient(
+                subset=['Diferencia'],
+                cmap='RdYlGn',
+                vmin=-20,
+                vmax=20
+            ),
         use_container_width=True
     )
+
 
 # ==================== AVANCE ====================
 elif pagina == "📈 Avance":
@@ -2006,23 +2049,32 @@ elif pagina == "📈 Avance":
     st.markdown("---")
     
     # Tabla de Avance
+    # 📋 Tabla de Avance Completa
     st.markdown("<h2 class='section-header'>📋 Tabla de Avance Completa</h2>", unsafe_allow_html=True)
-    
-    tabla_progresion = progresion[['ESTUDIANTE', 'HP1', 'HP2', 'Avancemos', 
-                                     'CAMBIO_HP1_HP2', 'CAMBIO_HP2AVAN', 'CAMBIO_TOTAL']]
+
+    tabla_progresion = progresion[['ESTUDIANTE', 'HP1', 'HP2', 'Avancemos',
+                                'CAMBIO_HP1_HP2', 'CAMBIO_HP2AVAN', 'CAMBIO_TOTAL']]
+
+    # Ordenar y redondear
     tabla_progresion = tabla_progresion.sort_values('CAMBIO_TOTAL', ascending=False)
     tabla_progresion = tabla_progresion.round(2)
-    
+
+    # Identificar columnas numéricas
+    columnas_num = tabla_progresion.select_dtypes(include=['float64', 'int64']).columns
+
     st.dataframe(
-        tabla_progresion.style.background_gradient(
-            subset=['CAMBIO_HP1_HP2', 'CAMBIO_HP2AVAN', 'CAMBIO_TOTAL'], 
-            cmap='RdYlGn', 
-            vmin=-50, 
-            vmax=50
-        ),
+        tabla_progresion.style
+            .format({col: "{:.2f}" for col in columnas_num})
+            .background_gradient(
+                subset=['CAMBIO_HP1_HP2', 'CAMBIO_HP2AVAN', 'CAMBIO_TOTAL'],
+                cmap='RdYlGn',
+                vmin=-50,
+                vmax=50
+            ),
         use_container_width=True,
         height=600
     )
+
 
 # ==================== ESTADÍSTICAS DETALLADAS ====================
 elif pagina == "📉 Estadísticas Detalladas":
@@ -2117,9 +2169,33 @@ elif pagina == "📉 Estadísticas Detalladas":
             df_grados = df_grados.round(2)
             
             st.markdown("#### 📊 Tabla de Promedios por Grado")
+
+            tabla_grados = []
+            for grado in sorted(grados_disponibles):
+                datos_g = datos_grado[datos_grado['GRADO'].astype(str) == grado]
+                fila = {'Grado': grado}
+                for mat in materias:
+                    fila[mat] = datos_g[mat].mean()
+                fila['Promedio General'] = datos_g['PROMEDIO PONDERADO'].mean()
+                tabla_grados.append(fila)
+
+            df_grados = pd.DataFrame(tabla_grados)
+
+            # Redondear a 2 decimales
+            df_grados = df_grados.round(2)
+
+            # Identificar columnas numéricas
+            columnas_num = df_grados.select_dtypes(include=['float64', 'int64']).columns
+
             st.dataframe(
-                df_grados.style.background_gradient(cmap='YlGnBu', subset=materias + ['Promedio General']),
-                use_container_width=True
+                df_grados.style
+                    .format({col: "{:.2f}" for col in columnas_num})
+                    .background_gradient(
+                        cmap='YlGnBu',
+                        subset=materias + ['Promedio General']
+                    ),
+                use_container_width=True,
+                hide_index=True
             )
         else:
             st.warning("No hay información de grado disponible en este simulacro.")
@@ -2184,24 +2260,34 @@ elif pagina == "📉 Estadísticas Detalladas":
         st.markdown("---")
         
         # Ranking general
+        # 🏆 Ranking General
         st.markdown("### 🏆 Ranking General")
-        
+
         ranking_general = datos_top.nlargest(30, 'PROMEDIO PONDERADO')[
             ['ESTUDIANTE'] + materias + ['PROMEDIO PONDERADO']
         ].reset_index(drop=True)
+
         ranking_general.index = ranking_general.index + 1
+
+        # Redondear a 2 decimales
         ranking_general = ranking_general.round(2)
-        
+
+        # Identificar columnas numéricas
+        columnas_num = ranking_general.select_dtypes(include=['float64', 'int64']).columns
+
         st.dataframe(
-            ranking_general.style.background_gradient(
-                cmap='RdYlGn',
-                subset=materias + ['PROMEDIO PONDERADO'],
-                vmin=40,
-                vmax=100
-            ),
+            ranking_general.style
+                .format({col: "{:.2f}" for col in columnas_num})
+                .background_gradient(
+                    cmap='RdYlGn',
+                    subset=materias + ['PROMEDIO PONDERADO'],
+                    vmin=40,
+                    vmax=100
+                ),
             use_container_width=True,
             height=600
         )
+
 
 # Footer
 st.markdown("---")
