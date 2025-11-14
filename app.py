@@ -743,6 +743,8 @@ if pagina == "🏠 Inicio":
         'Rango': [max(hp1, hp2, prep) - min(hp1, hp2, prep) for hp1, hp2, prep in zip(promedios_hp1, promedios_hp2, promediosAVAN)]
     })
     comp_materias_df = comp_materias_df.round(2)
+
+    comp_materias_df = comp_materias_df.replace(0, '')
     st.dataframe(
         comp_materias_df.style.background_gradient(subset=['HP1', 'HP2', 'Avancemos'], cmap='RdYlGn', vmin=40, vmax=90),
         use_container_width=True,
