@@ -591,7 +591,6 @@ if "user_email" not in st.session_state:
 if not usuarios_auth:
     st.stop()
 
-if not st.session_state.authenticated:
 
 
 st.markdown(
