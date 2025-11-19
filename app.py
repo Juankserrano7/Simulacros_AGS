@@ -644,7 +644,7 @@ if not st.session_state.authenticated:
         unsafe_allow_html=True
     )
 
-    st.markdown("<div class='login-background'>", unsafe_allow_html=True)
+    
     st.markdown(
         """
         <div class='login-hero' style='margin-bottom: 2.5rem;'>
