@@ -1,0 +1,29 @@
+Plan detallado para implementar autenticación basada en correos institucionales
+
+1. Inventario y gobierno de usuarios
+   - Centralizar los correos autorizados en `listado_correeos_profes.txt`. Verificar que cada entrada pertenece al dominio `@aspaen.edu.co`, eliminar duplicados y mantener el archivo versionado.
+   - Definir responsables y frecuencia de actualización del listado (altas/bajas de docentes).
+
+2. Generación y custodia de credenciales
+   - Crear contraseñas iniciales únicas para cada correo y documentarlas temporalmente en `claves.txt`.
+   - Entregar las credenciales a cada docente por un canal seguro y eliminar/eliminar el archivo una vez distribuidas.
+   - Establecer una política de rotación (por ejemplo, cambiar contraseñas cada periodo académico).
+
+3. Base de datos / almacén de autenticación
+   - Crear un almacenamiento estructurado (`auth_users.csv` o SQLite) con columnas: `email`, `password_hash`, `salt`, `activo`, `ultima_actualizacion`.
+   - Construir un script de sincronización que lea `listado_correeos_profes.txt`, genere hashes con `hashlib.pbkdf2_hmac` o `bcrypt` a partir de las contraseñas de `claves.txt` y actualice/inserte registros.
+   - Guardar el almacén en una ubicación no accesible públicamente (por ejemplo, fuera del repositorio o dentro de `st.secrets` si son pocos usuarios).
+
+4. Configuración de secretos en entorno
+   - Cargar el almacén o el diccionario de hashes en `st.secrets` o variables de entorno al desplegar.
+   - Proteger los archivos sensibles (`claves.txt`, base de datos) en `.gitignore` si no deben versionarse.
+
+5. Integración en Streamlit
+   - Antes de ejecutar lógica del dashboard, mostrar un formulario de login (correo + contraseña) y validar contra el almacén de hashes.
+   - Registrar en `st.session_state` los atributos del usuario autenticado (correo, hora de login) y mostrar controles de cierre de sesión.
+   - Limitar el acceso a funcionalidades/visualizaciones si el usuario no está autenticado.
+
+6. Auditoría y soporte
+   - Implementar métricas o logs básicos de intentos de acceso fallidos para detectar patrones sospechosos.
+   - Definir procedimiento para restablecimiento de contraseña (por ejemplo, regenerar clave y volver a distribuir).
+   - Documentar el flujo completo en el README o wiki interna para que futuros administradores puedan operarlo.

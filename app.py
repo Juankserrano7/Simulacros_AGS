@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -418,6 +420,93 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+AUTH_USERS_FILE = "auth_users.csv"
+PBKDF2_ITERATIONS = 390000
+
+
+@st.cache_data
+def cargar_usuarios_auth(path: str = AUTH_USERS_FILE):
+    try:
+        df = pd.read_csv(path)
+    except FileNotFoundError:
+        st.error(
+            f"No se encontró el archivo de credenciales ({path}). "
+            "Ejecuta scripts/sync_profesores.py para generarlo."
+        )
+        return {}
+    required_cols = {"email", "salt", "password_hash", "activo"}
+    if not required_cols.issubset(df.columns):
+        st.error(
+            "El archivo de autenticación no contiene las columnas requeridas: "
+            f"{', '.join(required_cols)}"
+        )
+        return {}
+
+    df["email"] = df["email"].str.strip().str.lower()
+
+    def as_bool(value):
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() in ("true", "1", "yes", "si")
+
+    return {
+        row["email"]: {
+            "salt": row["salt"],
+            "password_hash": str(row["password_hash"]),
+            "activo": as_bool(row["activo"]),
+        }
+        for _, row in df.iterrows()
+        if isinstance(row["email"], str) and row["email"]
+    }
+
+
+def verificar_credenciales(email: str, password: str, usuarios: dict) -> bool:
+    user = usuarios.get(email.lower())
+    if not user or not user.get("activo"):
+        return False
+    try:
+        salt_bytes = bytes.fromhex(str(user["salt"]))
+    except ValueError:
+        return False
+    hashed = hashlib.pbkdf2_hmac(
+        "sha256", password.encode("utf-8"), salt_bytes, PBKDF2_ITERATIONS
+    ).hex()
+    return hmac.compare_digest(hashed, str(user["password_hash"]))
+
+# Gestión de autenticación
+usuarios_auth = cargar_usuarios_auth()
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "user_email" not in st.session_state:
+    st.session_state.user_email = ""
+
+if not usuarios_auth:
+    st.stop()
+
+if not st.session_state.authenticated:
+    st.markdown(
+        "<div style='text-align:center; margin-top:4rem;'>"
+        "<h1 class='header-title'>Acceso Restringido</h1>"
+        "<p class='header-subtitle'>Ingresa tu correo institucional y clave personal.</p>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    with st.form("login_profesores"):
+        email_input = st.text_input("Correo institucional").strip().lower()
+        password_input = st.text_input("Contraseña", type="password")
+        login = st.form_submit_button("Ingresar")
+
+    if login:
+        if verificar_credenciales(email_input, password_input, usuarios_auth):
+            st.session_state.authenticated = True
+            st.session_state.user_email = email_input
+            st.success("Ingreso exitoso.")
+            st.experimental_rerun()
+        else:
+            st.error("Correo o contraseña inválidos.")
+
+    st.stop()
+
 # Función para cargar datos
 @st.cache_data
 def cargar_datos():
@@ -476,6 +565,19 @@ with st.sidebar:
         </p>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown(
+        f"""
+        <div style='text-align: center; color: rgba(255,255,255,0.85); margin-bottom: 0.5rem;'>
+            👤 {st.session_state.user_email}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.sidebar.button("Cerrar sesión"):
+        st.session_state.authenticated = False
+        st.session_state.user_email = ""
+        st.experimental_rerun()
     
     st.markdown("<hr style='margin: 1rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
     
