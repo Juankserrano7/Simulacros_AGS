@@ -447,8 +447,8 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         padding: 2rem;
-        border-radius: 24px 0 0 24px;
-        box-shadow: 0 35px 80px rgba(13, 27, 42, 0.25);
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .login-panel-left img {
@@ -458,14 +458,22 @@ st.markdown("""
     }
 
     .login-panel-right {
-        background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
+        background: #ffffff;
         min-height: 520px;
         padding: 2.5rem 3rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        border-radius: 0 24px 24px 0;
-        box-shadow: 0 35px 80px rgba(13, 27, 42, 0.25);
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.login-panel-left) {
+        gap: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.login-panel-left) div[data-testid="column"] > div {
+        padding: 0 !important;
     }
     
     .login-helper {
