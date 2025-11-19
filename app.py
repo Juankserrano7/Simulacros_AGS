@@ -440,13 +440,6 @@ st.markdown("""
         filter: drop-shadow(0 12px 30px rgba(13, 27, 42, 0.15));
     }
 
-    .login-wrapper {
-        margin-top: 2rem;
-        border-radius: 24px;
-        overflow: hidden;
-        box-shadow: 0 35px 80px rgba(13, 27, 42, 0.25);
-    }
-
     .login-panel-left {
         background: #17313e;
         min-height: 520px;
@@ -623,29 +616,28 @@ if not st.session_state.authenticated:
         col_logo, col_form = st.columns([1, 1], gap="small")
 
         with col_logo:
+            st.markdown(
+                "<div class='login-panel-left' style='border-radius:24px 0 0 24px;'>",
+                unsafe_allow_html=True
+            )
             if LOGO_BASE64:
                 st.markdown(
-                    f"""
-                    <div class='login-panel-left'>
-                        <img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'>
-                    </div>
-                    """,
+                    f"<img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'>",
                     unsafe_allow_html=True
                 )
             else:
                 st.markdown(
-                    """
-                    <div class='login-panel-left'>
-                        <h1 style="color:#f0f4fb;">PreIcfes AGS</h1>
-                    </div>
-                    """,
+                    "<h1 style='color:#f0f4fb;'>PreIcfes AGS</h1>",
                     unsafe_allow_html=True
                 )
+            st.markdown("</div>", unsafe_allow_html=True)
 
         with col_form:
-            panel_form = st.container()
-            panel_form.markdown("<div class='login-panel-right'>", unsafe_allow_html=True)
-            panel_form.markdown(
+            st.markdown(
+                "<div class='login-panel-right' style='border-radius:0 24px 24px 0;'>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
                 """
                 <div class='login-hero' style='margin-top:0;'>
                     <h1>PreIcfes AGS</h1>
@@ -655,7 +647,7 @@ if not st.session_state.authenticated:
                 """,
                 unsafe_allow_html=True
             )
-            with panel_form.form("login_profesores"):
+            with st.form("login_profesores"):
                 email_input = st.text_input(
                     "Correo institucional",
                     placeholder="nombre.apellido@aspaen.edu.co"
@@ -676,12 +668,12 @@ if not st.session_state.authenticated:
                 else:
                     st.error("Correo o contraseña inválidos.")
 
-            panel_form.markdown(
+            st.markdown(
                 "<p class='login-helper' style='margin-top:1rem;'>¿Problemas para ingresar? "
                 "Contacta al Director Integral: <a href='mailto:juan.serrano@aspaen.edu.co'>juan.serrano@aspaen.edu.co</a>.</p>",
                 unsafe_allow_html=True
             )
-            panel_form.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
     st.stop()
 
