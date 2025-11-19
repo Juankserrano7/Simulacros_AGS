@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -418,6 +419,70 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+STATIC_AUTH_PASSWORD = st.secrets.get(
+    "PROFESORES_STATIC_PASSWORD",
+    os.environ.get("PROFESORES_STATIC_PASSWORD", "SimulacrosAGS2025!")
+)
+PROFESSOR_EMAILS_FILE = "listado_correos_profesores.txt"
+
+
+@st.cache_data
+def cargar_correos(path: str = PROFESSOR_EMAILS_FILE):
+    """Lee y normaliza los correos autorizados desde el TXT."""
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            correos = {line.strip().lower() for line in file if line.strip()}
+        return correos
+    except FileNotFoundError:
+        st.error(
+            f"No se encontró el archivo de correos autorizados ({path}). "
+            "Verifica que exista en el directorio del proyecto."
+        )
+        return set()
+
+
+profesores_autorizados = cargar_correos()
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "user_email" not in st.session_state:
+    st.session_state.user_email = ""
+
+if not profesores_autorizados:
+    st.warning(
+        "No hay correos autorizados cargados. Contacta al administrador "
+        "para registrar los usuarios permitidos."
+    )
+    st.stop()
+
+if not st.session_state.authenticated:
+    st.markdown(
+        "<div style='text-align:center; margin-top:4rem;'>"
+        "<h1 class='header-title'>Acceso Restringido</h1>"
+        "<p class='header-subtitle'>Ingresa con tu correo institucional para "
+        "continuar.</p>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    with st.form("login_profes"):
+        email_input = st.text_input("Correo institucional").strip()
+        password_input = st.text_input("Clave de acceso", type="password")
+        submit_login = st.form_submit_button("Ingresar")
+
+    if submit_login:
+        normalized_email = email_input.lower()
+        if (
+            normalized_email in profesores_autorizados
+            and password_input == STATIC_AUTH_PASSWORD
+        ):
+            st.session_state.authenticated = True
+            st.session_state.user_email = email_input
+            st.success("Acceso concedido. Cargando panel...")
+            st.experimental_rerun()
+        else:
+            st.error("Credenciales inválidas o correo no autorizado.")
+
+    st.stop()
+
 # Función para cargar datos
 @st.cache_data
 def cargar_datos():
@@ -476,6 +541,19 @@ with st.sidebar:
         </p>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown(
+        f"""
+        <div style='text-align: center; color: rgba(255,255,255,0.85); margin-bottom: 0.5rem;'>
+            👤 {st.session_state.user_email}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.sidebar.button("Cerrar sesión"):
+        st.session_state.authenticated = False
+        st.session_state.user_email = ""
+        st.experimental_rerun()
     
     st.markdown("<hr style='margin: 1rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
     
