@@ -594,53 +594,100 @@ if not usuarios_auth:
 
 if not st.session_state.authenticated:
     if LOGO_BASE64:
-        st.markdown(
-            f"<div class='login-logo' style='margin-top:0rem; transform: scale(1); transform-origin: top left;'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>",
-            unsafe_allow_html=True
-        )
     st.markdown(
-        """
-        <div class='login-hero'>
-            <h1>PreIcfes AGS</h1>
-            <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
+        f"""
+        <div style='text-align: center; margin-bottom: 2rem;'>
+            <img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes' style='max-width: 180px; height: auto;'>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    _, col_login, _ = st.columns([1, 1.4, 1])
-    with col_login:
-        st.markdown(
-            "<p class='login-helper'>Utiliza tu correo institucional y la contraseña asignada para acceder.</p>",
-            unsafe_allow_html=True
+st.markdown(
+    """
+    <div style='text-align: center; margin-bottom: 3rem;'>
+        <h1 style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                   -webkit-background-clip: text; 
+                   -webkit-text-fill-color: transparent;
+                   background-clip: text;
+                   font-size: 3rem;
+                   font-weight: 700;
+                   margin-bottom: 0.5rem;'>
+            PreIcfes AGS
+        </h1>
+        <p style='color: #6b7280; font-size: 1.1rem; max-width: 500px; margin: 0 auto;'>
+            Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+_, col_login, _ = st.columns([1, 1.2, 1])
+with col_login:
+    st.markdown(
+        """
+        <div style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+                    border-radius: 20px;
+                    padding: 2.5rem;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+                    backdrop-filter: blur(10px);'>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        "<p style='text-align: center; color: #4b5563; margin-bottom: 1.5rem; font-size: 0.95rem;'>Utiliza tu correo institucional y la contraseña asignada</p>",
+        unsafe_allow_html=True
+    )
+
+    with st.form("login_profesores"):
+        email_input = st.text_input(
+            "📧 Correo institucional",
+            placeholder="nombre.apellido@aspaen.edu.co",
+            label_visibility="visible"
+        ).strip().lower()
+        
+        password_input = st.text_input(
+            "🔒 Contraseña",
+            type="password",
+            placeholder="••••••••••",
+            label_visibility="visible"
+        )
+        
+        st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
+        
+        login = st.form_submit_button(
+            "🚀 Ingresar al panel", 
+            use_container_width=True,
+            type="primary"
         )
 
-        with st.form("login_profesores"):
-            email_input = st.text_input(
-                "Correo institucional",
-                placeholder="nombre.apellido@aspaen.edu.co"
-            ).strip().lower()
-            password_input = st.text_input(
-                "Contraseña",
-                type="password",
-                placeholder="••••••••••"
-            )
-            login = st.form_submit_button("Ingresar al panel", use_container_width=True)
+    if login:
+        if verificar_credenciales(email_input, password_input, usuarios_auth):
+            st.session_state.authenticated = True
+            st.session_state.user_email = email_input
+            st.success("✅ Ingreso exitoso. Redirigiendo...")
+            st.rerun()
+        else:
+            st.error("❌ Correo o contraseña inválidos. Por favor, intenta nuevamente.")
 
-        if login:
-            if verificar_credenciales(email_input, password_input, usuarios_auth):
-                st.session_state.authenticated = True
-                st.session_state.user_email = email_input
-                st.success("Ingreso exitoso.")
-                st.rerun()
-            else:
-                st.error("Correo o contraseña inválidos.")
-
-        st.markdown(
-            "<p class='login-helper' style='margin-top:1rem;'>¿Problemas para ingresar? "
-            "Contacta al Director Integral: <a href='mailto:juan.serrano@aspaen.edu.co'>juan.serrano@aspaen.edu.co</a>.</p>",
-            unsafe_allow_html=True
-        )
+    st.markdown(
+        """
+        <div style='text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;'>
+            <p style='color: #6b7280; font-size: 0.9rem;'>
+                ¿Problemas para ingresar?<br>
+                Contacta al Director Integral:<br>
+                <a href='mailto:juan.serrano@aspaen.edu.co' 
+                   style='color: #667eea; text-decoration: none; font-weight: 600;'>
+                    juan.serrano@aspaen.edu.co
+                </a>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.stop()
 
