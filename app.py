@@ -465,7 +465,7 @@ st.markdown("""
     }
     
     .login-card label {
-        color: #17233f !important;
+        color: #ffffff !important;
         font-weight: 600;
     }
     
