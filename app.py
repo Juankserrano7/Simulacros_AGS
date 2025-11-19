@@ -592,15 +592,7 @@ if not usuarios_auth:
     st.stop()
 
 if not st.session_state.authenticated:
-    if LOGO_BASE64:
-        st.markdown(
-            f"""
-            <div style='text-align: center;'>
-                <img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes' style='max-width: 250px; height: auto;'>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+
 
 st.markdown(
     """
