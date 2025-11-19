@@ -661,10 +661,9 @@ if not st.session_state.authenticated:
 
         with st.form("login_profesores"):
             email_input = st.text_input(
-                "📧 Correo institucional",
+                st.markdown("""<h1 style=color:#FFFFFF>📧 Correo institucional</h1>", unsafe_allow_html=True"""),
                 placeholder="nombre.apellido@aspaen.edu.co",
                 label_visibility="visible",
-                color="#FFFFFF"
             ).strip().lower()
             
             password_input = st.text_input(
@@ -672,7 +671,6 @@ if not st.session_state.authenticated:
                 type="password",
                 placeholder="••••••••••",
                 label_visibility="visible",
-                color="#FFFFFF"
             )
             
             st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
