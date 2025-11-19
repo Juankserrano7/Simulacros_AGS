@@ -657,11 +657,6 @@ if not st.session_state.authenticated:
 
     _, col_login, _ = st.columns([1, 1.1, 1])
     with col_login:
-        st.markdown("<div class='login-card'>", unsafe_allow_html=True)
-        st.markdown(
-            "<p class='login-helper' style='margin-bottom: 1.5rem;'>Utiliza tu correo institucional y la contraseña asignada</p>",
-            unsafe_allow_html=True
-        )
 
         with st.form("login_profesores"):
             email_input = st.text_input(
