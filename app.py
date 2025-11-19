@@ -501,7 +501,7 @@ if not st.session_state.authenticated:
             st.session_state.authenticated = True
             st.session_state.user_email = email_input
             st.success("Ingreso exitoso.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Correo o contraseña inválidos.")
 
@@ -577,7 +577,7 @@ with st.sidebar:
     if st.sidebar.button("Cerrar sesión"):
         st.session_state.authenticated = False
         st.session_state.user_email = ""
-        st.experimental_rerun()
+        st.rerun()
     
     st.markdown("<hr style='margin: 1rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
     
