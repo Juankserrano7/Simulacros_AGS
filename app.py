@@ -596,7 +596,7 @@ if not usuarios_auth:
 if not st.session_state.authenticated:
     st.markdown(
         """
-        <div style='text-align: center; margin-bottom: 0; margin-top: 0;'>
+        <div style='text-align: center; margin-bottom: 0.10rem; margin-top: 0;'>
             <h1 style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                        -webkit-background-clip: text; 
                        -webkit-text-fill-color: transparent;
