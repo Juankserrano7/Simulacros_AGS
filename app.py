@@ -456,34 +456,35 @@ st.markdown("""
     }
     
     .login-card {
-        background: rgba(19, 30, 53, 0.95);
+        background: #ffffff;
         border-radius: 26px;
         padding: 2.8rem 3.2rem;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
-        color: #ffffff;
+        border: 1px solid rgba(13, 27, 42, 0.1);
+        box-shadow: 0 30px 70px rgba(4, 9, 20, 0.25);
+        color: #0d1b2a;
     }
     
     .login-card label {
-        color: #f5f7ff !important;
+        color: #17233f !important;
         font-weight: 600;
     }
     
     .login-card input {
         border-radius: 14px !important;
-        border: 1px solid rgba(255, 255, 255, 0.35) !important;
-        background: rgba(255, 255, 255, 0.2);
-        color: #ffffff !important;
+        border: 1px solid rgba(13, 27, 42, 0.2) !important;
+        background: #f5f6fb;
+        color: #0d1b2a !important;
     }
     
     .login-card input::placeholder {
-        color: rgba(255, 255, 255, 0.78);
+        color: rgba(13, 27, 42, 0.55);
     }
     
     .login-card .stButton>button {
-        background: linear-gradient(135deg, #9fa8ff 0%, #5865f2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #5a60ff 100%);
         border: none;
-        box-shadow: 0 18px 45px rgba(89, 101, 242, 0.55);
+        color: #ffffff;
+        box-shadow: 0 18px 45px rgba(89, 101, 242, 0.35);
     }
     
     form[data-testid="stForm"] {
