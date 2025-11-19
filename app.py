@@ -533,7 +533,6 @@ def formatear_nombre_desde_email(email: str) -> str:
         return email
 
 
-@st.cache_data
 def cargar_usuarios_auth(path: str = AUTH_USERS_FILE):
     try:
         df = pd.read_csv(path)
