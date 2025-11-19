@@ -465,6 +465,28 @@ st.markdown("""
         border: 1px solid rgba(13, 27, 42, 0.15) !important;
         background: rgba(13, 27, 42, 0.03);
     }
+
+    .sidebar-user-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        margin-bottom: 1rem;
+    }
+
+    .sidebar-user-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.2rem;
+    }
+
+    .sidebar-user-email {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.75);
+        margin-bottom: 0.8rem;
+    }
     
     @keyframes bounce {
         0%, 100% { transform: translateY(0); }
@@ -486,6 +508,19 @@ def cargar_logo_base64(path: str = "Logo.png") -> str:
 
 
 LOGO_BASE64 = cargar_logo_base64()
+
+
+def formatear_nombre_desde_email(email: str) -> str:
+    if not email:
+        return "Docente"
+    try:
+        username = email.split("@")[0]
+        partes = [p for p in username.replace("_", " ").split(".") if p]
+        if not partes:
+            return username.title()
+        return " ".join(p.capitalize() for p in partes)
+    except Exception:
+        return email
 
 
 @st.cache_data
@@ -548,16 +583,15 @@ if not usuarios_auth:
     st.stop()
 
 if not st.session_state.authenticated:
-    logo_block = (
-        f"<div class='login-logo'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>"
-        if LOGO_BASE64
-        else ""
-    )
+    if LOGO_BASE64:
+        st.markdown(
+            f"<div class='login-logo' style='margin-top:1rem;'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>",
+            unsafe_allow_html=True
+        )
     st.markdown(
-        f"""
+        """
         <div class='login-hero'>
-            {logo_block}
-            <h1>Portal Docentes AGS</h1>
+            <h1>PreIcfes AGS</h1>
             <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
         </div>
         """,
@@ -594,7 +628,7 @@ if not st.session_state.authenticated:
 
         st.markdown(
             "<p class='login-helper' style='margin-top:1rem;'>¿Problemas para ingresar? "
-            "Contacta a coordinación académica.</p>",
+            "Contacta al Director Integral: <a href='mailto:juan.serrano@aspaen.edu.co'>juan.serrano@aspaen.edu.co</a>.</p>",
             unsafe_allow_html=True
         )
 
@@ -659,15 +693,17 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
+    nombre_usuario = formatear_nombre_desde_email(st.session_state.user_email)
     st.markdown(
         f"""
-        <div style='text-align: center; color: rgba(255,255,255,0.85); margin-bottom: 0.5rem;'>
-            👤 {st.session_state.user_email}
+        <div class='sidebar-user-card'>
+            <div class='sidebar-user-name'>{nombre_usuario}</div>
+            <div class='sidebar-user-email'>{st.session_state.user_email}</div>
         </div>
         """,
         unsafe_allow_html=True
     )
-    if st.sidebar.button("Cerrar sesión"):
+    if st.sidebar.button("Cerrar sesión", use_container_width=True):
         st.session_state.authenticated = False
         st.session_state.user_email = ""
         st.rerun()
