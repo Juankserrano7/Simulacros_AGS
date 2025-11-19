@@ -420,16 +420,6 @@ st.markdown("""
         max-width: 640px;
     }
     
-    .login-hero .login-pill {
-        display: inline-block;
-        padding: 0.3rem 1rem;
-        border-radius: 50px;
-        background: rgba(102, 126, 234, 0.1);
-        color: #4c66d6;
-        font-weight: 600;
-        margin-bottom: 0.8rem;
-    }
-    
     .login-hero h1 {
         font-size: 3rem;
         font-weight: 800;
@@ -558,10 +548,15 @@ if not usuarios_auth:
     st.stop()
 
 if not st.session_state.authenticated:
+    logo_block = (
+        f"<div class='login-logo'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>"
+        if LOGO_BASE64
+        else ""
+    )
     st.markdown(
-        """
+        f"""
         <div class='login-hero'>
-            <span class='login-pill'>Acceso privado</span>
+            {logo_block}
             <h1>Portal Docentes AGS</h1>
             <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
         </div>
@@ -571,12 +566,6 @@ if not st.session_state.authenticated:
 
     _, col_login, _ = st.columns([1, 1.4, 1])
     with col_login:
-        if LOGO_BASE64:
-            st.markdown(
-                f"<div class='login-logo'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>",
-                unsafe_allow_html=True
-            )
-
         st.markdown(
             "<p class='login-helper'>Utiliza tu correo institucional y la contraseña asignada para acceder.</p>",
             unsafe_allow_html=True
