@@ -448,7 +448,7 @@ st.markdown("""
     }
 
     .login-panel-left {
-        background: linear-gradient(135deg, #e4e8ef 0%, #cfd5e1 40%, #b9c1d4 100%);
+        background: #17313e;
         min-height: 520px;
         display: flex;
         align-items: center;
@@ -618,67 +618,70 @@ if not usuarios_auth:
     st.stop()
 
 if not st.session_state.authenticated:
-    col_logo, col_form = st.columns([1, 1], gap="small")
+    cont_login = st.container()
+    with cont_login:
+        col_logo, col_form = st.columns([1, 1], gap="small")
 
-    with col_logo:
-        if LOGO_BASE64:
-            st.markdown(
-                f"""
-                <div class='login-panel-left'>
-                    <img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                """
-                <div class='login-panel-left'>
-                    <h1 style="color:#0d1b2a;">PreIcfes AGS</h1>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-    with col_form:
-        st.markdown("<div class='login-panel-right'>", unsafe_allow_html=True)
-        st.markdown(
-            """
-            <div class='login-hero' style='margin-top:0;'>
-                <h1>PreIcfes AGS</h1>
-                <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
-            </div>
-            <p class='login-helper'>Utiliza tu correo institucional y la contraseña asignada para acceder.</p>
-            """,
-            unsafe_allow_html=True
-        )
-        with st.form("login_profesores"):
-            email_input = st.text_input(
-                "Correo institucional",
-                placeholder="nombre.apellido@aspaen.edu.co"
-            ).strip().lower()
-            password_input = st.text_input(
-                "Contraseña",
-                type="password",
-                placeholder="••••••••••"
-            )
-            login = st.form_submit_button("Ingresar al panel", use_container_width=True)
-
-        if login:
-            if verificar_credenciales(email_input, password_input, usuarios_auth):
-                st.session_state.authenticated = True
-                st.session_state.user_email = email_input
-                st.success("Ingreso exitoso.")
-                st.rerun()
+        with col_logo:
+            if LOGO_BASE64:
+                st.markdown(
+                    f"""
+                    <div class='login-panel-left'>
+                        <img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
             else:
-                st.error("Correo o contraseña inválidos.")
+                st.markdown(
+                    """
+                    <div class='login-panel-left'>
+                        <h1 style="color:#f0f4fb;">PreIcfes AGS</h1>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-        st.markdown(
-            "<p class='login-helper' style='margin-top:1rem;'>¿Problemas para ingresar? "
-            "Contacta al Director Integral: <a href='mailto:juan.serrano@aspaen.edu.co'>juan.serrano@aspaen.edu.co</a>.</p>",
-            unsafe_allow_html=True
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+        with col_form:
+            panel_form = st.container()
+            panel_form.markdown("<div class='login-panel-right'>", unsafe_allow_html=True)
+            panel_form.markdown(
+                """
+                <div class='login-hero' style='margin-top:0;'>
+                    <h1>PreIcfes AGS</h1>
+                    <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
+                </div>
+                <p class='login-helper'>Utiliza tu correo institucional y la contraseña asignada para acceder.</p>
+                """,
+                unsafe_allow_html=True
+            )
+            with panel_form.form("login_profesores"):
+                email_input = st.text_input(
+                    "Correo institucional",
+                    placeholder="nombre.apellido@aspaen.edu.co"
+                ).strip().lower()
+                password_input = st.text_input(
+                    "Contraseña",
+                    type="password",
+                    placeholder="••••••••••"
+                )
+                login = st.form_submit_button("Ingresar al panel", use_container_width=True)
+
+            if login:
+                if verificar_credenciales(email_input, password_input, usuarios_auth):
+                    st.session_state.authenticated = True
+                    st.session_state.user_email = email_input
+                    st.success("Ingreso exitoso.")
+                    st.rerun()
+                else:
+                    st.error("Correo o contraseña inválidos.")
+
+            panel_form.markdown(
+                "<p class='login-helper' style='margin-top:1rem;'>¿Problemas para ingresar? "
+                "Contacta al Director Integral: <a href='mailto:juan.serrano@aspaen.edu.co'>juan.serrano@aspaen.edu.co</a>.</p>",
+                unsafe_allow_html=True
+            )
+            panel_form.markdown("</div>", unsafe_allow_html=True)
 
     st.stop()
 
