@@ -595,7 +595,7 @@ if not usuarios_auth:
 if not st.session_state.authenticated:
     if LOGO_BASE64:
         st.markdown(
-            f"<div class='login-logo' style='margin-top:1rem; transform: scale(10); transform-origin: top left;'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>",
+            f"<div class='login-logo' style='margin-top:1rem; transform: scale(2); transform-origin: top left;'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>",
             unsafe_allow_html=True
         )
     st.markdown(
