@@ -1,0 +1,19 @@
+Plan de autenticación para profesorado
+1. Normalizar el listado de correos en `listado_correos_profesores.txt` y validar que todos pertenezcan al dominio institucional (`@aspaen.edu.co`). Versionar el archivo y documentar el proceso para futuras altas/bajas.
+2. Definir una clave estática institucional. Guardarla como variable de entorno (`PROFESORES_STATIC_PASSWORD`) o en `st.secrets` para evitar que quede expuesta en el código. Comunicarla fuera del repositorio.
+3. Construir una base (CSV/SQLite) con dos columnas (`email`, `password_hash`). Para llenarla:
+   - Leer el TXT.
+   - Para cada correo, aplicar `hashlib.pbkdf2_hmac` (o `bcrypt`) a la clave estática y guardar el hash resultante.
+   - Opcional: añadir campos `activo` y `ultima_actualizacion` para control administrativo.
+4. Crear un pequeño script (`scripts/sync_profesores.py`) que:
+   - Lea el TXT.
+   - Verifique duplicados y dominios inválidos.
+   - Inserte o actualice registros en la base con el hash de la clave estática.
+5. En Streamlit:
+   - Cargar la base y comparar el correo ingresado contra la columna `email`.
+   - Validar la contraseña ingresada contra el `password_hash`.
+   - Registrar auditoría ligera en `st.session_state` (correo y hora de login).
+6. Establecer un procedimiento operativo:
+   - Responsable de actualizar el TXT/base.
+   - Caducidad o rotación de la clave estática.
+   - Flujo de comunicación de la clave y revocación de accesos.
