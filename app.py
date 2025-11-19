@@ -663,14 +663,16 @@ if not st.session_state.authenticated:
             email_input = st.text_input(
                 "📧 Correo institucional",
                 placeholder="nombre.apellido@aspaen.edu.co",
-                label_visibility="visible"
+                label_visibility="visible",
+                color="#FFFFFF"
             ).strip().lower()
             
             password_input = st.text_input(
                 "🔒 Contraseña",
                 type="password",
                 placeholder="••••••••••",
-                label_visibility="visible"
+                label_visibility="visible",
+                color="#FFFFFF"
             )
             
             st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
