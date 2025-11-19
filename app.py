@@ -660,6 +660,7 @@ if not st.session_state.authenticated:
     with col_login:
 
         with st.form("login_profesores"):
+            f"<div class='login-background', style=color: #FFFFFF;>"
             email_input = st.text_input(
                 "📧 Correo institucional",
                 placeholder="nombre.apellido@aspaen.edu.co",
@@ -680,6 +681,7 @@ if not st.session_state.authenticated:
                 use_container_width=True,
                 type="primary"
             )
+            f"</div>"
 
         if login:
             if verificar_credenciales(email_input, password_input, usuarios_auth):
