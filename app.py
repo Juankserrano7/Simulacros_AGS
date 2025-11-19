@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import streamlit as st
@@ -413,6 +414,68 @@ st.markdown("""
         animation: bounce 2s infinite;
     }
     
+    .login-hero {
+        text-align: center;
+        margin: 3rem auto 2rem;
+        max-width: 640px;
+    }
+    
+    .login-hero .login-pill {
+        display: inline-block;
+        padding: 0.3rem 1rem;
+        border-radius: 50px;
+        background: rgba(102, 126, 234, 0.1);
+        color: #4c66d6;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
+    
+    .login-hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #0d1b2a;
+        margin-bottom: 0.5rem;
+    }
+    
+    .login-hero p {
+        color: #6c7a89;
+        font-size: 1.1rem;
+        margin: 0 auto;
+    }
+    
+    .login-logo img {
+        width: 220px;
+        margin: 0 auto 1rem;
+        display: block;
+        filter: drop-shadow(0 12px 30px rgba(13, 27, 42, 0.15));
+    }
+    
+    .login-helper {
+        text-align: center;
+        color: #4a5568;
+        margin-bottom: 1.2rem;
+    }
+    
+    form[data-testid="stForm"] {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        padding: 2.2rem;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
+        border: 1px solid rgba(65, 90, 119, 0.1);
+        backdrop-filter: blur(12px);
+    }
+    
+    form[data-testid="stForm"] label {
+        font-weight: 600;
+        color: #0d1b2a !important;
+    }
+    
+    form[data-testid="stForm"] input {
+        border-radius: 12px !important;
+        border: 1px solid rgba(13, 27, 42, 0.15) !important;
+        background: rgba(13, 27, 42, 0.03);
+    }
+    
     @keyframes bounce {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-10px); }
@@ -422,6 +485,17 @@ st.markdown("""
 
 AUTH_USERS_FILE = "auth_users.csv"
 PBKDF2_ITERATIONS = 390000
+
+
+def cargar_logo_base64(path: str = "Logo.png") -> str:
+    try:
+        with open(path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode()
+    except FileNotFoundError:
+        return ""
+
+
+LOGO_BASE64 = cargar_logo_base64()
 
 
 @st.cache_data
@@ -485,25 +559,55 @@ if not usuarios_auth:
 
 if not st.session_state.authenticated:
     st.markdown(
-        "<div style='text-align:center; margin-top:4rem;'>"
-        "<h1 class='header-title'>Acceso Restringido</h1>"
-        "<p class='header-subtitle'>Ingresa tu correo institucional y clave personal.</p>"
-        "</div>",
+        """
+        <div class='login-hero'>
+            <span class='login-pill'>Acceso privado</span>
+            <h1>Portal Docentes AGS</h1>
+            <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
+        </div>
+        """,
         unsafe_allow_html=True
     )
-    with st.form("login_profesores"):
-        email_input = st.text_input("Correo institucional").strip().lower()
-        password_input = st.text_input("Contraseña", type="password")
-        login = st.form_submit_button("Ingresar")
 
-    if login:
-        if verificar_credenciales(email_input, password_input, usuarios_auth):
-            st.session_state.authenticated = True
-            st.session_state.user_email = email_input
-            st.success("Ingreso exitoso.")
-            st.rerun()
-        else:
-            st.error("Correo o contraseña inválidos.")
+    _, col_login, _ = st.columns([1, 1.4, 1])
+    with col_login:
+        if LOGO_BASE64:
+            st.markdown(
+                f"<div class='login-logo'><img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'></div>",
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            "<p class='login-helper'>Utiliza tu correo institucional y la contraseña asignada para acceder.</p>",
+            unsafe_allow_html=True
+        )
+
+        with st.form("login_profesores"):
+            email_input = st.text_input(
+                "Correo institucional",
+                placeholder="nombre.apellido@aspaen.edu.co"
+            ).strip().lower()
+            password_input = st.text_input(
+                "Contraseña",
+                type="password",
+                placeholder="••••••••••"
+            )
+            login = st.form_submit_button("Ingresar al panel", use_container_width=True)
+
+        if login:
+            if verificar_credenciales(email_input, password_input, usuarios_auth):
+                st.session_state.authenticated = True
+                st.session_state.user_email = email_input
+                st.success("Ingreso exitoso.")
+                st.rerun()
+            else:
+                st.error("Correo o contraseña inválidos.")
+
+        st.markdown(
+            "<p class='login-helper' style='margin-top:1rem;'>¿Problemas para ingresar? "
+            "Contacta a coordinación académica.</p>",
+            unsafe_allow_html=True
+        )
 
     st.stop()
 
