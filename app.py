@@ -434,10 +434,11 @@ st.markdown("""
     }
     
     .login-logo img {
-        width: 220px;
-        margin: 0 auto 1rem;
+        width: 320px;
+        max-width: 85%;
+        margin: 0 auto 1.5rem;
         display: block;
-        filter: drop-shadow(0 12px 30px rgba(13, 27, 42, 0.15));
+        filter: drop-shadow(0 18px 40px rgba(13, 27, 42, 0.25));
     }
     
     .login-helper {
@@ -487,10 +488,15 @@ st.markdown("""
         color: rgba(255, 255, 255, 0.75);
         margin-bottom: 0.8rem;
     }
-
-    #MainMenu {visibility: hidden;}
-    header[data-testid="stHeader"] {display: none;}
-    footer {visibility: hidden;}
+    
+    header [data-testid="stToolbar"] a[href*="github"] {
+        display: none !important;
+    }
+    
+    header [data-testid="stToolbar"] button[title*="Fork"],
+    header [data-testid="stToolbar"] a[title*="Fork"] {
+        display: none !important;
+    }
     
     @keyframes bounce {
         0%, 100% { transform: translateY(0); }
