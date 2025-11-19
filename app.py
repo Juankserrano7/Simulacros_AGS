@@ -448,7 +448,7 @@ st.markdown("""
     }
 
     .login-panel-left {
-        background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);
+        background: linear-gradient(135deg, #e4e8ef 0%, #cfd5e1 40%, #b9c1d4 100%);
         min-height: 520px;
         display: flex;
         align-items: center;
@@ -457,9 +457,9 @@ st.markdown("""
     }
 
     .login-panel-left img {
-        width: 80%;
-        max-width: 320px;
-        filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.35));
+        width: 95%;
+        max-width: 460px;
+        filter: drop-shadow(0 12px 28px rgba(13, 27, 42, 0.35));
     }
 
     .login-panel-right {
@@ -518,6 +518,10 @@ st.markdown("""
         color: rgba(255, 255, 255, 0.75);
         margin-bottom: 0.8rem;
     }
+
+    #MainMenu {visibility: hidden;}
+    header[data-testid="stHeader"] {display: none;}
+    footer {visibility: hidden;}
     
     @keyframes bounce {
         0%, 100% { transform: translateY(0); }
@@ -614,15 +618,14 @@ if not usuarios_auth:
     st.stop()
 
 if not st.session_state.authenticated:
-    col_logo, col_form = st.columns(2)
+    col_logo, col_form = st.columns([1, 1], gap="small")
+
     with col_logo:
         if LOGO_BASE64:
             st.markdown(
                 f"""
-                <div class='login-wrapper'>
-                    <div class='login-panel-left'>
-                        <img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'>
-                    </div>
+                <div class='login-panel-left'>
+                    <img src='data:image/png;base64,{LOGO_BASE64}' alt='Logo PreIcfes'>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -630,29 +633,23 @@ if not st.session_state.authenticated:
         else:
             st.markdown(
                 """
-                <div class='login-wrapper'>
-                    <div class='login-panel-left'>
-                        <h1 style="color:white;">PreIcfes AGS</h1>
-                    </div>
+                <div class='login-panel-left'>
+                    <h1 style="color:#0d1b2a;">PreIcfes AGS</h1>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
     with col_form:
+        st.markdown("<div class='login-panel-right'>", unsafe_allow_html=True)
         st.markdown(
             """
-            <div class='login-wrapper'>
-                <div class='login-panel-right'>
-                    <div class='login-hero' style='margin-top:0;'>
-                        <h1>PreIcfes AGS</h1>
-                        <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
-                    </div>
+            <div class='login-hero' style='margin-top:0;'>
+                <h1>PreIcfes AGS</h1>
+                <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
+            </div>
+            <p class='login-helper'>Utiliza tu correo institucional y la contraseña asignada para acceder.</p>
             """,
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            "<p class='login-helper'>Utiliza tu correo institucional y la contraseña asignada para acceder.</p>",
             unsafe_allow_html=True
         )
         with st.form("login_profesores"):
@@ -681,7 +678,7 @@ if not st.session_state.authenticated:
             "Contacta al Director Integral: <a href='mailto:juan.serrano@aspaen.edu.co'>juan.serrano@aspaen.edu.co</a>.</p>",
             unsafe_allow_html=True
         )
-        st.markdown("</div></div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.stop()
 
