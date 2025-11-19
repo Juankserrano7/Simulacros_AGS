@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 
+
 # Configuración de la página
 st.set_page_config(
     page_title="Dashboard Simulacros PreIcfes",
