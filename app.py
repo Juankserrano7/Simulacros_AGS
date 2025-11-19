@@ -487,6 +487,10 @@ st.markdown("""
         color: rgba(255, 255, 255, 0.75);
         margin-bottom: 0.8rem;
     }
+
+    #MainMenu {visibility: hidden;}
+    header[data-testid="stHeader"] {display: none;}
+    footer {visibility: hidden;}
     
     @keyframes bounce {
         0%, 100% { transform: translateY(0); }
