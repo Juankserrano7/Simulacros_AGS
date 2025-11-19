@@ -504,7 +504,7 @@ st.markdown("""
     form[data-testid="stForm"] input {
         border-radius: 12px !important;
         border: 1px solid rgba(13, 27, 42, 0.15) !important;
-        background: rgba(13, 27, 42, 0.03);
+        background: rgba(160, 32, 240, 0.03);
     }
 
     .sidebar-user-card {
