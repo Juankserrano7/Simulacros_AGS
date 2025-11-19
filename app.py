@@ -423,12 +423,12 @@ st.markdown("""
     .login-hero h1 {
         font-size: 3rem;
         font-weight: 800;
-        color: #0d1b2a;
+        color: #f4f7ff;
         margin-bottom: 0.5rem;
     }
     
     .login-hero p {
-        color: #6c7a89;
+        color: #cfd6e8;
         font-size: 1.1rem;
         margin: 0 auto;
     }
@@ -443,8 +443,47 @@ st.markdown("""
     
     .login-helper {
         text-align: center;
-        color: #4a5568;
+        color: #c0cadc;
         margin-bottom: 1.2rem;
+    }
+    
+    .login-background {
+        background: #0b1a2b;
+        border-radius: 24px;
+        padding: 3rem 2rem 4rem;
+        box-shadow: 0 35px 80px rgba(5, 10, 20, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    
+    .login-card {
+        background: rgba(8, 16, 32, 0.92);
+        border-radius: 26px;
+        padding: 2.8rem 3.2rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+        color: #f8fafc;
+    }
+    
+    .login-card label {
+        color: #dbe4ff !important;
+        font-weight: 600;
+    }
+    
+    .login-card input {
+        border-radius: 14px !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        background: rgba(255, 255, 255, 0.1);
+        color: #f8fafc !important;
+    }
+    
+    .login-card input::placeholder {
+        color: rgba(255, 255, 255, 0.65);
+    }
+    
+    .login-card .stButton>button {
+        background: linear-gradient(135deg, #9fa8ff 0%, #5865f2 100%);
+        border: none;
+        box-shadow: 0 18px 45px rgba(89, 101, 242, 0.55);
     }
     
     form[data-testid="stForm"] {
@@ -596,27 +635,34 @@ if not usuarios_auth:
 if not st.session_state.authenticated:
     st.markdown(
         """
-        <div style='text-align: center; margin-bottom: 3rem; margin-top: 0;'>
-            <h1 style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                       -webkit-background-clip: text; 
-                       -webkit-text-fill-color: transparent;
-                       background-clip: text;
-                       font-size: 3rem;
-                       font-weight: 700;
-                       margin-bottom: 0.5rem;'>
-                PreIcfes AGS
-            </h1>
-            <p style='color: #6b7280; font-size: 1.1rem; max-width: 500px; margin: 0 auto;'>
-                Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.
-            </p>
+        <style>
+            .stApp {
+                background: #020c1d !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<div class='login-background'>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class='login-hero' style='margin-bottom: 2.5rem;'>
+            <h1>PreIcfes AGS</h1>
+            <p>Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.</p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    _, col_login, _ = st.columns([1, 1.2, 1])
+    _, col_login, _ = st.columns([1, 1.1, 1])
     with col_login:
-    
+        st.markdown("<div class='login-card'>", unsafe_allow_html=True)
+        st.markdown(
+            "<p class='login-helper' style='margin-bottom: 1.5rem;'>Utiliza tu correo institucional y la contraseña asignada</p>",
+            unsafe_allow_html=True
+        )
+
         with st.form("login_profesores"):
             email_input = st.text_input(
                 "📧 Correo institucional",
@@ -650,12 +696,12 @@ if not st.session_state.authenticated:
 
         st.markdown(
             """
-            <div style='text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;'>
-                <p style='color: #6b7280; font-size: 0.9rem;'>
+            <div style='text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);'>
+                <p style='color: #d1d5db; font-size: 0.9rem;'>
                     ¿Problemas para ingresar?<br>
                     Contacta al Director Integral:<br>
                     <a href='mailto:juan.serrano@aspaen.edu.co' 
-                       style='color: #667eea; text-decoration: none; font-weight: 600;'>
+                       style='color: #9fa8ff; text-decoration: none; font-weight: 600;'>
                         juan.serrano@aspaen.edu.co
                     </a>
                 </p>
@@ -663,7 +709,9 @@ if not st.session_state.authenticated:
             """,
             unsafe_allow_html=True
         )
+        st.markdown("</div>", unsafe_allow_html=True)
 
+    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 # Función para cargar datos
