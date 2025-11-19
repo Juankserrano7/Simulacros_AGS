@@ -596,7 +596,7 @@ if not usuarios_auth:
 if not st.session_state.authenticated:
     st.markdown(
         """
-        <div style='text-align: center; margin-bottom: 3rem; margin-top: 0;'>
+        <div style='text-align: center; margin-bottom: 0; margin-top: 0;'>
             <h1 style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                        -webkit-background-clip: text; 
                        -webkit-text-fill-color: transparent;
@@ -606,7 +606,7 @@ if not st.session_state.authenticated:
                        margin-bottom: 0.5rem;'>
                 PreIcfes AGS
             </h1>
-            <p style='color: #6b7280; font-size: 1.1rem; max-width: 500px; margin: 0 auto;'>
+            <p style='color: #6b7280; font-size: 1.1rem; max-width: 500px; margin: 0;'>
                 Conecta con el tablero de simulacros para monitorear el progreso académico en tiempo real.
             </p>
         </div>
