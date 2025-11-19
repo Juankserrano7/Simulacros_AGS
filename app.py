@@ -498,7 +498,7 @@ st.markdown("""
     
     form[data-testid="stForm"] label {
         font-weight: 600;
-        color: #800080 !important;
+        color: #FFFFFF !important;
     }
     
     form[data-testid="stForm"] input {
