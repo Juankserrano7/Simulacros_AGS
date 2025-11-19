@@ -625,17 +625,6 @@ st.markdown(
 
 _, col_login, _ = st.columns([1, 1.2, 1])
 with col_login:
-    st.markdown(
-        """
-        <div style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-                    border-radius: 20px;
-                    padding: 2.5rem;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-                    backdrop-filter: blur(10px);'>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
     
     st.markdown(
         "<p style='text-align: center; color: #4b5563; margin-bottom: 1.5rem; font-size: 0.95rem;'>Utiliza tu correo institucional y la contraseña asignada</p>",
