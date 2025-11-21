@@ -7,7 +7,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-21T21:50:20.877686+00:00",
+      "creado_en": "2025-11-21T21:54:29.020312+00:00",
       "errores": [],
       "insights": {}
     },
@@ -18,7 +18,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-21T21:50:20.877686+00:00",
+      "creado_en": "2025-11-21T21:54:29.020312+00:00",
       "errores": [],
       "insights": {}
     },
@@ -29,11 +29,11 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-21T21:50:20.877686+00:00",
+      "creado_en": "2025-11-21T21:54:29.020312+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-21T21:50:20.998613+00:00",
+        "generado_en": "2025-11-21T21:54:29.155345+00:00",
         "resumen": "Panorama de AVANCEMOS actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
@@ -85,18 +85,18 @@
       }
     },
     {
-      "id": "helmer-pardo-3",
-      "nombre": "HELMER PARDO 3",
-      "path": "simulacros_data/uploads/helmer-pardo-3.csv",
+      "id": "simulacro-prueba",
+      "nombre": "simulacro_prueba",
+      "path": "simulacros_data/uploads/simulacro-prueba.csv",
       "origen": "upload",
       "estado": "ready",
       "creado_por": "juan.serrano@aspaen.edu.co",
-      "creado_en": "2025-11-21T21:50:37.240535+00:00",
+      "creado_en": "2025-11-21T22:01:41.642568+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-21T21:50:37.257838+00:00",
-        "resumen": "Panorama de HELMER PARDO 3 actualizado automáticamente.",
+        "generado_en": "2025-11-21T22:01:41.657598+00:00",
+        "resumen": "Panorama de simulacro_prueba actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
             "Fortalece LECTURA CRÍTICA con sesiones cortas de práctica diagnóstica y retroalimentación semanal, priorizando a los estudiantes debajo del promedio general.",
