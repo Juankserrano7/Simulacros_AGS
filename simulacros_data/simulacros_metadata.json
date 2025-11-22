@@ -7,7 +7,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-21T21:54:29.020312+00:00",
+      "creado_en": "2025-11-22T20:58:15.074795+00:00",
       "errores": [],
       "insights": {}
     },
@@ -18,7 +18,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-21T21:54:29.020312+00:00",
+      "creado_en": "2025-11-22T20:58:15.074795+00:00",
       "errores": [],
       "insights": {}
     },
@@ -29,11 +29,11 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-21T21:54:29.020312+00:00",
+      "creado_en": "2025-11-22T20:58:15.074795+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-21T21:54:29.155345+00:00",
+        "generado_en": "2025-11-22T20:58:15.797656+00:00",
         "resumen": "Panorama de AVANCEMOS actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
@@ -85,18 +85,18 @@
       }
     },
     {
-      "id": "simulacro-prueba",
-      "nombre": "simulacro_prueba",
-      "path": "simulacros_data/uploads/simulacro-prueba.csv",
+      "id": "helmer-pardo-3",
+      "nombre": "HELMER_PARDO_3",
+      "path": "simulacros_data/uploads/helmer-pardo-3.csv",
       "origen": "upload",
       "estado": "ready",
       "creado_por": "juan.serrano@aspaen.edu.co",
-      "creado_en": "2025-11-21T22:01:41.642568+00:00",
+      "creado_en": "2025-11-22T21:01:33.383133+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-21T22:01:41.657598+00:00",
-        "resumen": "Panorama de simulacro_prueba actualizado automáticamente.",
+        "generado_en": "2025-11-22T21:01:33.397862+00:00",
+        "resumen": "Panorama de HELMER_PARDO_3 actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
             "Fortalece LECTURA CRÍTICA con sesiones cortas de práctica diagnóstica y retroalimentación semanal, priorizando a los estudiantes debajo del promedio general.",
@@ -116,30 +116,30 @@
         },
         "conclusiones": [],
         "alertas": [
-          "Variabilidad alta en LECTURA CRÍTICA (σ 16.4).",
-          "LECTURA CRÍTICA es el área crítica (68.6 pts)."
+          "Variabilidad alta en INGLÉS (σ 11.5).",
+          "LECTURA CRÍTICA es el área crítica (60.4 pts)."
         ],
         "fortalezas": [
-          "Destaca INGLÉS con 72.7 pts.",
+          "Destaca INGLÉS con 79.3 pts.",
           "Hay margen de apoyo entre pares desde las materias fuertes hacia las débiles."
         ],
         "datos": {
-          "promedio_general": 368.9,
-          "min_general": 291.0,
-          "max_general": 442.0,
+          "promedio_general": 329.0897435897436,
+          "min_general": 257.3076923076923,
+          "max_general": 415.0,
           "promedios_materias": {
-            "LECTURA CRÍTICA": 68.6,
-            "MATEMÁTICAS": 72.63333333333334,
-            "SOCIALES Y CIUDADANAS": 72.2,
-            "CIENCIAS NATURALES": 71.73333333333333,
-            "INGLÉS": 72.73333333333333
+            "LECTURA CRÍTICA": 60.36666666666667,
+            "MATEMÁTICAS": 64.13333333333334,
+            "SOCIALES Y CIUDADANAS": 72.26666666666667,
+            "CIENCIAS NATURALES": 62.0,
+            "INGLÉS": 79.33333333333333
           },
           "desviaciones": {
-            "LECTURA CRÍTICA": 16.40563401963505,
-            "MATEMÁTICAS": 14.79394874738418,
-            "SOCIALES Y CIUDADANAS": 13.332356286040778,
-            "CIENCIAS NATURALES": 14.405299152678534,
-            "INGLÉS": 12.93733792724292
+            "LECTURA CRÍTICA": 7.141347952222511,
+            "MATEMÁTICAS": 10.556035480116162,
+            "SOCIALES Y CIUDADANAS": 10.862568862789805,
+            "CIENCIAS NATURALES": 11.243388862057929,
+            "INGLÉS": 11.53804302217708
           },
           "mejor_materia": "INGLÉS",
           "peor_materia": "LECTURA CRÍTICA"
