@@ -7,7 +7,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-23T19:45:24.467326+00:00",
+      "creado_en": "2025-11-23T20:25:26.287356+00:00",
       "errores": [],
       "insights": {}
     },
@@ -18,7 +18,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-23T19:45:24.467326+00:00",
+      "creado_en": "2025-11-23T20:25:26.287356+00:00",
       "errores": [],
       "insights": {}
     },
@@ -29,11 +29,11 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-23T19:45:24.467326+00:00",
+      "creado_en": "2025-11-23T20:25:26.287356+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-23T19:45:24.584514+00:00",
+        "generado_en": "2025-11-23T20:25:26.417919+00:00",
         "resumen": "Panorama de AVANCEMOS actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
@@ -91,11 +91,11 @@
       "origen": "upload",
       "estado": "ready",
       "creado_por": "juan.serrano@aspaen.edu.co",
-      "creado_en": "2025-11-23T19:45:53.343316+00:00",
+      "creado_en": "2025-11-23T20:27:04.743885+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-23T19:45:53.361907+00:00",
+        "generado_en": "2025-11-23T20:27:04.758576+00:00",
         "resumen": "Panorama de HELMER_PARDO_3 actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
