@@ -3,36 +3,75 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from simulacros_ags.data import get_or_generate_insights
 
-def render(hp1, hp2, prep, materias, simulacro_seleccionado, simulacros_map):
-    st.markdown("<h1 class='header-title'> Estadísticas Detalladas</h1>", unsafe_allow_html=True)
+
+def render(simulacros, simulacro_actual, materias):
+    datos_actual = simulacro_actual["df"]
+    st.markdown(f"<h1 class='header-title'> Estadísticas Detalladas - {simulacro_actual['nombre']}</h1>", unsafe_allow_html=True)
     tab1, tab2, tab3 = st.tabs(["📊 Correlaciones", "📈 Análisis por Grado", "🎯 Top Performers"])
 
+    # --- Correlaciones ---
     with tab1:
         st.markdown("### 🔗 Matriz de Correlación entre Materias")
-        col1, col2, col3 = st.columns(3)
-        for idx, (nombre, datos) in enumerate([("HP1", hp1), ("HP2", hp2), ("Prep", prep)]):
-            with [col1, col2, col3][idx]:
-                st.markdown(f"#### {nombre}")
-                correlacion = datos[materias].corr()
-                fig = px.imshow(correlacion, text_auto=".2f", color_continuous_scale="RdBu_r", aspect="auto", zmin=-1, zmax=1)
+        # mostrar hasta 3 simulacros en columnas para mantener estética previa
+        cols = st.columns(min(3, len(simulacros)))
+        mostrar = simulacros[-3:] if len(simulacros) > 3 else simulacros
+        for idx, sim in enumerate(mostrar):
+            correlacion = sim["df"][materias].corr()
+            with cols[idx]:
+                st.markdown(f"#### {sim['nombre']}")
+                fig = px.imshow(
+                    correlacion,
+                    text_auto=".2f",
+                    color_continuous_scale="RdBu_r",
+                    aspect="auto",
+                    zmin=-1,
+                    zmax=1,
+                    labels=dict(color="Correlación"),
+                )
                 fig.update_layout(height=400)
                 st.plotly_chart(fig, width="stretch")
         st.markdown("---")
         st.info(
             """
-        **Correlación alta (>0.7):** Las materias están fuertemente relacionadas. 
-        Un buen desempeño en una suele indicar buen desempeño en la otra.
+        **Correlación alta (>0.7):** materias fuertemente relacionadas.
 
-        **Correlación Media (0.4-0.7):** Relación moderada entre las materias.
+        **Correlación media (0.4-0.7):** relación moderada.
 
-        **Correlación baja (<0.4):** Las materias son relativamente independientes.
+        **Correlación baja (<0.4):** independencia relativa.
         """
         )
+        # IA: resumen dinámico de correlaciones
+        insights = get_or_generate_insights(simulacro_actual)
+        st.markdown(
+            """
+        <div style='background: linear-gradient(135deg, #1f2a44 0%, #2b3a5e 100%); padding: 1.2rem; border-radius: 12px; color: white; margin-top: 1rem;'>
+            <h4 style='margin: 0 0 0.5rem 0;'>🤖 Análisis automático (IA)</h4>
+            <p style='margin: 0 0 0.5rem 0; opacity: 0.9;'>{resumen}</p>
+            <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;'>
+                <div>
+                    <h5 style='margin: 0 0 0.4rem 0;'>Alertas / Prioridades</h5>
+                    {alertas}
+                </div>
+                <div>
+                    <h5 style='margin: 0 0 0.4rem 0;'>Fortalezas / Oportunidades</h5>
+                    {fortalezas}
+                </div>
+            </div>
+        </div>
+        """.format(
+                resumen=insights.get("resumen", "Análisis generado automáticamente."),
+                alertas="<ul style='margin:0; padding-left:1.2rem;'>" + "".join([f"<li>{i}</li>" for i in insights.get("alertas", [])]) + "</ul>",
+                fortalezas="<ul style='margin:0; padding-left:1.2rem;'>" + "".join([f"<li>{i}</li>" for i in insights.get("fortalezas", [])]) + "</ul>",
+            ),
+            unsafe_allow_html=True,
+        )
 
+    # --- Análisis por grado ---
     with tab2:
         st.markdown("### 📚 Análisis Comparativo por Grado")
-        datos_grado = simulacros_map[simulacro_seleccionado]
+        datos_grado = datos_actual
         if "GRADO" in datos_grado.columns:
             grados_disponibles = [str(g) for g in datos_grado["GRADO"].dropna().unique()]
             fig = go.Figure()
@@ -40,10 +79,16 @@ def render(hp1, hp2, prep, materias, simulacro_seleccionado, simulacros_map):
                 datos_g = datos_grado[datos_grado["GRADO"].astype(str) == grado]
                 promedios_g = [datos_g[mat].mean() for mat in materias]
                 fig.add_trace(
-                    go.Bar(name=f"Grado {grado}", x=materias, y=promedios_g, text=[f"{p:.1f}" for p in promedios_g], textposition="outside")
+                    go.Bar(
+                        name=f"Grado {grado}",
+                        x=materias,
+                        y=promedios_g,
+                        text=[f"{p:.1f}" for p in promedios_g],
+                        textposition="outside",
+                    )
                 )
             fig.update_layout(
-                title=f"Comparación de Promedios por Grado - {simulacro_seleccionado}",
+                title=f"Comparación de Promedios por Grado - {simulacro_actual['nombre']}",
                 xaxis_title="Materia",
                 yaxis_title="Puntaje Promedio",
                 barmode="group",
@@ -74,15 +119,15 @@ def render(hp1, hp2, prep, materias, simulacro_seleccionado, simulacros_map):
         else:
             st.warning("No hay información de grado disponible en este simulacro.")
 
+    # --- Top performers ---
     with tab3:
         st.markdown("### 🏆 Top Performers por Materia")
-        datos_top = simulacros_map[simulacro_seleccionado]
         n_top = st.slider("Número de estudiantes a mostrar", 5, 30, 15)
         cols = st.columns(2)
         for idx, materia in enumerate(materias):
             with cols[idx % 2]:
                 st.markdown(f"#### {materia}")
-                top_materia = datos_top.nlargest(n_top, materia)[["ESTUDIANTE", materia]].reset_index(drop=True)
+                top_materia = datos_actual.nlargest(n_top, materia)[["ESTUDIANTE", materia]].reset_index(drop=True)
                 top_materia.index = top_materia.index + 1
                 custom_colorscale = [
                     [0.0, "#E74C3C"],
@@ -107,7 +152,7 @@ def render(hp1, hp2, prep, materias, simulacro_seleccionado, simulacros_map):
 
         st.markdown("---")
         st.markdown("### 🏆 Ranking General")
-        ranking_general = datos_top.nlargest(30, "PROMEDIO PONDERADO")[["ESTUDIANTE"] + materias + ["PROMEDIO PONDERADO"]].reset_index(drop=True)
+        ranking_general = datos_actual.nlargest(30, "PROMEDIO PONDERADO")[["ESTUDIANTE"] + materias + ["PROMEDIO PONDERADO"]].reset_index(drop=True)
         ranking_general.index = ranking_general.index + 1
         ranking_general = ranking_general.round(2)
         columnas_num = ranking_general.select_dtypes(include=["float64", "int64"]).columns

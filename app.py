@@ -1,13 +1,14 @@
 import streamlit as st
 
 from simulacros_ags.auth import format_name_from_email, load_auth_users, verify_credentials
-from simulacros_ags.config import MATERIAS
-from simulacros_ags.data import load_datasets
+from simulacros_ags.config import MATERIAS, UPLOAD_ALLOWED_USER
+from simulacros_ags.data import load_all_simulacros, ordenar_simulacros
 from simulacros_ags.pages import (
     analisis_individual,
     avance,
     comparacion,
     estadisticas_detalladas,
+    gestion,
     inicio,
     rankings,
     reporte_general,
@@ -96,12 +97,16 @@ if not st.session_state.authenticated:
     st.stop()
 
 # --- Datos base ---
-hp1, hp2, prep = load_datasets()
-if hp1 is None or hp2 is None or prep is None:
+metadatos, data_map, errores_carga = load_all_simulacros()
+simulacros = ordenar_simulacros(data_map)
+if not simulacros:
+    st.error("No se encontraron simulacros listos. Sube un archivo desde la sección de gestión.")
+    if errores_carga:
+        st.warning("\n".join(errores_carga))
     st.stop()
 
-materias = MATERIAS
-simulacros_map = {"Helmer Pardo 1": hp1, "Helmer Pardo 2": hp2, "AVANCEMOS": prep}
+simulacro_por_nombre = {sim["nombre"]: sim for sim in simulacros}
+opciones_simulacro = list(simulacro_por_nombre.keys())
 
 # --- Sidebar ---
 with st.sidebar:
@@ -136,23 +141,23 @@ with st.sidebar:
 
     st.markdown("<hr style='margin: 1rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
     st.markdown("### 🧭 NAVEGACIÓN")
-    pagina = st.radio(
-        "Navegación",
-        [
-            "🏠 Inicio",
-            "🎖️ Rankings",
-            "📊 Reporte General",
-            "🔄 Comparación Simulacros",
-            "👤 Análisis Individual",
-            "📈 Avance",
-            "📉 Estadísticas Detalladas",
-        ],
-        label_visibility="collapsed",
-    )
+    opciones_paginas = [
+        "🏠 Inicio",
+        "🎖️ Rankings",
+        "📊 Reporte General",
+        "🔄 Comparación Simulacros",
+        "👤 Análisis Individual",
+        "📈 Avance",
+        "📉 Estadísticas Detalladas",
+    ]
+    if st.session_state.user_email.lower() == UPLOAD_ALLOWED_USER:
+        opciones_paginas.append("🧰 Gestión de Simulacros")
+
+    pagina = st.radio("Navegación", opciones_paginas, label_visibility="collapsed")
 
     st.markdown("<hr style='margin: 1.5rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
     st.markdown("### 🎯 FILTROS")
-    simulacro_seleccionado = st.selectbox("📋 Simulacro Activo", list(simulacros_map.keys()))
+    simulacro_seleccionado = st.selectbox("📋 Simulacro Activo", opciones_simulacro, index=len(opciones_simulacro) - 1)
 
     st.markdown("<hr style='margin: 1.5rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
     st.markdown(
@@ -178,21 +183,26 @@ with st.sidebar:
     )
 
     with st.expander("🔍 Diagnóstico de Datos"):
-        st.write(f"**HP1:** {len(hp1)} estudiantes")
-        st.write(f"**HP2:** {len(hp2)} estudiantes")
-        st.write(f"**AVANCEMOS:** {len(prep)} estudiantes")
+        for sim in simulacros:
+            st.write(f"**{sim['nombre']}:** {len(sim['df'])} estudiantes")
+        if errores_carga:
+            st.warning("Problemas detectados en algunos archivos.")
 
-datos_actual = simulacros_map[simulacro_seleccionado]
+datos_actual = simulacro_por_nombre[simulacro_seleccionado]["df"]
+sim_actual_obj = simulacro_por_nombre[simulacro_seleccionado]
 
 page_handlers = {
-    "🏠 Inicio": lambda: inicio.render(hp1, hp2, prep, materias),
-    "🎖️ Rankings": lambda: rankings.render(hp1, hp2, prep, materias, simulacros_map),
-    "📊 Reporte General": lambda: reporte_general.render(datos_actual, simulacro_seleccionado, materias),
-    "🔄 Comparación Simulacros": lambda: comparacion.render(hp1, hp2, prep, materias),
-    "👤 Análisis Individual": lambda: analisis_individual.render(datos_actual, materias),
-    "📈 Avance": lambda: avance.render(hp1, hp2, prep, materias),
-    "📉 Estadísticas Detalladas": lambda: estadisticas_detalladas.render(hp1, hp2, prep, materias, simulacro_seleccionado, simulacros_map),
+    "🏠 Inicio": lambda: inicio.render(simulacros, MATERIAS),
+    "🎖️ Rankings": lambda: rankings.render(simulacros, MATERIAS),
+    "📊 Reporte General": lambda: reporte_general.render(datos_actual, simulacro_seleccionado, MATERIAS),
+    "🔄 Comparación Simulacros": lambda: comparacion.render(simulacros, MATERIAS),
+    "👤 Análisis Individual": lambda: analisis_individual.render(datos_actual, MATERIAS),
+    "📈 Avance": lambda: avance.render(simulacros, MATERIAS),
+    "📉 Estadísticas Detalladas": lambda: estadisticas_detalladas.render(simulacros, sim_actual_obj, MATERIAS),
 }
+
+if st.session_state.user_email.lower() == UPLOAD_ALLOWED_USER:
+    page_handlers["🧰 Gestión de Simulacros"] = lambda: gestion.render(st.session_state.user_email)
 
 page_handlers.get(pagina, lambda: None)()
 
@@ -203,7 +213,7 @@ st.markdown(
     <p style='font-size: 0.9rem;'>
         <strong> Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
-        DIN HS JKS SSO Desarrallado con Streamlit, Pandas, Plotly y NumPy
+        Construido con Streamlit, Pandas, Plotly y NumPy
     </p>
 </div>
 """,
