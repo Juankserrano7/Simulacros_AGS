@@ -7,7 +7,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-22T20:58:15.074795+00:00",
+      "creado_en": "2025-11-23T19:23:50.047769+00:00",
       "errores": [],
       "insights": {}
     },
@@ -18,7 +18,7 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-22T20:58:15.074795+00:00",
+      "creado_en": "2025-11-23T19:23:50.047769+00:00",
       "errores": [],
       "insights": {}
     },
@@ -29,11 +29,11 @@
       "origen": "semilla",
       "estado": "ready",
       "creado_por": "sistema",
-      "creado_en": "2025-11-22T20:58:15.074795+00:00",
+      "creado_en": "2025-11-23T19:23:50.047769+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-22T20:58:15.797656+00:00",
+        "generado_en": "2025-11-23T19:23:50.168525+00:00",
         "resumen": "Panorama de AVANCEMOS actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
@@ -86,17 +86,17 @@
     },
     {
       "id": "helmer-pardo-3",
-      "nombre": "HELMER_PARDO_3",
+      "nombre": "Helmer Pardo 3",
       "path": "simulacros_data/uploads/helmer-pardo-3.csv",
       "origen": "upload",
       "estado": "ready",
       "creado_por": "juan.serrano@aspaen.edu.co",
-      "creado_en": "2025-11-22T21:01:33.383133+00:00",
+      "creado_en": "2025-11-23T19:24:51.379150+00:00",
       "errores": [],
       "insights": {
         "modelo": "heuristico-local",
-        "generado_en": "2025-11-22T21:01:33.397862+00:00",
-        "resumen": "Panorama de HELMER_PARDO_3 actualizado automáticamente.",
+        "generado_en": "2025-11-23T19:24:51.391288+00:00",
+        "resumen": "Panorama de Helmer Pardo 3 actualizado automáticamente.",
         "recomendaciones": {
           "corto": [
             "Fortalece LECTURA CRÍTICA con sesiones cortas de práctica diagnóstica y retroalimentación semanal, priorizando a los estudiantes debajo del promedio general.",
