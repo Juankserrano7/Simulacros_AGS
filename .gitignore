@@ -1,1 +1,9 @@
-.ssh/simulacros_deploy
+.venv/
+.env
+.env.*
+.ssh/
+.streamlit/secrets.toml
+__pycache__/
+*.pyc
+*.log
+*.tmp
