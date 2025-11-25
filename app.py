@@ -213,7 +213,7 @@ st.markdown(
     <p style='font-size: 0.9rem;'>
         <strong> Dashboard de Análisis de Simulacros PreIcfes</strong><br>
         Sistema de Evaluación y Seguimiento Académico - Grado 11<br>
-        Construido con Streamlit, Pandas, Plotly y NumPy
+        DIN JKS AGS SSO, Construido con Streamlit, Pandas, Plotly y NumPy
     </p>
 </div>
 """,
