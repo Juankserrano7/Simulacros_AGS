@@ -21,23 +21,30 @@ def render(simulacros, materias):
         return
 
     st.markdown("<h2 class='section-header'>📊 Comparación de Promedios por Materia</h2>", unsafe_allow_html=True)
+
+    # Paleta de colores (agregar más si hay más simulacros)
+    colores = [
+    "#e74c3c",  # rojo
+    "#3498db",  # azul
+    "#2ecc71",  # verde
+    "#f1c40f",  # amarillo
+    "#9b59b6",  # morado
+    "#e67e22",  # naranja
+    "#1abc9c",  # turquesa
+    ]
+
     fig = go.Figure()
-    for sim in activos:
-        fig.add_trace(
-            go.Bar(
-                name=sim["nombre"],
-                x=materias,
-                y=[sim["df"][mat].mean() for mat in materias],
-                marker=dict(
-                    color=[0 if i % 2 else 1 for i in range(len(materias))],
-                    colorscale=[
-                        [0.0, "#27ae60"],
-                        [0.5, "#f39c12"],
-                        [1.0, "#e74c3c"],
-                    ],
-                ),
-            )
+
+    for i, sim in enumerate(activos):
+    fig.add_trace(
+        go.Bar(
+            name=sim["nombre"],
+            x=materias,
+            y=[sim["df"][mat].mean() for mat in materias],
+            marker=dict(color=colores[i % len(colores)]),  
         )
+    )
+
     fig.update_layout(
         barmode="group",
         height=450,
@@ -46,6 +53,7 @@ def render(simulacros, materias):
         yaxis_title="Puntaje Promedio",
         template="plotly_white",
     )
+
     st.plotly_chart(fig, width="stretch")
 
     st.markdown("### 🔥 Variaciones clave")
