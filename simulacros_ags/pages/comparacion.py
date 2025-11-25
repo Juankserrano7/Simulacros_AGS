@@ -36,23 +36,23 @@ def render(simulacros, materias):
     fig = go.Figure()
 
     for i, sim in enumerate(activos):
-    fig.add_trace(
-        go.Bar(
-            name=sim["nombre"],
-            x=materias,
-            y=[sim["df"][mat].mean() for mat in materias],
-            marker=dict(color=colores[i % len(colores)]),  
+        fig.add_trace(
+            go.Bar(
+                name=sim["nombre"],
+                x=materias,
+                y=[sim["df"][mat].mean() for mat in materias],
+                marker=dict(color=colores[i % len(colores)]),  
+            )
         )
-    )
 
-    fig.update_layout(
-        barmode="group",
-        height=450,
-        title="Promedios por materia",
-        xaxis_title="Materia",
-        yaxis_title="Puntaje Promedio",
-        template="plotly_white",
-    )
+        fig.update_layout(
+            barmode="group",
+            height=450,
+            title="Promedios por materia",
+            xaxis_title="Materia",
+            yaxis_title="Puntaje Promedio",
+            template="plotly_white",
+        )
 
     st.plotly_chart(fig, width="stretch")
 
