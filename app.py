@@ -138,6 +138,9 @@ with st.sidebar:
         st.session_state.authenticated = False
         st.session_state.user_email = ""
         st.rerun()
+    if st.sidebar.button("Sincronizar simulacros", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
     st.markdown("<hr style='margin: 1rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
     st.markdown("### 🧭 NAVEGACIÓN")

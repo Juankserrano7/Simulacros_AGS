@@ -1,6 +1,41 @@
+import colorsys
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+
+
+def _hex_from_hsl(h: float, s: float = 0.65, l: float = 0.5) -> str:
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+
+
+def _sim_colors(simulacros) -> dict:
+    # Palette base + deterministic HSL fallback for scalability
+    base = [
+        "#27ae60",
+        "#f39c12",
+        "#e74c3c",
+        "#667eea",
+        "#9b59b6",
+        "#16a085",
+        "#2980b9",
+        "#d35400",
+        "#2c3e50",
+        "#8e44ad",
+        "#c0392b",
+        "#1abc9c",
+        "#34495e",
+    ]
+    colors = {}
+    for idx, sim in enumerate(simulacros):
+        if idx < len(base):
+            colors[sim["nombre"]] = base[idx]
+        else:
+            # Golden ratio spacing for distinct hues
+            h = (0.61803398875 * idx) % 1.0
+            colors[sim["nombre"]] = _hex_from_hsl(h)
+    return colors
 
 
 def render(simulacros, materias):
@@ -21,27 +56,16 @@ def render(simulacros, materias):
         return
 
     st.markdown("<h2 class='section-header'>📊 Comparación de Promedios por Materia</h2>", unsafe_allow_html=True)
-
-    # Paleta de colores (agregar más si hay más simulacros)
-    colores = [
-    "#e74c3c",  # rojo
-    "#3498db",  # azul
-    "#2ecc71",  # verde
-    "#f1c40f",  # amarillo
-    "#9b59b6",  # morado
-    "#e67e22",  # naranja
-    "#1abc9c",  # turquesa
-    ]
-
+    color_map = _sim_colors(activos)
     fig = go.Figure()
 
-    for i, sim in enumerate(activos):
+    for sim in activos:
         fig.add_trace(
             go.Bar(
                 name=sim["nombre"],
                 x=materias,
                 y=[sim["df"][mat].mean() for mat in materias],
-                marker=dict(color=colores[i % len(colores)]),  
+                marker=dict(color=color_map.get(sim["nombre"], "#667eea")),
             )
         )
 
@@ -114,6 +138,7 @@ def render(simulacros, materias):
     st.markdown("---")
     st.markdown("<h2 class='section-header'>📈 Evolución del promedio general</h2>", unsafe_allow_html=True)
     fig_line = go.Figure()
+    color_map_all = _sim_colors(simulacros)
     fig_line.add_trace(
         go.Scatter(
             x=[sim["nombre"] for sim in simulacros],
@@ -122,7 +147,10 @@ def render(simulacros, materias):
             text=[f"{p:.2f}" for p in promedios_generales],
             textposition="top center",
             line=dict(color="#667eea", width=4),
-            marker=dict(size=15, color=["#27ae60", "#f39c12", "#e74c3c", "#667eea", "#9b59b6"] * 3),
+            marker=dict(
+                size=15,
+                color=[color_map_all.get(sim["nombre"], "#667eea") for sim in simulacros],
+            ),
         )
     )
     fig_line.update_layout(title="Tendencia del Promedio Ponderado", yaxis_title="Promedio Ponderado", height=420, template="plotly_white")

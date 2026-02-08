@@ -74,6 +74,9 @@ def render(simulacros, simulacro_actual, materias):
         datos_grado = datos_actual
         if "GRADO" in datos_grado.columns:
             grados_disponibles = [str(g) for g in datos_grado["GRADO"].dropna().unique()]
+            if not grados_disponibles:
+                st.warning("No hay información de grado disponible en este simulacro.")
+                return
             fig = go.Figure()
             for grado in sorted(grados_disponibles):
                 datos_g = datos_grado[datos_grado["GRADO"].astype(str) == grado]
@@ -109,13 +112,11 @@ def render(simulacros, simulacro_actual, materias):
             df_grados = pd.DataFrame(tabla_grados).round(2)
             columnas_num = df_grados.select_dtypes(include=["float64", "int64"]).columns
             st.markdown("#### 📊 Tabla de Promedios por Grado")
-            st.dataframe(
-                df_grados.style.format({col: "{:.2f}" for col in columnas_num}).background_gradient(
-                    cmap="YlGnBu", subset=materias + ["Promedio General"]
-                ),
-                width="stretch",
-                hide_index=True,
-            )
+            subset_cols = [col for col in materias + ["Promedio General"] if col in df_grados.columns]
+            styled = df_grados.style.format({col: "{:.2f}" for col in columnas_num})
+            if subset_cols:
+                styled = styled.background_gradient(cmap="YlGnBu", subset=subset_cols)
+            st.dataframe(styled, width="stretch", hide_index=True)
         else:
             st.warning("No hay información de grado disponible en este simulacro.")
 
