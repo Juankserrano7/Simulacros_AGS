@@ -1,22 +1,19 @@
-from io import BytesIO
+import json
+import os
+import uuid
 import unicodedata
+from io import BytesIO
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 import pandas as pd
+import psycopg2
 import streamlit as st
 
+
 from .ai import generate_ai_insights
-from .config import MATERIAS, MAX_UPLOAD_MB, TEMPLATE_FILE, UPLOADS_DIR, METADATA_FILE
-from .storage import (
-    bootstrap_metadata,
-    get_simulacros_metadata,
-    mark_estado,
-    register_simulacro,
-    upsert_insights,
-    update_simulacro,
-)
-from .git_sync import push_changes, has_push_config
+from .config import MATERIAS, MAX_UPLOAD_MB
+
 
 REQUIRED_COLUMNS = ["ESTUDIANTE", "PROMEDIO PONDERADO"] + MATERIAS
 OPTIONAL_NUMERIC = ["PROMEDIO SIMPLE", "DESVIACIÓN ESTÁNDAR", "PP POR MATERIA"]
@@ -265,7 +262,7 @@ def ensure_template_file() -> Path:
 
 
 def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str) -> Tuple[bool, str, Dict]:
-    """Valida y almacena un nuevo simulacro cargado por Excel."""
+    """Valida e ingesta un nuevo simulacro cargado por Excel directamente en Supabase."""
     if not nombre or not nombre.strip():
         return False, "Debes indicar un nombre para el simulacro.", {}
 
@@ -274,6 +271,15 @@ def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str) -> T
     if size_mb > MAX_UPLOAD_MB:
         return False, f"El archivo excede el límite de {MAX_UPLOAD_MB} MB.", {}
     file_buffer.seek(0)
+    header = file_buffer.read(8)
+    file_buffer.seek(0)
+
+    # Validar firma de archivo Excel (Magic Bytes)
+    fname = getattr(file_buffer, "name", "").lower()
+    if fname.endswith(".xlsx") and not header.startswith(b"PK\x03\x04"):
+        return False, "El archivo .xlsx no posee una cabecera binaria válida de hoja de cálculo.", {}
+    elif fname.endswith(".xls") and not header.startswith(b"\xd0\xcf\x11\xe0"):
+        return False, "El archivo .xls no posee una cabecera binaria válida de Excel.", {}
 
     try:
         df_raw = pd.read_excel(file_buffer)
@@ -286,22 +292,81 @@ def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str) -> T
     if errores:
         return False, "; ".join(errores), {}
 
-    registro = register_simulacro(nombre.strip(), path=Path("pendiente"), creado_por=usuario)
-    sim_id = registro["id"]
-    destino = UPLOADS_DIR / f"{sim_id}.csv"
+    promocion_id = st.session_state.get("promocion_activa_id")
+    if not promocion_id:
+        return False, "No hay una promoción activa seleccionada.", {}
+
+    db_url = os.getenv("SUPABASE_DB_URL")
+    if not db_url:
+        return False, "No hay conexión configurada a Supabase.", {}
+
+    sim_id = str(uuid.uuid4())
+    insights = generate_ai_insights(nombre.strip(), df, materias=MATERIAS)
+
+    conn = psycopg2.connect(db_url)
     try:
-        df.to_csv(destino, index=False)
-        update_simulacro(sim_id, path=str(destino))
-        insights = generate_ai_insights(nombre.strip(), df, materias=MATERIAS)
-        upsert_insights(sim_id, insights)
-        mark_estado(sim_id, "ready", errores=[])
-        if has_push_config():
-            push_changes(destino, f"chore: add simulacro {nombre.strip()}")
+        with conn.cursor() as cur:
+            # 1. Insertar registro en tabla `simulacros`
+            cur.execute("""
+                INSERT INTO simulacros (id, nombre, promocion_id, origen, estado, creado_por, insights)
+                VALUES (%s, %s, %s, 'upload', 'ready', %s, %s::jsonb);
+            """, (sim_id, nombre.strip(), promocion_id, usuario, json.dumps(insights)))
+
+            # 2. Insertar/obtener estudiantes e insertar sus resultados
+            for _, r in df.iterrows():
+                st_name = str(r["ESTUDIANTE"]).strip()
+                st_grado = str(r["GRADO"]).strip() if pd.notna(r.get("GRADO")) else None
+
+                cur.execute("""
+                    INSERT INTO estudiantes (nombre, grado, promocion_id)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (nombre, promocion_id) DO UPDATE SET grado = EXCLUDED.grado
+                    RETURNING id;
+                """, (st_name, st_grado, promocion_id))
+                st_id = cur.fetchone()[0]
+
+                def safe_num(v):
+                    if pd.isna(v):
+                        return None
+                    try:
+                        return float(v)
+                    except (ValueError, TypeError):
+                        return None
+
+                cur.execute("""
+                    INSERT INTO resultados_simulacro (
+                        simulacro_id, estudiante_id, lectura_critica, matematicas,
+                        sociales_ciudadanas, ciencias_naturales, ingles,
+                        promedio_simple, promedio_ponderado, desviacion_estandar
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (simulacro_id, estudiante_id) DO UPDATE SET
+                        lectura_critica = EXCLUDED.lectura_critica,
+                        matematicas = EXCLUDED.matematicas,
+                        sociales_ciudadanas = EXCLUDED.sociales_ciudadanas,
+                        ciencias_naturales = EXCLUDED.ciencias_naturales,
+                        ingles = EXCLUDED.ingles,
+                        promedio_simple = EXCLUDED.promedio_simple,
+                        promedio_ponderado = EXCLUDED.promedio_ponderado,
+                        desviacion_estandar = EXCLUDED.desviacion_estandar;
+                """, (
+                    sim_id, st_id,
+                    safe_num(r.get("LECTURA CRÍTICA")),
+                    safe_num(r.get("MATEMÁTICAS")),
+                    safe_num(r.get("SOCIALES Y CIUDADANAS")),
+                    safe_num(r.get("CIENCIAS NATURALES")),
+                    safe_num(r.get("INGLÉS")),
+                    safe_num(r.get("PROMEDIO SIMPLE")),
+                    safe_num(r.get("PROMEDIO PONDERADO")),
+                    safe_num(r.get("DESVIACIÓN ESTÁNDAR"))
+                ))
+        conn.commit()
         st.cache_data.clear()
-        return True, "Simulacro cargado correctamente.", registro
+        return True, f"Simulacro '{nombre.strip()}' subido e ingestado correctamente en Supabase.", {"id": sim_id, "nombre": nombre.strip()}
     except Exception as exc:  # noqa: BLE001
-        mark_estado(sim_id, "failed", errores=[str(exc)])
-        return False, f"Error al guardar el archivo: {exc}", registro
+        conn.rollback()
+        return False, f"Error al procesar e insertar en Supabase: {exc}", {}
+    finally:
+        conn.close()
 
 
 def ordenar_simulacros(data_map: Dict[str, Dict]) -> List[Dict]:
@@ -331,6 +396,21 @@ def get_or_generate_insights(sim_entry: Dict) -> Dict:
     df = sim_entry.get("df")
     nombre = meta.get("nombre", meta.get("id", "Simulacro"))
     nuevo = generate_ai_insights(nombre, df, materias=MATERIAS)
-    upsert_insights(sim_entry.get("id"), nuevo)
+    
+    sim_id = sim_entry.get("id")
+    db_url = os.getenv("SUPABASE_DB_URL")
+    if db_url and sim_id:
+        try:
+            conn = psycopg2.connect(db_url)
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("UPDATE simulacros SET insights = %s::jsonb WHERE id = %s;", (json.dumps(nuevo), str(sim_id)))
+                conn.commit()
+            finally:
+                conn.close()
+        except Exception:
+            pass
+
     st.cache_data.clear()
     return nuevo
+
