@@ -216,7 +216,7 @@ def render(simulacros, materias):
         tabla_estilo = (
             tabla_display.style.background_gradient(subset=columnas_para_gradiente, cmap="RdYlGn", vmin=0, vmax=100)
             .apply(resaltar_promedio)
-            .format({col: "{:.2f}" for col in columnas_para_gradiente})
+            .format({col: "{:.2f}" for col in columnas_para_gradiente}, na_rep="No presentó")
         )
         st.dataframe(tabla_estilo, width="stretch", height=600)
 

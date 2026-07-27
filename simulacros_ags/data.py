@@ -154,7 +154,7 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                     }
                     metadatos.append(meta)
 
-                    # 2. Consultar resultados de estudiantes para este simulacro
+                    # 2. Consultar resultados de estudiantes para este simulacro (LEFT JOIN para incluir a todos los estudiantes)
                     cur.execute("""
                         SELECT 
                             e.nombre AS "ESTUDIANTE",
@@ -168,9 +168,10 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                             rs.promedio_simple AS "PROMEDIO SIMPLE",
                             rs.promedio_ponderado AS "PROMEDIO PONDERADO",
                             rs.desviacion_estandar AS "DESVIACIÓN ESTÁNDAR"
-                        FROM resultados_simulacro rs
-                        JOIN estudiantes e ON rs.estudiante_id = e.id
-                        WHERE rs.simulacro_id = %s AND e.promocion_id = %s;
+                        FROM estudiantes e
+                        LEFT JOIN resultados_simulacro rs ON rs.estudiante_id = e.id AND rs.simulacro_id = %s
+                        WHERE e.promocion_id = %s
+                        ORDER BY e.nombre ASC;
                     """, (s_id, promocion_id))
                     res_rows = cur.fetchall()
                     cols = [
@@ -186,7 +187,7 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                             df[col] = pd.to_numeric(df[col], errors="coerce")
                     data_map[s_id] = {"meta": meta, "df": df}
 
-                # 3. Consultar si hay resultados de ICFES Real para esta promoción y agregarlo como evaluación dinamicamente
+                # 3. Consultar si hay resultados de ICFES Real para esta promoción y agregarlo como evaluación dinámicamente
                 cur.execute("""
                     SELECT 
                         e.nombre AS "ESTUDIANTE",
@@ -198,10 +199,11 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                         rir.ciencias_naturales AS "CIENCIAS NATURALES",
                         rir.ingles AS "INGLÉS",
                         rir.puntaje_global AS "PROMEDIO PONDERADO"
-                    FROM resultados_icfes_real rir
-                    JOIN estudiantes e ON rir.estudiante_id = e.id
-                    WHERE rir.promocion_id = %s;
-                """, (promocion_id,))
+                    FROM estudiantes e
+                    LEFT JOIN resultados_icfes_real rir ON rir.estudiante_id = e.id AND rir.promocion_id = %s
+                    WHERE e.promocion_id = %s
+                    ORDER BY e.nombre ASC;
+                """, (promocion_id, promocion_id))
                 real_rows = cur.fetchall()
                 if real_rows:
                     cols_real = [

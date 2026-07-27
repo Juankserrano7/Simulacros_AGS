@@ -29,10 +29,16 @@ def render(datos_actual, materias):
     if "GRADO" in datos_estudiante and pd.notna(datos_estudiante["GRADO"]):
         st.markdown(f"**Grado:** {datos_estudiante['GRADO']}")
 
+    val_sim = datos_estudiante.get("PROMEDIO PONDERADO")
+    no_presento = pd.isna(val_sim)
+
+    if no_presento:
+        st.warning(f"⚠️ El estudiante **{estudiante_seleccionado}** NO presentó esta evaluación.")
+
     st.markdown("---")
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.metric("📋 Simulacro Activo", f"{datos_estudiante['PROMEDIO PONDERADO']:.1f}")
+        st.metric("📋 Simulacro Activo", f"{val_sim:.1f}" if pd.notna(val_sim) else "No presentó")
 
     with col2:
         if icfes_row is not None and pd.notna(icfes_row.get("PROMEDIO PONDERADO")):
@@ -41,17 +47,28 @@ def render(datos_actual, materias):
             st.metric("🎯 ICFES Real", "Pendiente")
 
     with col3:
-        percentil = (datos_actual["PROMEDIO PONDERADO"] < datos_estudiante["PROMEDIO PONDERADO"]).sum() / len(datos_actual) * 100
-        st.metric("📊 Percentil (Simulacro)", f"{percentil:.1f}%")
+        if pd.notna(val_sim):
+            valid_proms = datos_actual["PROMEDIO PONDERADO"].dropna()
+            percentil = (valid_proms < val_sim).sum() / len(valid_proms) * 100 if len(valid_proms) > 0 else 0
+            st.metric("📊 Percentil (Simulacro)", f"{percentil:.1f}%")
+        else:
+            st.metric("📊 Percentil", "N/A")
 
     with col4:
-        ranking = datos_actual.sort_values("PROMEDIO PONDERADO", ascending=False).reset_index(drop=True)
-        posicion = ranking[ranking["ESTUDIANTE"] == estudiante_seleccionado].index[0] + 1
-        st.metric("🏆 Posición Simulacro", f"{posicion} / {len(datos_actual)}")
+        if pd.notna(val_sim):
+            ranking = datos_actual.dropna(subset=["PROMEDIO PONDERADO"]).sort_values("PROMEDIO PONDERADO", ascending=False).reset_index(drop=True)
+            pos_sub = ranking[ranking["ESTUDIANTE"] == estudiante_seleccionado]
+            posicion = pos_sub.index[0] + 1 if not pos_sub.empty else "N/A"
+            st.metric("🏆 Posición Simulacro", f"{posicion} / {len(ranking)}")
+        else:
+            st.metric("🏆 Posición", "No presentó")
 
     with col5:
-        mejor_materia = max(materias, key=lambda m: datos_estudiante[m] if pd.notna(datos_estudiante[m]) else 0)
-        st.metric("⭐ Mejor Materia", mejor_materia.split()[0])
+        if pd.notna(val_sim):
+            mejor_materia = max(materias, key=lambda m: datos_estudiante[m] if pd.notna(datos_estudiante[m]) else -1)
+            st.metric("⭐ Mejor Materia", mejor_materia.split()[0])
+        else:
+            st.metric("⭐ Mejor Materia", "N/A")
 
     st.markdown("---")
     st.markdown("<h2 class='section-header'>📊 Perfil de Competencias (Simulacro vs ICFES Real vs Grupo)</h2>", unsafe_allow_html=True)
