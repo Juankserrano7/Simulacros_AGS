@@ -1,13 +1,13 @@
 import base64
 import hashlib
 import hmac
+import os
 from pathlib import Path
 from typing import Dict
-
-import pandas as pd
+import psycopg2
 import streamlit as st
 
-from .config import AUTH_USERS_FILE, LOGO_PATH, PBKDF2_ITERATIONS
+from .config import LOGO_PATH, PBKDF2_ITERATIONS
 
 
 def load_logo_base64(path: str | Path = LOGO_PATH) -> str:
@@ -27,47 +27,69 @@ def format_name_from_email(email: str) -> str:
         username = email.split("@")[0]
         parts = [part for part in username.replace("_", " ").split(".") if part]
         if not parts:
-            return username.title()
+            return str(username).title()
         return " ".join(part.capitalize() for part in parts)
     except Exception:
-        return email
+        return str(email)
 
 
-def load_auth_users(path: str | Path = AUTH_USERS_FILE) -> Dict[str, dict]:
-    """Lee el almacén de credenciales PBKDF2 desde CSV."""
+def get_user_role(email: str) -> str:
+    """Consulta el rol real del usuario desde Supabase ('admin' o 'docente')."""
+    if not email:
+        return "docente"
+    email_clean = email.strip().lower()
+    db_url = os.getenv("SUPABASE_DB_URL")
+    if db_url:
+        try:
+            conn = psycopg2.connect(db_url)
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT rol FROM usuarios WHERE LOWER(email) = %s AND activo = true;", (email_clean,))
+                    row = cur.fetchone()
+                    if row and row[0]:
+                        return str(row[0]).strip().lower()
+            finally:
+                conn.close()
+        except Exception:
+            pass
+    if email_clean == "juan.serrano@aspaen.edu.co":
+        return "admin"
+    return "docente"
+
+
+def load_auth_users_from_db(db_url: str) -> Dict[str, dict]:
+    """Carga usuarios directamente desde la tabla `usuarios` en Supabase."""
+    conn = psycopg2.connect(db_url)
     try:
-        df = pd.read_csv(path)
-    except FileNotFoundError:
-        st.error(
-            f"No se encontró el archivo de credenciales ({path}). "
-            "Ejecuta scripts/sync_profesores.py para generarlo."
-        )
+        with conn.cursor() as cur:
+            cur.execute("SELECT email, salt, password_hash, activo, rol FROM usuarios WHERE activo = true;")
+            rows = cur.fetchall()
+            users = {}
+            for email, salt, password_hash, activo, rol in rows:
+                if email:
+                    users[email.strip().lower()] = {
+                        "salt": salt,
+                        "password_hash": str(password_hash),
+                        "activo": bool(activo),
+                        "rol": rol or "docente",
+                    }
+            return users
+    finally:
+        conn.close()
+
+
+@st.cache_data(ttl=60)
+def load_auth_users() -> Dict[str, dict]:
+    """Carga credenciales preferentemente desde Supabase (tabla usuarios)."""
+    db_url = os.getenv("SUPABASE_DB_URL")
+    if not db_url:
+        st.error("No se encontró la variable de entorno SUPABASE_DB_URL para la autenticación.")
         return {}
-
-    required_cols = {"email", "salt", "password_hash", "activo"}
-    if not required_cols.issubset(df.columns):
-        st.error(
-            "El archivo de autenticación no contiene las columnas requeridas: "
-            f"{', '.join(required_cols)}"
-        )
+    try:
+        return load_auth_users_from_db(db_url)
+    except Exception as exc:
+        st.error(f"Error al conectar con la base de datos de usuarios en Supabase: {exc}")
         return {}
-
-    df["email"] = df["email"].str.strip().str.lower()
-
-    def as_bool(value):
-        if isinstance(value, bool):
-            return value
-        return str(value).strip().lower() in ("true", "1", "yes", "si")
-
-    return {
-        row["email"]: {
-            "salt": row["salt"],
-            "password_hash": str(row["password_hash"]),
-            "activo": as_bool(row["activo"]),
-        }
-        for _, row in df.iterrows()
-        if isinstance(row["email"], str) and row["email"]
-    }
 
 
 def verify_credentials(email: str, password: str, users: Dict[str, dict]) -> bool:
