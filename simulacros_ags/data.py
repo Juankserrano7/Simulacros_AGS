@@ -192,6 +192,47 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
         return metadatos, data_map, [f"Error consultando Supabase: {exc}"]
 
 
+@st.cache_data(ttl=60)
+def load_icfes_real_data(promocion_id: Optional[str] = None) -> pd.DataFrame:
+    """Carga los resultados oficiales del ICFES Real para la promoción dada desde Supabase."""
+    if not promocion_id:
+        return pd.DataFrame()
+    db_url = os.getenv("SUPABASE_DB_URL")
+    if not db_url:
+        return pd.DataFrame()
+    try:
+        conn = psycopg2.connect(db_url)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 
+                        e.nombre AS "ESTUDIANTE",
+                        e.es_inclusion,
+                        rir.lectura_critica AS "LECTURA CRÍTICA",
+                        rir.matematicas AS "MATEMÁTICAS",
+                        rir.sociales_ciudadanas AS "SOCIALES Y CIUDADANAS",
+                        rir.ciencias_naturales AS "CIENCIAS NATURALES",
+                        rir.ingles AS "INGLÉS",
+                        rir.puntaje_global AS "PROMEDIO PONDERADO"
+                    FROM resultados_icfes_real rir
+                    JOIN estudiantes e ON rir.estudiante_id = e.id
+                    WHERE rir.promocion_id = %s;
+                """, (promocion_id,))
+                rows = cur.fetchall()
+                cols = ["ESTUDIANTE", "es_inclusion", "LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PROMEDIO PONDERADO"]
+                df = pd.DataFrame(rows, columns=cols)
+                num_cols = ["LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PROMEDIO PONDERADO"]
+                for col in num_cols:
+                    if col in df.columns:
+                        df[col] = pd.to_numeric(df[col], errors="coerce")
+                return df
+        finally:
+            conn.close()
+    except Exception:
+        return pd.DataFrame()
+
+
+
 
 def generate_template_bytes() -> bytes:
     """Genera la plantilla Excel en memoria y devuelve los bytes."""
