@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+.streamlit/secrets.toml
+auth_users.csv
+claves.txt
+listado_correeos_profes.txt
+*.csv
+simulacros_data/
+.git/
+.gitignore
+.dockerignore
+*.md
