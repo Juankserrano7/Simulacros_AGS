@@ -524,18 +524,28 @@ BASE_CSS = """
     
     /* GLOBAL DROPDOWN / SELECTBOX SCROLLBAR STYLING */
     [data-baseweb="popover"],
+    [data-baseweb="popover"] > div,
     [data-baseweb="menu"],
     div[role="listbox"],
-    ul[role="listbox"] {
-        max-height: 320px !important;
+    ul[role="listbox"],
+    ul[data-baseweb="menu"] {
+        max-height: 280px !important;
         overflow-y: auto !important;
         border-radius: 12px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
         -webkit-overflow-scrolling: touch !important;
+    }
+
+    [data-baseweb="popover"] ul,
+    [data-baseweb="menu"] ul,
+    div[role="listbox"] ul {
+        max-height: 280px !important;
+        overflow-y: auto !important;
     }
 
     /* Custom Scrollbar for Dropdown Popovers */
     [data-baseweb="popover"]::-webkit-scrollbar,
+    [data-baseweb="popover"] *::-webkit-scrollbar,
     [data-baseweb="menu"]::-webkit-scrollbar,
     div[role="listbox"]::-webkit-scrollbar,
     ul[role="listbox"]::-webkit-scrollbar {
@@ -543,14 +553,16 @@ BASE_CSS = """
     }
 
     [data-baseweb="popover"]::-webkit-scrollbar-track,
+    [data-baseweb="popover"] *::-webkit-scrollbar-track,
     [data-baseweb="menu"]::-webkit-scrollbar-track,
     div[role="listbox"]::-webkit-scrollbar-track,
     ul[role="listbox"]::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.05) !important;
+        background: rgba(0, 0, 0, 0.1) !important;
         border-radius: 10px !important;
     }
 
     [data-baseweb="popover"]::-webkit-scrollbar-thumb,
+    [data-baseweb="popover"] *::-webkit-scrollbar-thumb,
     [data-baseweb="menu"]::-webkit-scrollbar-thumb,
     div[role="listbox"]::-webkit-scrollbar-thumb,
     ul[role="listbox"]::-webkit-scrollbar-thumb {
@@ -578,6 +590,7 @@ BASE_CSS = """
         50% { transform: translateY(-10px); }
     }
 </style>
+
 
 """
 
