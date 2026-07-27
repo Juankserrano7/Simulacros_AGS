@@ -57,7 +57,7 @@ def render(simulacros, materias):
         <div class='metric-card' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); color: white;'>
             <h4>👥 Estudiantes Únicos</h4>
             <h2 style='font-size: 3rem; margin: 0;'>{total_estudiantes}</h2>
-            <p style='opacity: 0.9;'>{estudiantes_con_notas} evaluados en simulacros</p>
+            <p style='opacity: 0.9;'>Registro oficial</p>
         </div>
         """,
             unsafe_allow_html=True,
