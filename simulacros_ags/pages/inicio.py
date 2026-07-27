@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import psycopg2
 import streamlit as st
 
-from simulacros_ags.data import get_or_generate_insights
+from simulacros_ags.data import get_or_generate_insights, get_regular_presented_df
 
 
 def render(simulacros, materias):
@@ -89,12 +89,12 @@ def render(simulacros, materias):
     st.markdown("<h2 class='section-header'>📊 Análisis Comparativo de Simulacros</h2>", unsafe_allow_html=True)
     col_a, col_b = st.columns(2)
 
-    # Evolución de promedios
+    # Evolución de promedios (Aplicando protocolo: Excluye inclusión y no presentados)
     promedios_data = pd.DataFrame(
         {
             "Simulacro": [sim["nombre"] for sim in simulacros],
-            "Promedio": [sim["df"]["PROMEDIO PONDERADO"].mean() for sim in simulacros],
-            "Desv. Est.": [sim["df"]["PROMEDIO PONDERADO"].std() for sim in simulacros],
+            "Promedio": [get_regular_presented_df(sim["df"])["PROMEDIO PONDERADO"].mean() for sim in simulacros],
+            "Desv. Est.": [get_regular_presented_df(sim["df"])["PROMEDIO PONDERADO"].std() for sim in simulacros],
         }
     )
 
@@ -106,7 +106,7 @@ def render(simulacros, materias):
                 x=promedios_data["Simulacro"],
                 y=promedios_data["Promedio"],
                 marker_color=["#27ae60", "#f39c12", "#e74c3c", "#667eea", "#9b59b6"] * 5,
-                text=[f"{p:.1f}" for p in promedios_data["Promedio"]],
+                text=[f"{p:.1f}" if pd.notna(p) else "-" for p in promedios_data["Promedio"]],
                 textposition="outside",
                 name="Promedio",
             )
@@ -126,14 +126,15 @@ def render(simulacros, materias):
             st.markdown("#### 📉 Variaciones Detectadas")
             st.dataframe(cambios_df, use_container_width=True, hide_index=True)
 
-    # Distribución de rendimiento
+    # Distribución de rendimiento (Excluyendo inclusión y ausentes)
     categorias = ["Alto (≥300)", "Medio (250-299)", "Bajo (<250)"]
 
     def distribucion(df):
+        reg = get_regular_presented_df(df)
         return [
-            len(df[df["PROMEDIO PONDERADO"] >= 300]),
-            len(df[(df["PROMEDIO PONDERADO"] >= 250) & (df["PROMEDIO PONDERADO"] < 300)]),
-            len(df[df["PROMEDIO PONDERADO"] < 250]),
+            len(reg[reg["PROMEDIO PONDERADO"] >= 300]),
+            len(reg[(reg["PROMEDIO PONDERADO"] >= 250) & (reg["PROMEDIO PONDERADO"] < 300)]),
+            len(reg[reg["PROMEDIO PONDERADO"] < 250]),
         ]
 
     with col_b:
@@ -166,7 +167,8 @@ def render(simulacros, materias):
         for sim in simulacros:
             if sim["nombre"] not in seleccionados:
                 continue
-            promedios = [sim["df"][mat].mean() for mat in materias]
+            reg = get_regular_presented_df(sim["df"])
+            promedios = [reg[mat].mean() for mat in materias]
             fig.add_trace(
                 go.Scatterpolar(
                     r=promedios,
@@ -182,7 +184,24 @@ def render(simulacros, materias):
     st.markdown("#### 📊 Tabla Comparativa de Materias")
     comp_materias_df = pd.DataFrame({"Materia": materias})
     for sim in simulacros:
-        comp_materias_df[sim["nombre"]] = [sim["df"][mat].mean() for mat in materias]
+        reg = get_regular_presented_df(sim["df"])
+        comp_materias_df[sim["nombre"]] = [reg[mat].mean() for mat in materias]
+    comp_materias_df["Mejor"] = comp_materias_df.drop(columns=["Materia"]).max(axis=1)
+    comp_materias_df["Menor"] = comp_materias_df.drop(columns=["Materia"]).min(axis=1)
+    comp_materias_df["Rango"] = comp_materias_df["Mejor"] - comp_materias_df["Menor"]
+    comp_materias_df = comp_materias_df.round(2)
+    columnas_numericas = comp_materias_df.select_dtypes(include=["float64", "int64"]).columns
+    columnas_simulacros = [c for c in comp_materias_df.columns if c not in ["Materia", "Mejor", "Menor", "Rango"]]
+    st.dataframe(
+        comp_materias_df.style.format({col: "{:.2f}" for col in columnas_numericas}).background_gradient(
+            subset=columnas_simulacros,
+            cmap="RdYlGn",
+            vmin=40,
+            vmax=90,
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
     comp_materias_df["Mejor"] = comp_materias_df.drop(columns=["Materia"]).max(axis=1)
     comp_materias_df["Menor"] = comp_materias_df.drop(columns=["Materia"]).min(axis=1)
     comp_materias_df["Rango"] = comp_materias_df["Mejor"] - comp_materias_df["Menor"]

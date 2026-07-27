@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from ..data import load_icfes_real_data
+from ..data import get_regular_presented_df, load_icfes_real_data
 
 
 def render(datos_actual, simulacro_seleccionado, materias):
@@ -12,25 +12,26 @@ def render(datos_actual, simulacro_seleccionado, materias):
 
     promocion_id = st.session_state.get("promocion_activa_id")
     df_icfes_real = load_icfes_real_data(promocion_id)
-    if not df_icfes_real.empty and "es_inclusion" in df_icfes_real.columns:
-        df_icfes_regular = df_icfes_real[df_icfes_real["es_inclusion"] == False]
-    else:
-        df_icfes_regular = df_icfes_real
+    df_icfes_regular = get_regular_presented_df(df_icfes_real)
+    datos_actual_regular = get_regular_presented_df(datos_actual)
 
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.metric("📚 Estudiantes", len(datos_actual))
+        st.metric("📚 Estudiantes Evaluados", len(datos_actual_regular))
     with col2:
-        st.metric("📊 Promedio Simulacro", f"{datos_actual['PROMEDIO PONDERADO'].mean():.1f}")
+        st.metric("📊 Promedio Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].mean():.1f}" if not datos_actual_regular.empty else "N/A")
     with col3:
         if not df_icfes_regular.empty:
             st.metric("🎯 Promedio ICFES Real", f"{df_icfes_regular['PROMEDIO PONDERADO'].mean():.1f}")
         else:
-            st.metric("🏆 Máximo Simulacro", f"{datos_actual['PROMEDIO PONDERADO'].max():.1f}")
+            st.metric("🏆 Máximo Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].max():.1f}" if not datos_actual_regular.empty else "N/A")
     with col4:
-        st.metric("📉 Mínimo Simulacro", f"{datos_actual['PROMEDIO PONDERADO'].min():.1f}")
+        st.metric("📉 Mínimo Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].min():.1f}" if not datos_actual_regular.empty else "N/A")
     with col5:
-        st.metric("📈 Desv. Est. Simulacro", f"{datos_actual['PROMEDIO PONDERADO'].std():.1f}")
+        st.metric("📈 Desv. Est. Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].std():.1f}" if not datos_actual_regular.empty else "N/A")
+
+    datos_actual = datos_actual_regular  # Reemplazar con dataset limpio para los analisis del grupo
+
 
     st.markdown("---")
     st.markdown("<h2 class='section-header'>📊 Análisis Estadístico Completo</h2>", unsafe_allow_html=True)

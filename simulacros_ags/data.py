@@ -18,6 +18,20 @@ from .config import MATERIAS, MAX_UPLOAD_MB
 
 REQUIRED_COLUMNS = ["ESTUDIANTE", "PROMEDIO PONDERADO"] + MATERIAS
 OPTIONAL_NUMERIC = ["PROMEDIO SIMPLE", "DESVIACIÓN ESTÁNDAR", "PP POR MATERIA"]
+
+
+def get_regular_presented_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Aplica el protocolo institucional: Excluye estudiantes de inclusión y ausentes (No presentó) de las estadísticas del grupo."""
+    if df is None or df.empty:
+        return pd.DataFrame()
+    res = df.copy()
+    if "es_inclusion" in res.columns:
+        res = res[res["es_inclusion"] == False]
+    if "PROMEDIO PONDERADO" in res.columns:
+        res = res[res["PROMEDIO PONDERADO"].notna()]
+    return res
+
+
 COLUMN_CANONICAL_MAP = {
     "estudiante": "ESTUDIANTE",
     "grado": "GRADO",
