@@ -115,7 +115,7 @@ def _validate_schema(df: pd.DataFrame) -> List[str]:
 
 @st.cache_data(ttl=60)
 def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict], Dict[str, Dict], List[str]]:
-    """Carga todos los simulacros pertenecientes a la promoción activa desde Supabase."""
+    """Carga todos los simulacros e ICFES Real pertenecientes a la promoción activa desde Supabase."""
     metadatos: List[Dict] = []
     data_map: Dict[str, Dict] = {}
     errores: List[str] = []
@@ -159,6 +159,7 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                         SELECT 
                             e.nombre AS "ESTUDIANTE",
                             e.grado AS "GRADO",
+                            e.es_inclusion,
                             rs.lectura_critica AS "LECTURA CRÍTICA",
                             rs.matematicas AS "MATEMÁTICAS",
                             rs.sociales_ciudadanas AS "SOCIALES Y CIUDADANAS",
@@ -173,7 +174,7 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                     """, (s_id, promocion_id))
                     res_rows = cur.fetchall()
                     cols = [
-                        "ESTUDIANTE", "GRADO", "LECTURA CRÍTICA", "MATEMÁTICAS", 
+                        "ESTUDIANTE", "GRADO", "es_inclusion", "LECTURA CRÍTICA", "MATEMÁTICAS", 
                         "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", 
                         "PROMEDIO SIMPLE", "PROMEDIO PONDERADO", "DESVIACIÓN ESTÁNDAR"
                     ]
@@ -181,15 +182,58 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                     if not df.empty:
                         df = _clean_student_frame(df)
                     for col in cols:
-                        if col not in ["ESTUDIANTE", "GRADO"] and col in df.columns:
+                        if col not in ["ESTUDIANTE", "GRADO", "es_inclusion"] and col in df.columns:
                             df[col] = pd.to_numeric(df[col], errors="coerce")
                     data_map[s_id] = {"meta": meta, "df": df}
+
+                # 3. Consultar si hay resultados de ICFES Real para esta promoción y agregarlo como evaluación dinamicamente
+                cur.execute("""
+                    SELECT 
+                        e.nombre AS "ESTUDIANTE",
+                        e.grado AS "GRADO",
+                        e.es_inclusion,
+                        rir.lectura_critica AS "LECTURA CRÍTICA",
+                        rir.matematicas AS "MATEMÁTICAS",
+                        rir.sociales_ciudadanas AS "SOCIALES Y CIUDADANAS",
+                        rir.ciencias_naturales AS "CIENCIAS NATURALES",
+                        rir.ingles AS "INGLÉS",
+                        rir.puntaje_global AS "PROMEDIO PONDERADO"
+                    FROM resultados_icfes_real rir
+                    JOIN estudiantes e ON rir.estudiante_id = e.id
+                    WHERE rir.promocion_id = %s;
+                """, (promocion_id,))
+                real_rows = cur.fetchall()
+                if real_rows:
+                    cols_real = [
+                        "ESTUDIANTE", "GRADO", "es_inclusion", "LECTURA CRÍTICA", "MATEMÁTICAS",
+                        "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PROMEDIO PONDERADO"
+                    ]
+                    df_real = pd.DataFrame(real_rows, columns=cols_real)
+                    df_real = _clean_student_frame(df_real)
+                    for col in ["LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PROMEDIO PONDERADO"]:
+                        if col in df_real.columns:
+                            df_real[col] = pd.to_numeric(df_real[col], errors="coerce")
+
+                    meta_real = {
+                        "id": "icfes_real_definitivo",
+                        "nombre": "🎯 ICFES Real (Definitivo)",
+                        "origen": "oficial",
+                        "estado": "ready",
+                        "creado_por": "ICFES",
+                        "creado_en": "2026-05-15 23:59:59",
+                        "insights": {},
+                        "errores": [],
+                        "promocion_id": promocion_id
+                    }
+                    metadatos.append(meta_real)
+                    data_map["icfes_real_definitivo"] = {"meta": meta_real, "df": df_real}
 
                 return metadatos, data_map, errores
         finally:
             conn.close()
     except Exception as exc:  # noqa: BLE001
         return metadatos, data_map, [f"Error consultando Supabase: {exc}"]
+
 
 
 @st.cache_data(ttl=60)
