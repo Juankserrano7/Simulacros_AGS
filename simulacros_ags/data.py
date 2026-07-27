@@ -4,7 +4,8 @@ import uuid
 import unicodedata
 from io import BytesIO
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+
 
 import pandas as pd
 import psycopg2
@@ -112,43 +113,84 @@ def _validate_schema(df: pd.DataFrame) -> List[str]:
     return errores
 
 
-@st.cache_data
-def load_all_simulacros() -> Tuple[List[Dict], Dict[str, Dict], List[str]]:
-    """Carga todos los simulacros declarados en metadatos y devuelve los dataframes limpios."""
-    if not METADATA_FILE.exists():
-        bootstrap_metadata()
-    metadatos = get_simulacros_metadata()
+@st.cache_data(ttl=60)
+def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict], Dict[str, Dict], List[str]]:
+    """Carga todos los simulacros pertenecientes a la promoción activa desde Supabase."""
+    metadatos: List[Dict] = []
     data_map: Dict[str, Dict] = {}
     errores: List[str] = []
 
-    for sim in metadatos:
-        sim_id = sim.get("id")
-        path = Path(sim.get("path", ""))
-        if not path.is_absolute():
-            path = Path.cwd() / path
-        if not path.exists():
-            errores.append(f"{sim.get('nombre', sim_id)}: no se encontró el archivo en {path}.")
-            mark_estado(sim_id, "missing", errores=[f"Archivo no encontrado: {path}"])
-            continue
+    if not promocion_id:
+        return metadatos, data_map, ["No se especificó la promoción activa."]
+
+    db_url = os.getenv("SUPABASE_DB_URL")
+    if not db_url:
+        return metadatos, data_map, ["No hay conexión configurada a Supabase (SUPABASE_DB_URL)."]
+
+    try:
+        conn = psycopg2.connect(db_url)
         try:
-            raw_df = _try_read_file(path)
-            df = _clean_student_frame(raw_df)
-            schema_errors = _validate_schema(df)
-            if schema_errors:
-                errores.extend([f"{sim.get('nombre', sim_id)}: {msg}" for msg in schema_errors])
-                mark_estado(sim_id, "failed", errores=schema_errors)
-                continue
-            sim["estado"] = "ready"
-            sim["errores"] = []
-            sim["path"] = str(path)
-            mark_estado(sim_id, "ready", errores=[])
-            data_map[sim_id] = {"meta": sim, "df": df}
-        except Exception as exc:  # noqa: BLE001
-            error_msg = f"{sim.get('nombre', sim_id)}: error al cargar -> {exc}"
-            errores.append(error_msg)
-            mark_estado(sim_id, "failed", errores=[str(exc)])
-            continue
-    return metadatos, data_map, errores
+            with conn.cursor() as cur:
+                # 1. Consultar simulacros de la promoción
+                cur.execute("""
+                    SELECT id, nombre, origen, estado, creado_por, creado_en, insights
+                    FROM simulacros
+                    WHERE promocion_id = %s
+                    ORDER BY creado_en ASC;
+                """, (promocion_id,))
+                sim_rows = cur.fetchall()
+
+                for s_id, s_nombre, s_origen, s_estado, s_creado_por, s_creado_en, s_insights in sim_rows:
+                    meta = {
+                        "id": s_id,
+                        "nombre": s_nombre,
+                        "origen": s_origen or "upload",
+                        "estado": s_estado or "ready",
+                        "creado_por": s_creado_por or "sistema",
+                        "creado_en": str(s_creado_en) if s_creado_en else "",
+                        "insights": s_insights if isinstance(s_insights, dict) else {},
+                        "errores": [],
+                        "promocion_id": promocion_id
+                    }
+                    metadatos.append(meta)
+
+                    # 2. Consultar resultados de estudiantes para este simulacro
+                    cur.execute("""
+                        SELECT 
+                            e.nombre AS "ESTUDIANTE",
+                            e.grado AS "GRADO",
+                            rs.lectura_critica AS "LECTURA CRÍTICA",
+                            rs.matematicas AS "MATEMÁTICAS",
+                            rs.sociales_ciudadanas AS "SOCIALES Y CIUDADANAS",
+                            rs.ciencias_naturales AS "CIENCIAS NATURALES",
+                            rs.ingles AS "INGLÉS",
+                            rs.promedio_simple AS "PROMEDIO SIMPLE",
+                            rs.promedio_ponderado AS "PROMEDIO PONDERADO",
+                            rs.desviacion_estandar AS "DESVIACIÓN ESTÁNDAR"
+                        FROM resultados_simulacro rs
+                        JOIN estudiantes e ON rs.estudiante_id = e.id
+                        WHERE rs.simulacro_id = %s AND e.promocion_id = %s;
+                    """, (s_id, promocion_id))
+                    res_rows = cur.fetchall()
+                    cols = [
+                        "ESTUDIANTE", "GRADO", "LECTURA CRÍTICA", "MATEMÁTICAS", 
+                        "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", 
+                        "PROMEDIO SIMPLE", "PROMEDIO PONDERADO", "DESVIACIÓN ESTÁNDAR"
+                    ]
+                    df = pd.DataFrame(res_rows, columns=cols)
+                    if not df.empty:
+                        df = _clean_student_frame(df)
+                    for col in cols:
+                        if col not in ["ESTUDIANTE", "GRADO"] and col in df.columns:
+                            df[col] = pd.to_numeric(df[col], errors="coerce")
+                    data_map[s_id] = {"meta": meta, "df": df}
+
+                return metadatos, data_map, errores
+        finally:
+            conn.close()
+    except Exception as exc:  # noqa: BLE001
+        return metadatos, data_map, [f"Error consultando Supabase: {exc}"]
+
 
 
 def ensure_template_file() -> Path:
