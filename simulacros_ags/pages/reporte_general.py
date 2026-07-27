@@ -200,8 +200,9 @@ def render(datos_actual, simulacro_seleccionado, materias):
         Independencia relativa
         """
         )
-        corr_values = correlacion.values
+        corr_values = correlacion.values.copy()
         np.fill_diagonal(corr_values, -1)
+
         max_corr_idx = np.unravel_index(corr_values.argmax(), corr_values.shape)
         max_corr = corr_values[max_corr_idx]
         st.success(

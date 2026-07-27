@@ -193,17 +193,12 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
 
 
 
-def ensure_template_file() -> Path:
-    """Genera el archivo de plantilla (se reescribe siempre para incorporar cambios)."""
-    if TEMPLATE_FILE.exists():
-        TEMPLATE_FILE.unlink(missing_ok=True)
-
+def generate_template_bytes() -> bytes:
+    """Genera la plantilla Excel en memoria y devuelve los bytes."""
     from openpyxl import Workbook
-
-    TEMPLATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    wb = Workbook()
     from openpyxl.utils import get_column_letter
 
+    wb = Workbook()
     ws = wb.active
     ws.title = "Simulacro"
     headers = [
@@ -220,7 +215,6 @@ def ensure_template_file() -> Path:
         "PP POR MATERIA",
     ]
     ws.append(headers)
-    # Estudiantes prellenados sin valores numéricos
     estudiantes = [
         "ALVIAR MERCHAN JUAN NICOLAS",
         "BARBOSA REY MATEO",
@@ -253,15 +247,12 @@ def ensure_template_file() -> Path:
         "VILLAMIZAR NAVARRO JUAN JOSE",
         "VISBAL MONDRAGON NICOLAS",
     ]
-    # Prellenamos estudiantes y agregamos fórmulas para promedios
     col_map = {name: get_column_letter(idx + 1) for idx, name in enumerate(headers)}
     for row_idx, est in enumerate(estudiantes, start=2):
         ws.append([est] + [""] * (len(headers) - 1))
-        # Promedio simple: suma de las materias
         ws[f"{col_map['PROMEDIO SIMPLE']}{row_idx}"] = (
             f"=SUM({col_map['LECTURA CRITICA']}{row_idx}:{col_map['INGLES']}{row_idx})"
         )
-        # Promedio ponderado por materia
         ws[f"{col_map['PP POR MATERIA']}{row_idx}"] = (
             f"=(({col_map['LECTURA CRITICA']}{row_idx}*3)"
             f"+({col_map['MATEMATICAS']}{row_idx}*3)"
@@ -269,17 +260,14 @@ def ensure_template_file() -> Path:
             f"+({col_map['CIENCIAS NATURALES']}{row_idx}*3)"
             f"+({col_map['INGLES']}{row_idx}*1))/13"
         )
-        # Promedio ponderado
         ws[f"{col_map['PROMEDIO PONDERADO']}{row_idx}"] = f"={col_map['PP POR MATERIA']}{row_idx}*5"
-        # Desviación estándar de las materias
         ws[f"{col_map['DESV. ESTANDAR']}{row_idx}"] = (
             f"=STDEV.S({col_map['LECTURA CRITICA']}{row_idx}:{col_map['INGLES']}{row_idx})"
         )
 
-    # Formato de tabla
     from openpyxl.worksheet.table import Table, TableStyleInfo
 
-    total_rows = 1 + len(estudiantes)  # encabezado + filas
+    total_rows = 1 + len(estudiantes)
     table_ref = f"A1:K{total_rows}"
     table = Table(displayName="SimulacroTabla", ref=table_ref)
     style = TableStyleInfo(
@@ -299,8 +287,11 @@ def ensure_template_file() -> Path:
     ws_ins["A4"] = "- Las materias y los promedios deben ser numéricos."
     ws_ins["A5"] = "- Puedes dejar PROMEDIO SIMPLE, DESV. ESTANDAR y PP POR MATERIA si no los calculas; el sistema usará PROMEDIO PONDERADO."
 
-    wb.save(TEMPLATE_FILE)
-    return TEMPLATE_FILE
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
 
 
 def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str) -> Tuple[bool, str, Dict]:

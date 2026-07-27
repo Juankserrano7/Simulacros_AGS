@@ -3,12 +3,13 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 
-from ..config import MAX_UPLOAD_MB, UPLOAD_ALLOWED_USER
-from ..data import ensure_template_file, ingest_simulacro_excel, load_all_simulacros, ordenar_simulacros
+from ..auth import get_user_role
+from ..config import MAX_UPLOAD_MB
+from ..data import generate_template_bytes, ingest_simulacro_excel, load_all_simulacros, ordenar_simulacros
 
 
 def render(user_email: str):
-    if user_email.lower() != UPLOAD_ALLOWED_USER:
+    if get_user_role(user_email) != "admin":
         st.error("No tienes permisos para cargar nuevos simulacros.")
         st.stop()
 
@@ -20,9 +21,7 @@ def render(user_email: str):
     """
     )
 
-    plantilla_path = ensure_template_file()
-    with open(plantilla_path, "rb") as f:
-        plantilla_bytes = f.read()
+    plantilla_bytes = generate_template_bytes()
 
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -31,10 +30,11 @@ def render(user_email: str):
             data=plantilla_bytes,
             file_name="plantilla_simulacro.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            width="stretch",
+            use_container_width=True,
         )
     with col2:
         st.info(f"Límite de archivo: {MAX_UPLOAD_MB} MB. Incluye columnas: ESTUDIANTE, GRADO, materias y PROMEDIO PONDERADO.")
+
 
     with st.form("form_cargar_simulacro"):
         nombre = st.text_input("Nombre del simulacro", placeholder="Ej: Simulacro Octubre")
@@ -57,7 +57,8 @@ def render(user_email: str):
 
     st.markdown("---")
     st.markdown("### Estado de simulacros")
-    metadatos, data_map, errores = load_all_simulacros()
+    metadatos, data_map, errores = load_all_simulacros(st.session_state.get("promocion_activa_id"))
+
     simulacros = ordenar_simulacros(data_map)
     if errores:
         st.warning("⚠️ Hay archivos con problemas de formato o lectura. Revisa el detalle debajo.")
