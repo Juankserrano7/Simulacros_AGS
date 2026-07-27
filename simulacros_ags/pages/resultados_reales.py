@@ -303,7 +303,10 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
         st.info("No hay estudiantes en este grupo.")
         return
 
-    st.markdown("### 🏛️ Tabla Maestra de Evaluaciones de la Promoción (Listado de Simulacros + Puntaje Final ICFES Real)")
+    has_real_scores = not df_icfes_real.empty and "PUNTAJE GLOBAL" in df_icfes_real.columns and df_icfes_real["PUNTAJE GLOBAL"].dropna().count() > 0
+
+    header_text = "### 🏛️ Tabla Maestra de Evaluaciones de la Promoción (Listado de Simulacros + Puntaje Final ICFES Real)" if has_real_scores else "### 🏛️ Tabla Maestra de Evaluaciones de la Promoción"
+    st.markdown(header_text)
 
     # 1. Construir Tabla Maestra de Evaluaciones de la Promoción
     master_rows = []
@@ -331,7 +334,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
             
             master_rows.append(row_data)
 
-    if not df_icfes_real.empty:
+    if has_real_scores:
         n_est_real = df_icfes_real["estudiante_id"].nunique()
         pg_real = df_icfes_real["PUNTAJE GLOBAL"].mean()
         

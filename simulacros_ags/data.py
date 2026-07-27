@@ -201,7 +201,7 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                             df[col] = pd.to_numeric(df[col], errors="coerce")
                     data_map[s_id] = {"meta": meta, "df": df}
 
-                # 3. Consultar si hay resultados de ICFES Real para esta promoción y agregarlo como evaluación dinámicamente
+                # 3. Consultar si hay resultados de ICFES Real para esta promoción (solo si existen puntajes globales cargados)
                 cur.execute("""
                     SELECT 
                         e.nombre AS "ESTUDIANTE",
@@ -219,7 +219,8 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
                     ORDER BY e.nombre ASC;
                 """, (promocion_id, promocion_id))
                 real_rows = cur.fetchall()
-                if real_rows:
+                # Verificar si efectivamente hay calificaciones cargadas (al menos una nota no nula)
+                if real_rows and any(r[8] is not None for r in real_rows):
                     cols_real = [
                         "ESTUDIANTE", "GRADO", "es_inclusion", "LECTURA CRÍTICA", "MATEMÁTICAS",
                         "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PROMEDIO PONDERADO"
@@ -274,17 +275,25 @@ def load_icfes_real_data(promocion_id: Optional[str] = None) -> pd.DataFrame:
                         rir.ciencias_naturales AS "CIENCIAS NATURALES",
                         rir.ingles AS "INGLÉS",
                         rir.puntaje_global AS "PROMEDIO PONDERADO"
-                    FROM resultados_icfes_real rir
-                    JOIN estudiantes e ON rir.estudiante_id = e.id
-                    WHERE rir.promocion_id = %s;
-                """, (promocion_id,))
+                    FROM estudiantes e
+                    LEFT JOIN resultados_icfes_real rir ON rir.estudiante_id = e.id AND rir.promocion_id = %s
+                    WHERE e.promocion_id = %s
+                    ORDER BY e.nombre ASC;
+                """, (promocion_id, promocion_id))
                 rows = cur.fetchall()
+                if not rows or not any(r[7] is not None for r in rows):
+                    return pd.DataFrame()
+
                 cols = ["ESTUDIANTE", "es_inclusion", "LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PROMEDIO PONDERADO"]
                 df = pd.DataFrame(rows, columns=cols)
                 num_cols = ["LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PROMEDIO PONDERADO"]
                 for col in num_cols:
                     if col in df.columns:
                         df[col] = pd.to_numeric(df[col], errors="coerce")
+
+                if df["PROMEDIO PONDERADO"].dropna().empty:
+                    return pd.DataFrame()
+
                 return df
         finally:
             conn.close()

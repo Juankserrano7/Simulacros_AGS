@@ -92,7 +92,8 @@ def render(datos_actual, simulacro_seleccionado, materias):
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📚 Análisis Detallado por Materia (Simulacro vs ICFES Real)</h2>", unsafe_allow_html=True)
+    header_materia = "📚 Análisis Detallado por Materia (Simulacro vs ICFES Real)" if not df_icfes_regular.empty else "📚 Análisis Detallado por Materia"
+    st.markdown(f"<h2 class='section-header'>{header_materia}</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -123,9 +124,10 @@ def render(datos_actual, simulacro_seleccionado, materias):
             )
 
         fig.add_hline(y=np.mean(promedios_materias), line_dash="dash", line_color="red", annotation_text="Promedio Simulacro")
+        chart_title = f"Rendimiento por Área - {simulacro_seleccionado} vs ICFES Real" if not df_icfes_regular.empty else f"Rendimiento por Área - {simulacro_seleccionado}"
         fig.update_layout(
             barmode="group",
-            title=f"Rendimiento por Área - {simulacro_seleccionado} vs ICFES Real",
+            title=chart_title,
             xaxis_title="Materia",
             yaxis_title="Puntaje Promedio",
             height=450,
