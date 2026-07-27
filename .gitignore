@@ -9,3 +9,9 @@ __pycache__/
 *.tmp
 build/
 dist/
+*.xlsx
+*.XLSX
+*.xls
+*.XLS
+*.csv
+SABER 11 SAUCARA 2026 OFICIALES.xlsx
