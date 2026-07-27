@@ -152,7 +152,8 @@ def render(datos_actual, simulacro_seleccionado, materias):
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("### 📋 Tabla Estadísticas Detalladas por Materia (Simulacro vs ICFES Real)")
+    titulo_tabla = "### 📋 Tabla Estadísticas Detalladas por Materia (Simulacro vs ICFES Real)" if not df_icfes_regular.empty else "### 📋 Tabla Estadísticas Detalladas por Materia"
+    st.markdown(titulo_tabla)
 
     stats_dict = {
         "Materia": materias,

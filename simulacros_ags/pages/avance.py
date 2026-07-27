@@ -11,10 +11,12 @@ def render(simulacros, materias):
         st.warning("Carga al menos un simulacro para ver el avance.")
         return
 
-    st.markdown("<h1 class='header-title'>📈 Análisis de Avance hacia el ICFES Real</h1>", unsafe_allow_html=True)
-
     promocion_id = st.session_state.get("promocion_activa_id")
     df_icfes_real = load_icfes_real_data(promocion_id)
+    has_icfes_real = not df_icfes_real.empty
+
+    title_text = "📈 Análisis de Avance hacia el ICFES Real" if has_icfes_real else "📈 Análisis de Avance de Simulacros"
+    st.markdown(f"<h1 class='header-title'>{title_text}</h1>", unsafe_allow_html=True)
 
     frames = []
     for sim in simulacros:
@@ -23,7 +25,7 @@ def render(simulacros, materias):
         temp = temp.rename(columns={"PROMEDIO PONDERADO": sim["nombre"]})
         frames.append(temp)
 
-    if not df_icfes_real.empty and "ESTUDIANTE" in df_icfes_real.columns:
+    if has_icfes_real and "ESTUDIANTE" in df_icfes_real.columns:
         temp_real = df_icfes_real[["ESTUDIANTE", "PROMEDIO PONDERADO"]].copy()
         temp_real["ESTUDIANTE"] = temp_real["ESTUDIANTE"].str.strip().str.upper()
         temp_real = temp_real.rename(columns={"PROMEDIO PONDERADO": "🎯 ICFES Real"})
@@ -104,7 +106,7 @@ def render(simulacros, materias):
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📈 Evolución Individual (Simulacros e ICFES Real)</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>📈 Evolución Individual</h2>", unsafe_allow_html=True)
     estudiantes_mostrar = st.multiselect(
         "Seleccionar estudiantes para comparar la evolución histórica",
         progresion["ESTUDIANTE"].tolist(),
@@ -139,12 +141,12 @@ def render(simulacros, materias):
         st.plotly_chart(fig_ind, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📋 Tabla Resumen de Avance e ICFES Real</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>📋 Tabla Resumen de Avance</h2>", unsafe_allow_html=True)
     tabla_progresion = progresion[["ESTUDIANTE"] + eval_cols + ["CAMBIO_ULTIMO", "CAMBIO_TOTAL"]].copy()
     tabla_progresion = tabla_progresion.sort_values("CAMBIO_TOTAL", ascending=False).round(2)
     columnas_num = tabla_progresion.select_dtypes(include=["float64", "int64"]).columns
     st.dataframe(
-        tabla_progresion.style.format({col: "{:.2f}" for col in columnas_num}).background_gradient(
+        tabla_progresion.style.format({col: "{:.2f}" for col in columnas_num}, na_rep="No presentó").background_gradient(
             subset=["CAMBIO_ULTIMO", "CAMBIO_TOTAL"], cmap="RdYlGn", vmin=-50, vmax=50
         ),
         use_container_width=True,

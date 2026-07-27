@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from ..data import load_icfes_real_data
+from ..data import get_regular_presented_df, load_icfes_real_data
 
 
 def _hex_from_hsl(h: float, s: float = 0.65, l: float = 0.5) -> str:
@@ -34,14 +34,12 @@ def render(simulacros, materias):
         st.warning("Carga al menos un simulacro para comparar.")
         return
 
-    st.markdown("<h1 class='header-title'>🔬 Comparación entre Simulacros e ICFES Real</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>🔬 Comparación entre Simulacros</h1>", unsafe_allow_html=True)
 
     promocion_id = st.session_state.get("promocion_activa_id")
     df_icfes_real = load_icfes_real_data(promocion_id)
-    if not df_icfes_real.empty and "es_inclusion" in df_icfes_real.columns:
-        df_icfes_regular = df_icfes_real[df_icfes_real["es_inclusion"] == False]
-    else:
-        df_icfes_regular = df_icfes_real
+    df_icfes_regular = get_regular_presented_df(df_icfes_real)
+    has_icfes_real = not df_icfes_regular.empty
 
     seleccionados = st.multiselect(
         "Elige los simulacros a comparar",
@@ -58,7 +56,7 @@ def render(simulacros, materias):
     fig = go.Figure()
 
     for sim in activos:
-        df_reg = sim["df"][sim["df"]["es_inclusion"] == False] if "es_inclusion" in sim["df"].columns else sim["df"]
+        df_reg = get_regular_presented_df(sim["df"])
         fig.add_trace(
             go.Bar(
                 name=sim["nombre"],
@@ -68,7 +66,7 @@ def render(simulacros, materias):
             )
         )
 
-    if not df_icfes_regular.empty:
+    if has_icfes_real:
         fig.add_trace(
             go.Bar(
                 name="🎯 ICFES Real (Definitivo)",
@@ -92,26 +90,25 @@ def render(simulacros, materias):
     st.markdown("### 🔥 Variaciones clave")
     promedios_generales = []
     for sim in simulacros:
-        df_reg = sim["df"][sim["df"]["es_inclusion"] == False] if "es_inclusion" in sim["df"].columns else sim["df"]
+        df_reg = get_regular_presented_df(sim["df"])
         promedios_generales.append(df_reg["PROMEDIO PONDERADO"].mean())
 
-    icfes_real_prom = df_icfes_regular["PROMEDIO PONDERADO"].mean() if not df_icfes_regular.empty else None
+    icfes_real_prom = df_icfes_regular["PROMEDIO PONDERADO"].mean() if has_icfes_real else None
 
-    col_a, col_b, col_c, col_d = st.columns(4)
-    with col_a:
-        st.markdown(
-            f"""
-            <div class='stats-box'>
-                <h4>Último Simulacro</h4>
-                <h2>{promedios_generales[-1]:.2f}</h2>
-                <p>{simulacros[-1]['nombre']}</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    with col_b:
-        if icfes_real_prom is not None and not np.isnan(icfes_real_prom):
+    if has_icfes_real:
+        col_a, col_b, col_c, col_d = st.columns(4)
+        with col_a:
+            st.markdown(
+                f"""
+                <div class='stats-box'>
+                    <h4>Último Simulacro</h4>
+                    <h2>{promedios_generales[-1]:.2f}</h2>
+                    <p>{simulacros[-1]['nombre']}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col_b:
             st.markdown(
                 f"""
                 <div class='stats-box' style='background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); color: #000;'>
@@ -122,21 +119,8 @@ def render(simulacros, materias):
                 """,
                 unsafe_allow_html=True,
             )
-        else:
-            st.markdown(
-                """
-                <div class='stats-box' style='background: #34495e;'>
-                    <h4>🎯 ICFES Real</h4>
-                    <h2>Pendiente</h2>
-                    <p>Sin datos subidos aún</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    with col_c:
-        if icfes_real_prom is not None and not np.isnan(icfes_real_prom) and promedios_generales:
-            delta = icfes_real_prom - promedios_generales[-1]
+        with col_c:
+            delta = icfes_real_prom - promedios_generales[-1] if promedios_generales else 0
             st.markdown(
                 f"""
                 <div class='stats-box' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);'>
@@ -147,41 +131,66 @@ def render(simulacros, materias):
                 """,
                 unsafe_allow_html=True,
             )
-        elif len(promedios_generales) > 1:
-            delta = promedios_generales[-1] - promedios_generales[-2]
+        with col_d:
+            max_prom = max(promedios_generales) if promedios_generales else 0
+            mejor_sim = simulacros[promedios_generales.index(max_prom)]["nombre"] if promedios_generales else "-"
+            st.markdown(
+                f"""
+                <div class='stats-box' style='background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);'>
+                    <h4>Mejor en Simulacros</h4>
+                    <h2>{max_prom:.2f}</h2>
+                    <p>{mejor_sim}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    else:
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.markdown(
+                f"""
+                <div class='stats-box'>
+                    <h4>Último Simulacro</h4>
+                    <h2>{promedios_generales[-1]:.2f}</h2>
+                    <p>{simulacros[-1]['nombre']}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col_b:
+            delta = (promedios_generales[-1] - promedios_generales[-2]) if len(promedios_generales) > 1 else 0
             st.markdown(
                 f"""
                 <div class='stats-box' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);'>
                     <h4>Δ Último vs Previo</h4>
                     <h2>{delta:+.2f}</h2>
-                    <p>Puntos</p>
+                    <p>Puntos de diferencia</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col_c:
+            max_prom = max(promedios_generales) if promedios_generales else 0
+            mejor_sim = simulacros[promedios_generales.index(max_prom)]["nombre"] if promedios_generales else "-"
+            st.markdown(
+                f"""
+                <div class='stats-box' style='background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);'>
+                    <h4>Mejor en Simulacros</h4>
+                    <h2>{max_prom:.2f}</h2>
+                    <p>{mejor_sim}</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-    with col_d:
-        max_prom = max(promedios_generales) if promedios_generales else 0
-        mejor_sim = simulacros[promedios_generales.index(max_prom)]["nombre"] if promedios_generales else "-"
-        st.markdown(
-            f"""
-            <div class='stats-box' style='background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);'>
-                <h4>Mejor en Simulacros</h4>
-                <h2>{max_prom:.2f}</h2>
-                <p>{mejor_sim}</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
     # --- Tabla comparativa por materia ---
     st.markdown("### 📋 Tabla Comparativa por Materia")
     comp_dict = {"Materia": materias}
     for sim in activos:
-        df_reg = sim["df"][sim["df"]["es_inclusion"] == False] if "es_inclusion" in sim["df"].columns else sim["df"]
+        df_reg = get_regular_presented_df(sim["df"])
         comp_dict[sim["nombre"]] = [df_reg[mat].mean() for mat in materias]
 
-    if not df_icfes_regular.empty:
+    if has_icfes_real:
         comp_dict["🎯 ICFES Real"] = [df_icfes_regular[mat].mean() for mat in materias]
 
     comp_df = pd.DataFrame(comp_dict).round(2)
@@ -193,13 +202,13 @@ def render(simulacros, materias):
 
     # --- Evolución del promedio general ---
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📈 Evolución del Promedio General e ICFES Real</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>📈 Evolución del Promedio General</h2>", unsafe_allow_html=True)
 
     x_labels = [sim["nombre"] for sim in simulacros]
     y_values = list(promedios_generales)
     marker_colors = [color_map.get(sim["nombre"], "#667eea") for sim in simulacros]
 
-    if icfes_real_prom is not None and not np.isnan(icfes_real_prom):
+    if has_icfes_real and icfes_real_prom is not None:
         x_labels.append("🎯 ICFES Real")
         y_values.append(icfes_real_prom)
         marker_colors.append("#f1c40f")
@@ -210,34 +219,32 @@ def render(simulacros, materias):
             x=x_labels,
             y=y_values,
             mode="lines+markers+text",
-            text=[f"{p:.2f}" for p in y_values],
+            text=[f"{p:.2f}" if pd.notna(p) else "-" for p in y_values],
             textposition="top center",
             line=dict(color="#667eea", width=4),
             marker=dict(size=16, color=marker_colors, line=dict(color="#ffffff", width=2)),
         )
     )
-    fig_line.update_layout(title="Tendencia del Promedio Ponderado hacia el ICFES Real", yaxis_title="Promedio Ponderado / Global", height=420, template="plotly_white")
+    fig_line.update_layout(title="Tendencia del Promedio Ponderado General", yaxis_title="Promedio Ponderado / Global", height=420, template="plotly_white")
     st.plotly_chart(fig_line, use_container_width=True)
 
     # --- Tabla Comparativa Lado a Lado por Estudiante ---
     st.markdown("---")
-    st.markdown("### 👤 Tabla Comparativa Lado a Lado por Estudiante (Simulacros vs ICFES Real)")
+    st.markdown("### 👤 Tabla Comparativa Lado a Lado por Estudiante")
 
-    # Unir todos los estudiantes de los simulacros
     estudiantes_set = set()
     for sim in simulacros:
         if "ESTUDIANTE" in sim["df"].columns:
             estudiantes_set.update(sim["df"]["ESTUDIANTE"].dropna().tolist())
 
-    if not df_icfes_real.empty and "ESTUDIANTE" in df_icfes_real.columns:
+    if has_icfes_real and "ESTUDIANTE" in df_icfes_real.columns:
         estudiantes_set.update(df_icfes_real["ESTUDIANTE"].dropna().tolist())
 
     est_list = sorted(list(estudiantes_set))
     rows_est = []
 
-    # Map de ICFES Real por estudiante
     icfes_map = {}
-    if not df_icfes_real.empty:
+    if has_icfes_real:
         for _, r in df_icfes_real.iterrows():
             icfes_map[r["ESTUDIANTE"]] = (r.get("PROMEDIO PONDERADO"), r.get("es_inclusion", False))
 
@@ -251,7 +258,8 @@ def render(simulacros, materias):
             if not sub.empty:
                 val = sub.iloc[0].get("PROMEDIO PONDERADO")
                 row[sim["nombre"]] = round(val, 2) if pd.notna(val) else None
-                sim_vals.append(val)
+                if pd.notna(val):
+                    sim_vals.append(val)
                 if sub.iloc[0].get("es_inclusion"):
                     is_inc = True
             else:
@@ -260,31 +268,32 @@ def render(simulacros, materias):
         prom_sims = np.nanmean(sim_vals) if sim_vals else None
         row["Prom. Simulacros"] = round(prom_sims, 2) if prom_sims is not None and not np.isnan(prom_sims) else None
 
-        real_tuple = icfes_map.get(est)
-        if real_tuple:
-            real_val, inc_flag = real_tuple
-            if inc_flag:
-                is_inc = True
-            row["🎯 ICFES Real"] = round(real_val, 2) if real_val is not None and not np.isnan(real_val) else None
-        else:
-            row["🎯 ICFES Real"] = None
+        if has_icfes_real:
+            real_tuple = icfes_map.get(est)
+            if real_tuple:
+                real_val, inc_flag = real_tuple
+                if inc_flag:
+                    is_inc = True
+                row["🎯 ICFES Real"] = round(real_val, 2) if real_val is not None and not np.isnan(real_val) else None
+            else:
+                row["🎯 ICFES Real"] = None
 
-        if row["Prom. Simulacros"] is not None and row["🎯 ICFES Real"] is not None:
-            row["Δ (ICFES - Prom)"] = round(row["🎯 ICFES Real"] - row["Prom. Simulacros"], 2)
-        else:
-            row["Δ (ICFES - Prom)"] = None
+            if row["Prom. Simulacros"] is not None and row.get("🎯 ICFES Real") is not None:
+                row["Δ (ICFES - Prom)"] = round(row["🎯 ICFES Real"] - row["Prom. Simulacros"], 2)
+            else:
+                row["Δ (ICFES - Prom)"] = None
 
         row["Inclusión"] = "Sí" if is_inc else "No"
         rows_est.append(row)
 
     df_est_comp = pd.DataFrame(rows_est)
     if not df_est_comp.empty:
-        # Poner columna Inclusión al inicio
         cols_order = ["Estudiante", "Inclusión"] + [c for c in df_est_comp.columns if c not in ["Estudiante", "Inclusión"]]
         df_est_comp = df_est_comp[cols_order]
 
+        subset_grad = [c for c in ["Prom. Simulacros", "🎯 ICFES Real"] if c in df_est_comp.columns]
         st.dataframe(
-            df_est_comp.style.background_gradient(subset=["🎯 ICFES Real", "Prom. Simulacros"], cmap="YlGnBu", vmin=250, vmax=450),
+            df_est_comp.style.format(na_rep="No presentó").background_gradient(subset=subset_grad, cmap="YlGnBu", vmin=250, vmax=450),
             hide_index=True,
             use_container_width=True,
         )
