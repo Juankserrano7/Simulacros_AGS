@@ -303,81 +303,164 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
         st.info("No hay estudiantes en este grupo.")
         return
 
-    st.markdown("### 📊 Promedios a Nivel de Promoción (Simulacros vs. ICFES Real)")
+    st.markdown("### 🏛️ Tabla Maestra de Evaluaciones de la Promoción (Listado de Simulacros + Puntaje Final ICFES Real)")
 
-    # 1. Gráfica de Barras Agrupadas a nivel Promoción (Progresión)
+    # 1. Construir Tabla Maestra de Evaluaciones de la Promoción
+    master_rows = []
+    
     if not df_simulacros.empty:
-        sim_summary = df_simulacros.groupby(["simulacro_id", "simulacro_nombre"])[["PUNTAJE GLOBAL"] + MATERIAS].mean().reset_index()
-        
-        # Ordenar simulacros por fecha o id
         ordered_sims = df_simulacros[["simulacro_id", "simulacro_nombre", "creado_en"]].drop_duplicates().sort_values("creado_en")
-        sim_summary = ordered_sims.merge(sim_summary, on=["simulacro_id", "simulacro_nombre"])
+        
+        for _, s_info in ordered_sims.iterrows():
+            s_id = s_info["simulacro_id"]
+            s_name = s_info["simulacro_nombre"]
+            sub_df = df_simulacros[df_simulacros["simulacro_id"] == s_id]
+            
+            n_est = sub_df["estudiante_id"].nunique()
+            pg = sub_df["PUNTAJE GLOBAL"].mean()
+            
+            row_data = {
+                "Evaluación": s_name,
+                "Tipo": "Simulacro",
+                "Estudiantes": n_est,
+                "Puntaje Global": round(pg, 2) if pd.notna(pg) else None,
+            }
+            for mat in MATERIAS:
+                val_m = sub_df[mat].mean() if mat in sub_df.columns else np.nan
+                row_data[mat] = round(val_m, 2) if pd.notna(val_m) else None
+            
+            master_rows.append(row_data)
 
-        # Si hay ICFES Real
-        if not df_icfes_real.empty:
-            real_mean = df_icfes_real[["PUNTAJE GLOBAL"] + MATERIAS].mean()
-            real_row = {"simulacro_id": "icfes_real", "simulacro_nombre": "🎯 ICFES REAL (Oficial)"}
-            for col in ["PUNTAJE GLOBAL"] + MATERIAS:
-                real_row[col] = real_mean.get(col, np.nan)
-            sim_summary = pd.concat([sim_summary, pd.DataFrame([real_row])], ignore_index=True)
+    if not df_icfes_real.empty:
+        n_est_real = df_icfes_real["estudiante_id"].nunique()
+        pg_real = df_icfes_real["PUNTAJE GLOBAL"].mean()
+        
+        row_real = {
+            "Evaluación": "🎯 ICFES Real (Definitivo)",
+            "Tipo": "Resultado Oficial",
+            "Estudiantes": n_est_real,
+            "Puntaje Global": round(pg_real, 2) if pd.notna(pg_real) else None,
+        }
+        for mat in MATERIAS:
+            val_m = df_icfes_real[mat].mean() if mat in df_icfes_real.columns else np.nan
+            row_real[mat] = round(val_m, 2) if pd.notna(val_m) else None
+        
+        master_rows.append(row_real)
 
-        # Crear figura Plotly Progresión Puntaje Global
+    if not master_rows:
+        st.info("No hay simulacros ni resultados reales registrados aún para este grupo.")
+        return
+
+    df_maestro = pd.DataFrame(master_rows)
+
+    # Calcular Δ vs Prueba Anterior
+    deltas = [None]
+    for i in range(1, len(df_maestro)):
+        prev_pg = df_maestro.iloc[i-1]["Puntaje Global"]
+        curr_pg = df_maestro.iloc[i]["Puntaje Global"]
+        if prev_pg is not None and curr_pg is not None:
+            deltas.append(round(curr_pg - prev_pg, 2))
+        else:
+            deltas.append(None)
+    df_maestro["Δ vs Anterior"] = deltas
+
+    # Mostrar la Tabla Maestra estilizada
+    columnas_num = [c for c in df_maestro.columns if c not in ["Evaluación", "Tipo", "Estudiantes"]]
+    st.dataframe(
+        df_maestro.style.format({col: "{:+.2f}" if col == "Δ vs Anterior" else "{:.2f}" for col in columnas_num if col in df_maestro.columns})
+        .background_gradient(subset=["Puntaje Global"], cmap="YlGnBu", vmin=250, vmax=450),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.markdown("---")
+    st.markdown("### 📊 Gráficas Generadas a Partir de la Tabla Maestra de la Promoción")
+
+    col_g1, col_g2 = st.columns(2)
+
+    with col_g1:
+        # Gráfica 1: Progresión del Puntaje Global alimentada directamente de df_maestro
         fig_global = go.Figure()
-        colors = px.colors.qualitative.Pastel
+        colors = ["#3B82F6", "#6366F1", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981"]
 
-        for idx, row in sim_summary.iterrows():
-            nombre_etiqueta = row["simulacro_nombre"]
-            val_pg = row["PUNTAJE GLOBAL"]
-            is_real = (row["simulacro_id"] == "icfes_real")
-            
-            bar_color = "#10B981" if is_real else colors[idx % len(colors)]
-            
+        for idx, r in df_maestro.iterrows():
+            nombre_eval = r["Evaluación"]
+            val_pg = r["Puntaje Global"]
+            is_real = ("ICFES Real" in nombre_eval)
+            bar_color = "#F59E0B" if is_real else colors[idx % len(colors)]
+
             fig_global.add_trace(go.Bar(
-                x=[nombre_etiqueta],
-                y=[val_pg],
-                name=nombre_etiqueta,
+                x=[nombre_eval],
+                y=[val_pg if val_pg is not None else 0],
+                name=nombre_eval,
                 marker_color=bar_color,
-                text=[f"{val_pg:.1f}" if pd.notna(val_pg) else "-"],
+                text=[f"{val_pg:.1f}" if val_pg is not None else "-"],
                 textposition="auto"
             ))
 
         fig_global.update_layout(
-            title="Progresión del Puntaje Global: Simulacros ➔ ICFES Real",
+            title="1. Progresión Puntaje Global (Simulacros ➔ Puntaje Final)",
             yaxis=dict(title="Puntaje Global (0-500)", range=[0, 500]),
             xaxis=dict(title="Evaluación"),
             showlegend=False,
-            height=400,
-            template="plotly_dark"
+            height=420,
+            template="plotly_white"
         )
-
         st.plotly_chart(fig_global, use_container_width=True)
 
-        # 2. Desglose por Materias
-        st.markdown("#### 📚 Comparación por Materia (Promedio Promoción)")
-        
-        materia_data = []
-        for sim_name in sim_summary["simulacro_nombre"]:
-            sub = sim_summary[sim_summary["simulacro_nombre"] == sim_name].iloc[0]
-            for mat in MATERIAS:
-                materia_data.append({
-                    "Evaluación": sim_name,
-                    "Materia": mat,
-                    "Promedio": sub.get(mat, 0)
-                })
-        
-        df_mat_chart = pd.DataFrame(materia_data)
-        fig_mat = px.bar(
-            df_mat_chart,
-            x="Materia",
-            y="Promedio",
-            color="Evaluación",
-            barmode="group",
-            title="Comparación por Materias: Simulacros vs ICFES Real",
-            template="plotly_dark",
-            height=450
+    with col_g2:
+        # Gráfica 2: Variación Delta vs Prueba Anterior
+        fig_delta = go.Figure()
+        for idx, r in df_maestro.iterrows():
+            nombre_eval = r["Evaluación"]
+            d_val = r["Δ vs Anterior"]
+            if d_val is None:
+                continue
+            d_color = "#10B981" if d_val >= 0 else "#EF4444"
+            fig_delta.add_trace(go.Bar(
+                x=[nombre_eval],
+                y=[d_val],
+                name=nombre_eval,
+                marker_color=d_color,
+                text=[f"{d_val:+.2f}"],
+                textposition="outside"
+            ))
+        fig_delta.add_hline(y=0, line_color="black")
+        fig_delta.update_layout(
+            title="2. Variación en Puntos (Δ vs Evaluación Previa)",
+            yaxis=dict(title="Diferencia de Puntos"),
+            xaxis=dict(title="Evaluación"),
+            showlegend=False,
+            height=420,
+            template="plotly_white"
         )
-        fig_mat.update_layout(yaxis=dict(range=[0, 100]))
-        st.plotly_chart(fig_mat, use_container_width=True)
+        st.plotly_chart(fig_delta, use_container_width=True)
+
+    # Gráfica 3: Comparación por Materia Alimentada de df_maestro
+    materia_rows = []
+    for idx, r in df_maestro.iterrows():
+        nombre_eval = r["Evaluación"]
+        for mat in MATERIAS:
+            materia_rows.append({
+                "Evaluación": nombre_eval,
+                "Materia": mat,
+                "Promedio": r.get(mat) or 0
+            })
+    df_mat_chart = pd.DataFrame(materia_rows)
+
+    fig_mat = px.bar(
+        df_mat_chart,
+        x="Materia",
+        y="Promedio",
+        color="Evaluación",
+        barmode="group",
+        title="3. Desglose Promedio por Materia (Simulacros vs Puntaje Final ICFES)",
+        template="plotly_white",
+        height=450
+    )
+    fig_mat.update_layout(yaxis=dict(range=[0, 100]))
+    st.plotly_chart(fig_mat, use_container_width=True)
+
 
     # 3. Vista Individual por Estudiante (Lado a Lado)
     st.markdown("---")
