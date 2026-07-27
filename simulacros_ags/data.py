@@ -487,6 +487,133 @@ def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str) -> T
         conn.close()
 
 
+def save_manual_simulacro_grid(nombre: str, promocion_id: str, df_editor: pd.DataFrame, usuario: str) -> Tuple[bool, str, Dict]:
+    """Recibe la grilla de puntuaciones editada manualmente, aplica las fórmulas del ICFES y guarda en Supabase."""
+    if not nombre or not nombre.strip():
+        return False, "El nombre del simulacro no puede estar vacío.", {}
+
+    if not promocion_id:
+        return False, "No hay una promoción activa seleccionada.", {}
+
+    db_url = os.getenv("SUPABASE_DB_URL")
+    if not db_url:
+        return False, "No hay conexión configurada a Supabase.", {}
+
+    if df_editor.empty:
+        return False, "La grilla de estudiantes está vacía.", {}
+
+    sim_id = str(uuid.uuid4())
+    
+    # Calcular fórmulas ICFES por cada fila para asegurar integridad antes de guardar
+    calculated_rows = []
+    for _, r in df_editor.iterrows():
+        st_name = str(r.get("ESTUDIANTE", "")).strip()
+        if not st_name:
+            continue
+
+        def safe_num(v):
+            if pd.isna(v):
+                return 0.0
+            try:
+                val = float(v)
+                return max(0.0, min(100.0, val))
+            except (ValueError, TypeError):
+                return 0.0
+
+        lc = safe_num(r.get("LECTURA CRÍTICA"))
+        mat = safe_num(r.get("MATEMÁTICAS"))
+        soc = safe_num(r.get("SOCIALES Y CIUDADANAS"))
+        cn = safe_num(r.get("CIENCIAS NATURALES"))
+        ing = safe_num(r.get("INGLÉS"))
+
+        prom_simple = lc + mat + soc + cn + ing
+        pp_materia = ((lc * 3.0) + (mat * 3.0) + (soc * 3.0) + (cn * 3.0) + (ing * 1.0)) / 13.0
+        
+        pg_custom = r.get("PUNTAJE GLOBAL (0-500)") or r.get("PROMEDIO PONDERADO")
+        try:
+            pg_val = float(pg_custom) if pd.notna(pg_custom) and float(pg_custom) > 0 else (pp_materia * 5.0)
+        except (ValueError, TypeError):
+            pg_val = pp_materia * 5.0
+
+        scores_arr = [lc, mat, soc, cn, ing]
+        desv_est = float(np.std(scores_arr, ddof=1)) if len(scores_arr) > 1 else 0.0
+
+        calculated_rows.append({
+            "ESTUDIANTE": st_name,
+            "LECTURA CRÍTICA": lc,
+            "MATEMÁTICAS": mat,
+            "SOCIALES Y CIUDADANAS": soc,
+            "CIENCIAS NATURALES": cn,
+            "INGLÉS": ing,
+            "PROMEDIO SIMPLE": prom_simple,
+            "PROMEDIO PONDERADO": pg_val,
+            "DESVIACIÓN ESTÁNDAR": desv_est
+        })
+
+    df_calc = pd.DataFrame(calculated_rows)
+    insights = generate_ai_insights(nombre.strip(), df_calc, materias=MATERIAS)
+
+    conn = psycopg2.connect(db_url)
+    try:
+        with conn.cursor() as cur:
+            # 1. Insertar registro en tabla `simulacros`
+            cur.execute("""
+                INSERT INTO simulacros (id, nombre, promocion_id, origen, estado, creado_por, insights)
+                VALUES (%s, %s, %s, 'manual', 'ready', %s, %s::jsonb);
+            """, (sim_id, nombre.strip(), promocion_id, usuario, json.dumps(insights)))
+
+            # 2. Consultar mapa de estudiantes existentes en la promoción
+            cur.execute("SELECT id, nombre FROM estudiantes WHERE promocion_id = %s;", (promocion_id,))
+            st_db_map = {str(r[1]).strip().upper(): r[0] for r in cur.fetchall()}
+
+            inserted_count = 0
+            for _, r in df_calc.iterrows():
+                st_name = str(r["ESTUDIANTE"]).strip().upper()
+                st_id = st_db_map.get(st_name)
+                
+                if not st_id:
+                    cur.execute("""
+                        INSERT INTO estudiantes (nombre, grado, promocion_id)
+                        VALUES (%s, '11', %s)
+                        ON CONFLICT (nombre, promocion_id) DO UPDATE SET grado = EXCLUDED.grado
+                        RETURNING id;
+                    """, (r["ESTUDIANTE"], promocion_id))
+                    st_id = cur.fetchone()[0]
+
+                cur.execute("""
+                    INSERT INTO resultados_simulacro (
+                        simulacro_id, estudiante_id, lectura_critica, matematicas,
+                        sociales_ciudadanas, ciencias_naturales, ingles,
+                        promedio_simple, promedio_ponderado, desviacion_estandar
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (simulacro_id, estudiante_id) DO UPDATE SET
+                        lectura_critica = EXCLUDED.lectura_critica,
+                        matematicas = EXCLUDED.matematicas,
+                        sociales_ciudadanas = EXCLUDED.sociales_ciudadanas,
+                        ciencias_naturales = EXCLUDED.ciencias_naturales,
+                        ingles = EXCLUDED.ingles,
+                        promedio_simple = EXCLUDED.promedio_simple,
+                        promedio_ponderado = EXCLUDED.promedio_ponderado,
+                        desviacion_estandar = EXCLUDED.desviacion_estandar;
+                """, (
+                    sim_id, st_id,
+                    r["LECTURA CRÍTICA"], r["MATEMÁTICAS"], r["SOCIALES Y CIUDADANAS"],
+                    r["CIENCIAS NATURALES"], r["INGLÉS"], r["PROMEDIO SIMPLE"],
+                    r["PROMEDIO PONDERADO"], r["DESVIACIÓN ESTÁNDAR"]
+                ))
+                inserted_count += 1
+
+        conn.commit()
+        st.cache_data.clear()
+        return True, f"Simulacro '{nombre.strip()}' guardado e ingestado exitosamente con {inserted_count} estudiantes en Supabase.", {"id": sim_id, "nombre": nombre.strip()}
+    except Exception as exc:  # noqa: BLE001
+        conn.rollback()
+        return False, f"Error guardando el simulacro manual en Supabase: {exc}", {}
+    finally:
+        conn.close()
+
+
+
 def ordenar_simulacros(data_map: Dict[str, Dict]) -> List[Dict]:
     """Convierte el mapa de datos en una lista ordenada por fecha de creación."""
     simulacros = []
