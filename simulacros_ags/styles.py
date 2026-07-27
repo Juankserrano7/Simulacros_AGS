@@ -2,22 +2,80 @@ import streamlit as st
 
 BASE_CSS = """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
     @import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');
     @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css');
+
+    :root {
+        /* Identidad Cromática Institucional */
+        --color-primary: #21B7D2;
+        --color-primary-hover: #1999B0;
+        --color-sidebar-bg: linear-gradient(180deg, #0D1B2A 0%, #1B263B 50%, #2A3D54 100%);
+        --color-sidebar-card: #1B263B;
+        --color-accent-blue: #3B82F6;
+        --color-accent-indigo: #6366F1;
+        
+        /* Superficies y Fondos */
+        --color-bg-canvas: #F8FAFC;
+        --color-surface-card: #FFFFFF;
+        --color-border-subtle: #E2E8F0;
+
+        /* Texto */
+        --color-text-primary: #0F172A;
+        --color-text-secondary: #64748B;
+        --color-text-muted: #94A3B8;
+
+        /* Semántica ICFES */
+        --color-excellence: #10B981;
+        --color-satisfactory: #0EA5E9;
+        --color-warning: #F59E0B;
+        --color-critical: #EF4444;
+
+        /* Escala de Espaciado (8px grid) */
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 12px;
+        --space-lg: 16px;
+        --space-xl: 24px;
+        --space-2xl: 32px;
+
+        /* Radios de Borde */
+        --radius-sm: 4px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+
+        /* Profundidad y Sombras */
+        --elevation-0: none;
+        --elevation-1: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+        --elevation-2: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+        --elevation-3: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+
+        /* Transición Rápida CSS (180ms ease-out) */
+        --transition-fast: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
     
     * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    h1, h2, h3, h4, h5, h6, .header-title, .section-header, div[data-testid="stMetricValue"] {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
     
+    .stApp {
+        background: var(--color-bg-canvas);
+    }
+
     .main {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: var(--color-bg-canvas);
     }
     
-    /* SIDEBAR STYLING - Bootstrap 5 Design */
+    /* SIDEBAR STYLING - Institutional Obsidian Navy Design */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        background: var(--color-sidebar-bg);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
         min-width: 240px;
         max-width: 800px;
     }
@@ -28,14 +86,14 @@ BASE_CSS = """
     
     /* Sidebar Header */
     [data-testid="stSidebar"] h3 {
-        color: #ffffff !important;
+        color: #FFFFFF !important;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 1.1rem;
-        padding: 1rem 0;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-        margin-bottom: 1rem;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        padding: var(--space-sm) 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        margin-bottom: var(--space-md);
     }
     
     /* Radio Buttons Styling */
@@ -44,13 +102,13 @@ BASE_CSS = """
     }
     
     [data-testid="stSidebar"] .row-widget.stRadio > div > label {
-        background: rgba(255, 255, 255, 0.1);
-        color: #e0e1dd !important;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+        color: #E2E8F0 !important;
+        padding: var(--space-md) var(--space-lg);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-xs);
+        transition: var(--transition-fast);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -58,460 +116,211 @@ BASE_CSS = """
     }
     
     [data-testid="stSidebar"] .row-widget.stRadio > div > label:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.3);
-        transform: translateX(5px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    [data-testid="stSidebar"] .row-widget.stRadio > div > label[data-baseweb="radio"] > div:first-child {
-        background-color: rgba(255, 255, 255, 0.3);
-        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: translateX(3px);
     }
     
     [data-testid="stSidebar"] .row-widget.stRadio > div > label[data-baseweb="radio"]:has(input:checked) {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-color: #667eea;
-        color: white !important;
-        font-weight: 600;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        color: #0F172A !important;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(33, 183, 210, 0.35);
     }
     
     /* Selectbox Styling */
     [data-testid="stSidebar"] .stSelectbox > div > div {
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
+        border-radius: var(--radius-md);
         color: white;
     }
     
     [data-testid="stSidebar"] .stSelectbox label {
-        color: #e0e1dd !important;
+        color: #E2E8F0 !important;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
-        color: white;
-    }
-    
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"]:hover > div {
-        border-color: rgba(255, 255, 255, 0.5);
-        background: rgba(255, 255, 255, 0.2);
-    }
-    
     /* Divider */
     [data-testid="stSidebar"] hr {
-        border-color: rgba(255, 255, 255, 0.2);
-        margin: 1.5rem 0;
+        border-color: rgba(255, 255, 255, 0.15);
+        margin: var(--space-lg) 0;
     }
     
     /* Sidebar Text */
     [data-testid="stSidebar"] p, 
     [data-testid="stSidebar"] div {
-        color: #e0e1dd;
-    }
-    
-    /* Footer in Sidebar */
-    [data-testid="stSidebar"] .sidebar-footer {
-        background: rgba(0, 0, 0, 0.2);
-        padding: 1.5rem;
-        border-radius: 10px;
-        text-align: center;
-        margin-top: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #E2E8F0;
     }
     
     /* Main Content Buttons */
     .stButton>button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: var(--color-primary);
+        color: #0F172A;
         border: none;
-        border-radius: 10px;
-        padding: 0.6rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        border-radius: var(--radius-md);
+        padding: var(--space-sm) var(--space-xl);
+        font-weight: 700;
+        transition: var(--transition-fast);
+        box-shadow: var(--elevation-1);
     }
     
     .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        background: var(--color-primary-hover);
+        color: #FFFFFF;
+        transform: translateY(-1px);
+        box-shadow: var(--elevation-2);
     }
     
+    /* Target Metric Cards (Visual Signature Ribbon) */
     .metric-card {
-        background: white;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-        margin-bottom: 1rem;
+        background: var(--color-surface-card);
+        border-radius: var(--radius-lg);
+        padding: var(--space-lg);
+        box-shadow: var(--elevation-1);
+        border: 1px solid var(--color-border-subtle);
+        border-left: 4px solid var(--color-primary);
+        transition: var(--transition-fast);
+        margin-bottom: var(--space-md);
     }
     
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
+        box-shadow: var(--elevation-2);
     }
     
     .header-title {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 3rem;
-        font-weight: 700;
+        color: var(--color-text-primary);
+        font-size: 2.25rem;
+        font-weight: 800;
         text-align: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: var(--space-xs);
+        letter-spacing: -0.5px;
     }
     
     .header-subtitle {
         text-align: center;
-        color: #6c757d;
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
+        color: var(--color-text-secondary);
+        font-size: 1.05rem;
+        margin-bottom: var(--space-xl);
     }
     
     .section-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 1.5rem 0;
-        font-weight: 600;
+        background: #1B263B;
+        color: #FFFFFF;
+        padding: var(--space-md) var(--space-lg);
+        border-radius: var(--radius-lg);
+        margin: var(--space-lg) 0;
+        font-weight: 700;
+        border-left: 4px solid var(--color-primary);
     }
     
     .stats-box {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 15px;
+        background: #1B263B;
+        color: #FFFFFF;
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
         text-align: center;
-        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        box-shadow: var(--elevation-1);
+        border-top: 3px solid var(--color-primary);
     }
     
     .info-badge {
         display: inline-block;
-        background: #17a2b8;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
+        background: rgba(33, 183, 210, 0.12);
+        color: var(--color-primary);
+        padding: var(--space-xs) var(--space-md);
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
         font-weight: 600;
-        margin: 0.3rem;
+        margin: var(--space-xs);
     }
     
     .alert-success {
-        background: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 1rem 0;
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #065F46;
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
+        margin: var(--space-md) 0;
     }
     
     .alert-warning {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 1rem 0;
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        color: #92400E;
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
+        margin: var(--space-md) 0;
     }
     
     div[data-testid="stMetricValue"] {
         font-size: 2rem;
-        font-weight: 700;
-    }
-    
-    /* ESTILOS PARA EL RANKING */
-    .ranking-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        margin-bottom: 2rem;
-    }
-    
-    .podium-container {
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        gap: 1.5rem;
-        margin: 2rem 0;
-        padding: 2rem;
-    }
-    
-    .podium-place {
-        flex: 1;
-        max-width: 200px;
-        text-align: center;
-        transition: transform 0.3s ease;
-    }
-    
-    .podium-place:hover {
-        transform: translateY(-10px);
-    }
-    
-    .podium-first {
-        order: 2;
-    }
-    
-    .podium-second {
-        order: 1;
-    }
-    
-    .podium-third {
-        order: 3;
-    }
-    
-    .podium-avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3rem;
-        margin: 0 auto 1rem;
-        border: 4px solid;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-    
-    .podium-first .podium-avatar {
-        width: 140px;
-        height: 140px;
-        border-color: #FFD700;
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    }
-    
-    .podium-second .podium-avatar {
-        width: 120px;
-        height: 120px;
-        border-color: #C0C0C0;
-        background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
-    }
-    
-    .podium-third .podium-avatar {
-        width: 110px;
-        height: 110px;
-        border-color: #CD7F32;
-        background: linear-gradient(135deg, #CD7F32 0%, #B8732E 100%);
-    }
-    
-    .podium-base {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        margin-top: 1rem;
-    }
-    
-    .podium-first .podium-base {
-        background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
-        padding: 2rem 1.5rem;
-    }
-    
-    .podium-second .podium-base {
-        background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
-    }
-    
-    .podium-third .podium-base {
-        background: linear-gradient(135deg, rgba(205, 127, 50, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
-    }
-    
-    .podium-name {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #333;
-        margin-bottom: 0.5rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    
-    .podium-score {
-        font-size: 2rem;
         font-weight: 800;
-        color: #667eea;
-        margin: 0.5rem 0;
-    }
-    
-    .podium-badge {
-        display: inline-block;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: white;
-        margin-top: 0.5rem;
-    }
-    
-    .leaderboard-row {
-        background: white;
-        padding: 1rem 1.5rem;
-        margin: 0.5rem 0;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .leaderboard-row:hover {
-        transform: translateX(10px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-    
-    .rank-number {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: #667eea;
-        min-width: 50px;
-        text-align: center;
-    }
-    
-    .player-info {
-        flex: 1;
-        margin: 0 1rem;
-    }
-    
-    .player-name {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #333;
-        margin-bottom: 0.2rem;
-    }
-    
-    .player-score {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #667eea;
-        min-width: 100px;
-        text-align: right;
-    }
-    
-    .trophy-icon {
-        font-size: 2.5rem;
-        animation: bounce 2s infinite;
+        color: var(--color-text-primary);
     }
     
     .login-hero {
         text-align: center;
-        margin: 3rem auto 2rem;
+        margin: var(--space-2xl) auto var(--space-xl);
         max-width: 640px;
     }
     
     .login-hero h1 {
-        font-size: 3rem;
+        font-size: 2.75rem;
         font-weight: 800;
-        color: #f4f7ff;
-        margin-bottom: 0.5rem;
+        color: #FFFFFF;
+        margin-bottom: var(--space-xs);
     }
     
     .login-hero p {
-        color: #cfd6e8;
+        color: #94A3B8;
         font-size: 1.1rem;
-        margin: 0 auto;
-    }
-    
-    .login-logo img {
-        width: 320px;
-        max-width: 85%;
-        margin: 0 auto 1.5rem;
-        display: block;
-        filter: drop-shadow(0 18px 40px rgba(13, 27, 42, 0.25));
-    }
-    
-    .login-helper {
-        text-align: center;
-        color: #c0cadc;
-        margin-bottom: 1.2rem;
-    }
-    
-    .login-background {
-        background: #0b1a2b;
-        border-radius: 24px;
-        padding: 3rem 2rem 4rem;
-        box-shadow: 0 35px 80px rgba(5, 10, 20, 0.65);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-    
-    .login-card {
-        background: #ffffff;
-        border-radius: 26px;
-        padding: 2.8rem 3.2rem;
-        border: 1px solid rgba(13, 27, 42, 0.1);
-        box-shadow: 0 30px 70px rgba(4, 9, 20, 0.25);
-        color: #0d1b2a;
-    }
-    
-    .login-card label {
-        color: #ffffff !important;
-        font-weight: 600;
-    }
-    
-    .login-card input {
-        border-radius: 14px !important;
-        border: 1px solid rgba(13, 27, 42, 0.2) !important;
-        background: #f5f6fb;
-        color: #0d1b2a !important;
-    }
-    
-    .login-card input::placeholder {
-        color: rgba(13, 27, 42, 0.55);
-    }
-    
-    .login-card .stButton>button {
-        background: linear-gradient(135deg, #667eea 0%, #5a60ff 100%);
-        border: none;
-        color: #ffffff;
-        box-shadow: 0 18px 45px rgba(89, 101, 242, 0.35);
     }
     
     form[data-testid="stForm"] {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 24px;
-        padding: 2.2rem;
-        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
-        border: 1px solid rgba(65, 90, 119, 0.1);
-        backdrop-filter: blur(12px);
+        background: var(--color-surface-card);
+        border-radius: var(--radius-xl);
+        padding: var(--space-2xl);
+        box-shadow: var(--elevation-3);
+        border: 1px solid var(--color-border-subtle);
     }
     
     form[data-testid="stForm"] label {
         font-weight: 600;
-        color: #FFFFFF !important;
+        color: var(--color-text-primary) !important;
     }
     
     form[data-testid="stForm"] input {
-        border-radius: 12px !important;
-        border: 1px solid rgba(13, 27, 42, 0.15) !important;
-        background: rgba(160, 32, 240, 0.03);
+        border-radius: var(--radius-md) !important;
+        border: 1px solid var(--color-border-subtle) !important;
+        background: #F1F5F9;
     }
 
     .sidebar-user-card {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 1rem;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-lg);
+        padding: var(--space-md);
         text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        margin-bottom: var(--space-md);
     }
 
     .sidebar-user-name {
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: white;
-        margin-bottom: 0.2rem;
+        margin-bottom: var(--space-xs);
     }
 
     .sidebar-user-email {
         font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.75);
-        margin-bottom: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: var(--space-sm);
     }
     
     header [data-testid="stToolbar"] a[href*="github"] {
@@ -523,7 +332,7 @@ BASE_CSS = """
         display: none !important;
     }
     
-    /* GLOBAL DROPDOWN / SELECTBOX SCROLLBAR STYLING */
+    /* GLOBAL DROPDOWN / SELECTBOX STYLING */
     [data-baseweb="popover"],
     [data-baseweb="popover"] > div,
     [data-baseweb="menu"],
@@ -532,67 +341,16 @@ BASE_CSS = """
     ul[data-baseweb="menu"] {
         max-height: 280px !important;
         overflow-y: auto !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+        border-radius: var(--radius-lg) !important;
+        box-shadow: var(--elevation-3) !important;
         -webkit-overflow-scrolling: touch !important;
-    }
-
-    [data-baseweb="popover"] ul,
-    [data-baseweb="menu"] ul,
-    div[role="listbox"] ul {
-        max-height: 280px !important;
-        overflow-y: auto !important;
-    }
-
-    /* Custom Scrollbar for Dropdown Popovers */
-    [data-baseweb="popover"]::-webkit-scrollbar,
-    [data-baseweb="popover"] *::-webkit-scrollbar,
-    [data-baseweb="menu"]::-webkit-scrollbar,
-    div[role="listbox"]::-webkit-scrollbar,
-    ul[role="listbox"]::-webkit-scrollbar {
-        width: 8px !important;
-    }
-
-    [data-baseweb="popover"]::-webkit-scrollbar-track,
-    [data-baseweb="popover"] *::-webkit-scrollbar-track,
-    [data-baseweb="menu"]::-webkit-scrollbar-track,
-    div[role="listbox"]::-webkit-scrollbar-track,
-    ul[role="listbox"]::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.1) !important;
-        border-radius: 10px !important;
-    }
-
-    [data-baseweb="popover"]::-webkit-scrollbar-thumb,
-    [data-baseweb="popover"] *::-webkit-scrollbar-thumb,
-    [data-baseweb="menu"]::-webkit-scrollbar-thumb,
-    div[role="listbox"]::-webkit-scrollbar-thumb,
-    ul[role="listbox"]::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%) !important;
-        border-radius: 10px !important;
-    }
-
-    [data-baseweb="popover"] li,
-    div[role="listbox"] li,
-    ul[role="listbox"] li,
-    [data-baseweb="menu"] [role="option"] {
-        padding: 0.6rem 1rem !important;
-        font-size: 0.95rem !important;
-        border-radius: 6px !important;
-        transition: background 0.2s ease !important;
     }
 
     /* Selectbox Container Focus & Hover */
     .stSelectbox div[data-baseweb="select"] {
-        border-radius: 10px !important;
-    }
-
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+        border-radius: var(--radius-md) !important;
     }
 </style>
-
-
 """
 
 
@@ -603,5 +361,4 @@ def inject_base_styles():
 
 def render_inclusion_badge(text: str = "Inclusión") -> str:
     """Retorna el badge HTML institucional y uniforme para estudiantes o pestañas en condición de inclusión."""
-    return f'<span style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.6rem; border-radius: 4px; background: rgba(99, 102, 241, 0.12); color: #6366F1; font-weight: 600; font-size: 0.85rem;" title="Estudiante en Condición de Inclusión"><i class="bi bi-universal-access-circle" style="font-size: 0.95rem;"></i> {text}</span>'
-
+    return f'<span style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-sm); background: rgba(99, 102, 241, 0.12); color: var(--color-accent-indigo); font-weight: 600; font-size: 0.85rem;" title="Estudiante en Condición de Inclusión"><i class="bi bi-universal-access-circle" style="font-size: 0.95rem;"></i> {text}</span>'
