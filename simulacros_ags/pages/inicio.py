@@ -13,7 +13,7 @@ def render(simulacros, materias):
         st.error("No hay simulacros cargados.")
         return
 
-    st.markdown("<h1 class='header-title'> Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
 
     promocion_id = st.session_state.get("promocion_activa_id")
@@ -44,7 +44,7 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;'>
-            <h4>📝 Simulacros</h4>
+            <h4>Simulacros</h4>
             <h2 style='font-size: 3rem; margin: 0;'>{len(simulacros)}</h2>
             <p style='opacity: 0.9;'>Histórico listo</p>
         </div>
@@ -55,7 +55,7 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); color: white;'>
-            <h4>👥 Estudiantes Únicos</h4>
+            <h4>Estudiantes Únicos</h4>
             <h2 style='font-size: 3rem; margin: 0;'>{total_estudiantes}</h2>
             <p style='opacity: 0.9;'>Registro oficial</p>
         </div>
@@ -66,7 +66,7 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;'>
-            <h4>📚 Áreas</h4>
+            <h4>Áreas</h4>
             <h2 style='font-size: 3rem; margin: 0;'>{len(materias)}</h2>
             <p style='opacity: 0.9;'>Materias ICFES</p>
         </div>
@@ -77,7 +77,7 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white;'>
-            <h4>📋 Registros</h4>
+            <h4>Registros</h4>
             <h2 style='font-size: 3rem; margin: 0;'>{total_registros}</h2>
             <p style='opacity: 0.9;'>Filas consolidadas</p>
         </div>
@@ -86,7 +86,7 @@ def render(simulacros, materias):
         )
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📊 Análisis Comparativo de Simulacros</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Análisis Comparativo de Simulacros</h2>", unsafe_allow_html=True)
     col_a, col_b = st.columns(2)
 
     # Evolución de promedios (Aplicando protocolo: Excluye inclusión y no presentados)
@@ -99,7 +99,7 @@ def render(simulacros, materias):
     )
 
     with col_a:
-        st.markdown("### 📈 Evolución de Promedios")
+        st.markdown("### Evolución de Promedios")
         fig = go.Figure()
         fig.add_trace(
             go.Bar(
@@ -123,7 +123,7 @@ def render(simulacros, materias):
                 pct = (cambio / anterior["Promedio"] * 100) if anterior["Promedio"] else 0
                 cambios.append({"De": anterior["Simulacro"], "A": actual["Simulacro"], "Cambio": cambio, "%": pct})
             cambios_df = pd.DataFrame(cambios).round(2)
-            st.markdown("#### 📉 Variaciones Detectadas")
+            st.markdown("#### Variaciones Detectadas")
             st.dataframe(cambios_df, use_container_width=True, hide_index=True)
 
     # Distribución de rendimiento (Excluyendo inclusión y ausentes)
@@ -138,14 +138,14 @@ def render(simulacros, materias):
         ]
 
     with col_b:
-        st.markdown("### 📊 Distribución de Rendimiento por Simulacro")
+        st.markdown("### Distribución de Rendimiento por Simulacro")
         fig_dist = go.Figure()
         for sim in simulacros:
             fig_dist.add_trace(go.Bar(name=sim["nombre"], x=categorias, y=distribucion(sim["df"])))
         fig_dist.update_layout(barmode="group", height=420, yaxis_title="Número de estudiantes", template="plotly_white")
         st.plotly_chart(fig_dist, use_container_width=True)
 
-        st.markdown("#### 📋 Resumen de Distribución")
+        st.markdown("#### Resumen de Distribución")
         dist_df = pd.DataFrame(
             {
                 "Nivel": categorias,
@@ -155,7 +155,7 @@ def render(simulacros, materias):
         st.dataframe(dist_df, use_container_width=True, hide_index=True)
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📚 Desempeño por materia</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Desempeño por materia</h2>", unsafe_allow_html=True)
     default_sel = [sim["nombre"] for sim in simulacros[-3:]]
     seleccionados = st.multiselect(
         "Simulacros a comparar",
@@ -181,7 +181,7 @@ def render(simulacros, materias):
         fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, height=500)
         st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("#### 📊 Tabla Comparativa de Materias")
+    st.markdown("#### Tabla Comparativa de Materias")
     comp_materias_df = pd.DataFrame({"Materia": materias})
     for sim in simulacros:
         reg = get_regular_presented_df(sim["df"])
@@ -202,25 +202,9 @@ def render(simulacros, materias):
         use_container_width=True,
         hide_index=True,
     )
-    comp_materias_df["Mejor"] = comp_materias_df.drop(columns=["Materia"]).max(axis=1)
-    comp_materias_df["Menor"] = comp_materias_df.drop(columns=["Materia"]).min(axis=1)
-    comp_materias_df["Rango"] = comp_materias_df["Mejor"] - comp_materias_df["Menor"]
-    comp_materias_df = comp_materias_df.round(2)
-    columnas_numericas = comp_materias_df.select_dtypes(include=["float64", "int64"]).columns
-    columnas_simulacros = [c for c in comp_materias_df.columns if c not in ["Materia", "Mejor", "Menor", "Rango"]]
-    st.dataframe(
-        comp_materias_df.style.format({col: "{:.2f}" for col in columnas_numericas}).background_gradient(
-            subset=columnas_simulacros,
-            cmap="RdYlGn",
-            vmin=40,
-            vmax=90,
-        ),
-        use_container_width=True,
-        hide_index=True,
-    )
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>🔍 Hallazgos Principales y Recomendaciones</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Hallazgos Principales y Recomendaciones</h2>", unsafe_allow_html=True)
     promedios_curr = [ultimo["df"][mat].mean() for mat in materias]
     cambio_general = (np.mean(promedios_curr) - np.mean(promedios_curr[:-1])) if len(promedios_curr) > 1 else 0
     variabilidades = {mat: ultimo["df"][mat].std() for mat in materias}
@@ -245,7 +229,7 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='alert-warning'>
-            <h4>⚠️ Áreas de Atención Prioritaria</h4>
+            <h4>Áreas de Atención Prioritaria</h4>
             <ul>
                 {''.join([f'<li>{item}</li>' for item in insights_alertas])}
                 <li><strong>Variación general:</strong> {cambio_general:+.1f} puntos vs {nombre_anterior}</li>
@@ -262,7 +246,7 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='alert-success'>
-            <h4>✅ Fortalezas y Oportunidades</h4>
+            <h4>Fortalezas y Oportunidades</h4>
             <ul>
                 {''.join([f'<li>{item}</li>' for item in insights_fort])}
                 <li><strong>Mejor materia:</strong> {mejor_materia} ({max(promedios_curr):.1f} pts)</li>
@@ -277,7 +261,7 @@ def render(simulacros, materias):
 
     st.caption("Hallazgos generados automáticamente (IA + análisis de datos).")
 
-    st.markdown("<h2 class='section-header'>💡 Recomendaciones generadas por IA</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Recomendaciones generadas por IA</h2>", unsafe_allow_html=True)
     opciones_insights = [sim["nombre"] for sim in simulacros]
     elegido = st.selectbox("Selecciona el simulacro para ver recomendaciones", opciones_insights, index=len(opciones_insights) - 1)
     sim_obj = next(sim for sim in simulacros if sim["nombre"] == elegido)
@@ -294,7 +278,7 @@ def render(simulacros, materias):
         st.markdown(
             """
         <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.2rem; border-radius: 12px; color: white;'>
-            <h4 style='margin-top: 0;'>🎯 Corto Plazo</h4>
+            <h4 style='margin-top: 0;'>Corto Plazo</h4>
             <ul style='margin-bottom:0; padding-left:1.2rem;'>""" +
             "".join([f"<li>{rec}</li>" for rec in bloque[:3]]) +
             """</ul>
@@ -307,7 +291,7 @@ def render(simulacros, materias):
         st.markdown(
             """
         <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 1.2rem; border-radius: 12px; color: white;'>
-            <h4 style='margin-top: 0;'>📅 Mediano Plazo</h4>
+            <h4 style='margin-top: 0;'>Mediano Plazo</h4>
             <ul style='margin-bottom:0; padding-left:1.2rem;'>""" +
             "".join([f"<li>{rec}</li>" for rec in bloque[:3]]) +
             """</ul>
@@ -320,7 +304,7 @@ def render(simulacros, materias):
         st.markdown(
             """
         <div style='background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 1.2rem; border-radius: 12px; color: #333;'>
-            <h4 style='margin-top: 0;'>🎓 Largo Plazo</h4>
+            <h4 style='margin-top: 0;'>Largo Plazo</h4>
             <ul style='margin-bottom:0; padding-left:1.2rem;'>""" +
             "".join([f"<li>{rec}</li>" for rec in bloque[:3]]) +
             """</ul>

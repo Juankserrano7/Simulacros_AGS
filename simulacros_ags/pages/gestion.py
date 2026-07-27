@@ -13,7 +13,7 @@ def render(user_email: str):
         st.error("No tienes permisos de Administrador para gestionar simulacros.")
         st.stop()
 
-    st.markdown("<h1 class='header-title'>📝 Captura de Simulacros</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>Captura de Simulacros</h1>", unsafe_allow_html=True)
     st.markdown(
         """
         Ingresa el nombre del simulacro y digita o pega las puntuaciones de cada asignatura para la promoción activa.
@@ -25,10 +25,10 @@ def render(user_email: str):
     promocion_nombre = st.session_state.get("promocion_activa_nombre", "Promoción Seleccionada")
 
     if not promocion_id:
-        st.warning("⚠️ Selecciona una promoción activa en la barra lateral para continuar.")
+        st.warning("Selecciona una promoción activa en la barra lateral para continuar.")
         st.stop()
 
-    st.info(f"📌 Registrando notas para la promoción: **{promocion_nombre}**")
+    st.info(f"Registrando notas para la promoción: **{promocion_nombre}**")
 
     # 1. Cargar la lista de estudiantes registrados en Supabase para esta promoción
     db_url = os.getenv("SUPABASE_DB_URL")
@@ -50,7 +50,7 @@ def render(user_email: str):
             st.error(f"Error consultando estudiantes de la promoción: {exc}")
 
     if not estudiantes_list:
-        st.warning(f"⚠️ La promoción **{promocion_nombre}** no tiene estudiantes registrados aún.")
+        st.warning(f"La promoción **{promocion_nombre}** no tiene estudiantes registrados aún.")
         st.stop()
 
     st.markdown(f"**Estudiantes registrados ({len(estudiantes_list)}):**")
@@ -72,7 +72,7 @@ def render(user_email: str):
         })
     df_init = pd.DataFrame(init_data)
 
-    st.markdown("##### ✏️ Grilla de Puntajes (Ingresa notas de 0 a 100 por asignatura):")
+    st.markdown("##### Grilla de Puntajes (Ingresa notas de 0 a 100 por asignatura):")
     st.caption("Si dejas 'PUNTAJE GLOBAL' en 0, el sistema lo calculará automáticamente usando la fórmula ponderada ICFES (Base 500).")
 
     edited_df = st.data_editor(
@@ -92,9 +92,9 @@ def render(user_email: str):
         key=f"grid_sim_{promocion_id}"
     )
 
-    if st.button("💾 Guardar Simulacro en Supabase", type="primary", use_container_width=True):
+    if st.button("Guardar Simulacro en Supabase", type="primary", use_container_width=True):
         if not nombre_simulacro or not nombre_simulacro.strip():
-            st.error("⚠️ Debes ingresar un nombre válido para el simulacro.")
+            st.error("Debes ingresar un nombre válido para el simulacro.")
         else:
             with st.spinner("Guardando simulacro, aplicando fórmulas ICFES y calculando insights..."):
                 ok, mensaje, _ = save_manual_simulacro_grid(
@@ -112,12 +112,12 @@ def render(user_email: str):
 
     # 3. Estado de Simulacros Registrados
     st.markdown("---")
-    st.markdown("### 📋 Simulacros Registrados en esta Promoción")
+    st.markdown("### Simulacros Registrados en esta Promoción")
     metadatos, data_map, errores = load_all_simulacros(promocion_id)
     simulacros = ordenar_simulacros(data_map)
 
     if errores:
-        st.warning("⚠️ Se detectaron algunas observaciones en los simulacros cargados.")
+        st.warning("Se detectaron algunas observaciones en los simulacros cargados.")
 
     estado_df = pd.DataFrame(
         [

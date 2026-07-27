@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from ..auth import get_user_role
 from ..config import MATERIAS
+from ..styles import render_inclusion_badge
 
 load_dotenv()
 
@@ -40,10 +41,10 @@ def render(user_email: str):
     # Verificación estricta de Rol Administrador en Supabase
     rol_actual = get_user_role(user_email)
     if rol_actual != "admin":
-        st.error("🔒 Acceso Denegado. Esta sección es exclusiva para Administradores del Sistema.")
+        st.error("Acceso Denegado. Esta sección es exclusiva para Administradores del Sistema.")
         st.stop()
 
-    st.markdown("<h1 class='header-title'>⚙️ Panel Global de Administración</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>Panel Global de Administración</h1>", unsafe_allow_html=True)
     st.markdown(
         """
         Gestión centralizada de permisos por docente, configuración del flag de inclusión por estudiante, 
@@ -52,10 +53,10 @@ def render(user_email: str):
     )
 
     tab_permisos, tab_estudiantes, tab_inclusion, tab_auditoria = st.tabs([
-        "🔑 Gestión de Permisos",
-        "👥 Estudiantes por Promoción",
-        "♿ Sección Inclusión",
-        "📋 Historial de Auditoría"
+        "Gestión de Permisos",
+        "Estudiantes por Promoción",
+        "Sección Inclusión",
+        "Historial de Auditoría"
     ])
 
     # --- Pestaña 1: Gestión de Permisos ---
@@ -76,7 +77,7 @@ def render(user_email: str):
 
 
 def render_permisos_tab(current_admin_email: str):
-    st.markdown("### 🔑 Control de Usuarios, Roles y Accesos a Promociones")
+    st.markdown("### Control de Usuarios, Roles y Accesos a Promociones")
     
     conn = _get_db_connection()
     try:
@@ -107,13 +108,13 @@ def render_permisos_tab(current_admin_email: str):
             current_rol = urow["rol"]
             is_self = (target_email == current_admin_email.lower())
 
-            with st.expander(f"👤 {target_email} ({current_rol.upper()}) {' [Tu Cuenta Admin]' if is_self else ''}"):
+            with st.expander(f"{target_email} ({current_rol.upper()}) {' [Tu Cuenta Admin]' if is_self else ''}"):
                 c1, c2 = st.columns([1, 2])
                 
                 with c1:
                     st.write("**Cambio de Rol:**")
                     if is_self:
-                        st.info("🛡️ No puedes quitarte el rol de 'admin' a ti mismo para prevenir bloqueos por error.")
+                        st.info("No puedes quitarte el rol de 'admin' a ti mismo para prevenir bloqueos por error.")
                         new_rol = "admin"
                     else:
                         opciones_rol = ["docente", "admin"]
@@ -136,7 +137,7 @@ def render_permisos_tab(current_admin_email: str):
                                     registro_id=target_email,
                                     detalles={"rol_anterior": current_rol, "rol_nuevo": new_rol}
                                 )
-                                st.success(f"✅ Rol de {target_email} actualizado a '{new_rol}'.")
+                                st.success(f"Rol de {target_email} actualizado a '{new_rol}'.")
                                 st.cache_data.clear()
                                 st.rerun()
 
@@ -145,7 +146,7 @@ def render_permisos_tab(current_admin_email: str):
                     promos_actuales_user = user_promos_map.get(target_email, set())
                     
                     if is_self:
-                        st.info("🛡️ Posees acceso total a todas las promociones como Administrador.")
+                        st.info("Posees acceso total a todas las promociones como Administrador.")
                     else:
                         new_selected_promos = []
                         for p_id, p_nombre, p_anio in promos_all:
@@ -173,7 +174,7 @@ def render_permisos_tab(current_admin_email: str):
                                 registro_id=target_email,
                                 detalles={"promociones_asignadas_count": len(new_selected_promos)}
                             )
-                            st.success(f"✅ Accesos de {target_email} actualizados correctamente.")
+                            st.success(f"Accesos de {target_email} actualizados correctamente.")
                             st.cache_data.clear()
                             st.rerun()
 
@@ -182,7 +183,7 @@ def render_permisos_tab(current_admin_email: str):
 
 
 def render_estudiantes_tab(current_admin_email: str):
-    st.markdown("### 👥 Marcación y Gestión de Estudiantes por Promoción")
+    st.markdown("### Marcación y Gestión de Estudiantes por Promoción")
     
     conn = _get_db_connection()
     try:
@@ -223,9 +224,9 @@ def render_estudiantes_tab(current_admin_email: str):
 
             col_a, col_b, col_c = st.columns([3, 1, 2])
             with col_a:
-                st.write(f"👤 **{st_name}** (Grado: {st_grado})")
+                st.write(f"**{st_name}** (Grado: {st_grado})")
             with col_b:
-                new_inc = st.toggle("♿ Inclusión", value=curr_inc, key=f"tog_inc_{st_id}")
+                new_inc = st.toggle("Condición de Inclusión", value=curr_inc, key=f"tog_inc_{st_id}")
             with col_c:
                 if new_inc != curr_inc:
                     if st.button("Guardar Cambios", key=f"btn_inc_{st_id}", type="primary"):
@@ -239,7 +240,7 @@ def render_estudiantes_tab(current_admin_email: str):
                             registro_id=st_id,
                             detalles={"estudiante_nombre": st_name, "es_inclusion_anterior": curr_inc, "es_inclusion_nuevo": new_inc}
                         )
-                        st.success(f"✅ Estado de inclusión de {st_name} actualizado a {new_inc}.")
+                        st.success(f"Estado de inclusión de {st_name} actualizado a {new_inc}.")
                         st.cache_data.clear()
                         st.rerun()
 
@@ -248,7 +249,7 @@ def render_estudiantes_tab(current_admin_email: str):
 
 
 def render_inclusion_tab():
-    st.markdown("### ♿ Análisis Exclusivo de Estudiantes en Condición de Inclusión")
+    st.markdown("### Análisis Exclusivo de Estudiantes en Condición de Inclusión")
     
     conn = _get_db_connection()
     try:
@@ -286,7 +287,7 @@ def render_inclusion_tab():
             rows = cur.fetchall()
 
         if not rows:
-            st.info("ℹ️ No hay estudiantes marcados en condición de inclusión para esta promoción.")
+            st.info("No hay estudiantes marcados en condición de inclusión para esta promoción.")
             return
 
         df_inc = pd.DataFrame(rows, columns=[
@@ -299,7 +300,7 @@ def render_inclusion_tab():
             df_inc[col] = pd.to_numeric(df_inc[col], errors="coerce")
 
         unique_students = df_inc["nombre"].unique()
-        st.success(f"♿ Se encontraron {len(unique_students)} estudiantes en condición de inclusión.")
+        st.success(f"Se encontraron {len(unique_students)} estudiantes en condición de inclusión.")
 
         st.dataframe(df_inc[["nombre", "grado", "simulacro", "PROMEDIO PONDERADO"] + MATERIAS], use_container_width=True)
 
@@ -308,7 +309,7 @@ def render_inclusion_tab():
 
 
 def render_auditoria_tab():
-    st.markdown("### 📋 Registro Histórico de Auditoría de Cambios")
+    st.markdown("### Registro Histórico de Auditoría de Cambios")
     
     conn = _get_db_connection()
     try:

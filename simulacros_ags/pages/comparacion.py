@@ -25,7 +25,7 @@ def _sim_colors(simulacros) -> dict:
         else:
             h = (0.61803398875 * idx) % 1.0
             colors[sim["nombre"]] = _hex_from_hsl(h)
-    colors["🎯 ICFES Real"] = "#f1c40f"
+    colors["ICFES Real"] = "#f1c40f"
     return colors
 
 
@@ -34,7 +34,7 @@ def render(simulacros, materias):
         st.warning("Carga al menos un simulacro para comparar.")
         return
 
-    st.markdown("<h1 class='header-title'>🔬 Comparación entre Simulacros</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>Comparación entre Simulacros</h1>", unsafe_allow_html=True)
 
     promocion_id = st.session_state.get("promocion_activa_id")
     df_icfes_real = load_icfes_real_data(promocion_id)
@@ -51,7 +51,7 @@ def render(simulacros, materias):
         st.info("Selecciona al menos un simulacro.")
         return
 
-    st.markdown("<h2 class='section-header'>📊 Comparación de Promedios por Materia</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Comparación de Promedios por Materia</h2>", unsafe_allow_html=True)
     color_map = _sim_colors(simulacros)
     fig = go.Figure()
 
@@ -69,7 +69,7 @@ def render(simulacros, materias):
     if has_icfes_real:
         fig.add_trace(
             go.Bar(
-                name="🎯 ICFES Real (Definitivo)",
+                name="ICFES Real (Definitivo)",
                 x=materias,
                 y=[df_icfes_regular[mat].mean() for mat in materias if mat in df_icfes_regular.columns],
                 marker=dict(color="#f1c40f", line=dict(color="#d35400", width=2)),
@@ -87,7 +87,7 @@ def render(simulacros, materias):
     st.plotly_chart(fig, use_container_width=True)
 
     # --- Resumen de Variaciones Clave ---
-    st.markdown("### 🔥 Variaciones clave")
+    st.markdown("### Variaciones clave")
     promedios_generales = []
     for sim in simulacros:
         df_reg = get_regular_presented_df(sim["df"])
@@ -112,7 +112,7 @@ def render(simulacros, materias):
             st.markdown(
                 f"""
                 <div class='stats-box' style='background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); color: #000;'>
-                    <h4>🎯 ICFES Real</h4>
+                    <h4>ICFES Real</h4>
                     <h2>{icfes_real_prom:.2f}</h2>
                     <p>Resultado Oficial Definitivo</p>
                 </div>
@@ -184,14 +184,14 @@ def render(simulacros, materias):
             )
 
     # --- Tabla comparativa por materia ---
-    st.markdown("### 📋 Tabla Comparativa por Materia")
+    st.markdown("### Tabla Comparativa por Materia")
     comp_dict = {"Materia": materias}
     for sim in activos:
         df_reg = get_regular_presented_df(sim["df"])
         comp_dict[sim["nombre"]] = [df_reg[mat].mean() for mat in materias]
 
     if has_icfes_real:
-        comp_dict["🎯 ICFES Real"] = [df_icfes_regular[mat].mean() for mat in materias]
+        comp_dict["ICFES Real"] = [df_icfes_regular[mat].mean() for mat in materias]
 
     comp_df = pd.DataFrame(comp_dict).round(2)
     st.dataframe(
@@ -202,14 +202,14 @@ def render(simulacros, materias):
 
     # --- Evolución del promedio general ---
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📈 Evolución del Promedio General</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Evolución del Promedio General</h2>", unsafe_allow_html=True)
 
     x_labels = [sim["nombre"] for sim in simulacros]
     y_values = list(promedios_generales)
     marker_colors = [color_map.get(sim["nombre"], "#667eea") for sim in simulacros]
 
     if has_icfes_real and icfes_real_prom is not None:
-        x_labels.append("🎯 ICFES Real")
+        x_labels.append("ICFES Real")
         y_values.append(icfes_real_prom)
         marker_colors.append("#f1c40f")
 
@@ -230,7 +230,7 @@ def render(simulacros, materias):
 
     # --- Tabla Comparativa Lado a Lado por Estudiante ---
     st.markdown("---")
-    st.markdown("### 👤 Tabla Comparativa Lado a Lado por Estudiante")
+    st.markdown("### Tabla Comparativa Lado a Lado por Estudiante")
 
     estudiantes_set = set()
     for sim in simulacros:
@@ -274,12 +274,12 @@ def render(simulacros, materias):
                 real_val, inc_flag = real_tuple
                 if inc_flag:
                     is_inc = True
-                row["🎯 ICFES Real"] = round(real_val, 2) if real_val is not None and not np.isnan(real_val) else None
+                row["ICFES Real"] = round(real_val, 2) if real_val is not None and not np.isnan(real_val) else None
             else:
-                row["🎯 ICFES Real"] = None
+                row["ICFES Real"] = None
 
-            if row["Prom. Simulacros"] is not None and row.get("🎯 ICFES Real") is not None:
-                row["Δ (ICFES - Prom)"] = round(row["🎯 ICFES Real"] - row["Prom. Simulacros"], 2)
+            if row["Prom. Simulacros"] is not None and row.get("ICFES Real") is not None:
+                row["Δ (ICFES - Prom)"] = round(row["ICFES Real"] - row["Prom. Simulacros"], 2)
             else:
                 row["Δ (ICFES - Prom)"] = None
 
@@ -291,7 +291,7 @@ def render(simulacros, materias):
         cols_order = ["Estudiante", "Inclusión"] + [c for c in df_est_comp.columns if c not in ["Estudiante", "Inclusión"]]
         df_est_comp = df_est_comp[cols_order]
 
-        subset_grad = [c for c in ["Prom. Simulacros", "🎯 ICFES Real"] if c in df_est_comp.columns]
+        subset_grad = [c for c in ["Prom. Simulacros", "ICFES Real"] if c in df_est_comp.columns]
         st.dataframe(
             df_est_comp.style.format(na_rep="No presentó").background_gradient(subset=subset_grad, cmap="YlGnBu", vmin=250, vmax=450),
             hide_index=True,

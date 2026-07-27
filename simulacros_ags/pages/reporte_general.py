@@ -8,7 +8,7 @@ from ..data import get_regular_presented_df, load_icfes_real_data
 
 
 def render(datos_actual, simulacro_seleccionado, materias):
-    st.markdown(f"<h1 class='header-title'> Reporte General - {simulacro_seleccionado}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 class='header-title'>Reporte General - {simulacro_seleccionado}</h1>", unsafe_allow_html=True)
 
     promocion_id = st.session_state.get("promocion_activa_id")
     df_icfes_real = load_icfes_real_data(promocion_id)
@@ -17,24 +17,24 @@ def render(datos_actual, simulacro_seleccionado, materias):
 
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.metric("📚 Estudiantes Evaluados", len(datos_actual_regular))
+        st.metric("Estudiantes Evaluados", len(datos_actual_regular))
     with col2:
-        st.metric("📊 Promedio Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].mean():.1f}" if not datos_actual_regular.empty else "N/A")
+        st.metric("Promedio Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].mean():.1f}" if not datos_actual_regular.empty else "N/A")
     with col3:
         if not df_icfes_regular.empty:
-            st.metric("🎯 Promedio ICFES Real", f"{df_icfes_regular['PROMEDIO PONDERADO'].mean():.1f}")
+            st.metric("Promedio ICFES Real", f"{df_icfes_regular['PROMEDIO PONDERADO'].mean():.1f}")
         else:
-            st.metric("🏆 Máximo Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].max():.1f}" if not datos_actual_regular.empty else "N/A")
+            st.metric("Máximo Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].max():.1f}" if not datos_actual_regular.empty else "N/A")
     with col4:
-        st.metric("📉 Mínimo Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].min():.1f}" if not datos_actual_regular.empty else "N/A")
+        st.metric("Mínimo Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].min():.1f}" if not datos_actual_regular.empty else "N/A")
     with col5:
-        st.metric("📈 Desv. Est. Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].std():.1f}" if not datos_actual_regular.empty else "N/A")
+        st.metric("Desv. Est. Simulacro", f"{datos_actual_regular['PROMEDIO PONDERADO'].std():.1f}" if not datos_actual_regular.empty else "N/A")
 
     datos_actual = datos_actual_regular  # Reemplazar con dataset limpio para los analisis del grupo
 
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📊 Análisis Estadístico Completo</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Análisis Estadístico Completo</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -92,7 +92,7 @@ def render(datos_actual, simulacro_seleccionado, materias):
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
-    header_materia = "📚 Análisis Detallado por Materia (Simulacro vs ICFES Real)" if not df_icfes_regular.empty else "📚 Análisis Detallado por Materia"
+    header_materia = "Análisis Detallado por Materia (Simulacro vs ICFES Real)" if not df_icfes_regular.empty else "Análisis Detallado por Materia"
     st.markdown(f"<h2 class='section-header'>{header_materia}</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
@@ -114,7 +114,7 @@ def render(datos_actual, simulacro_seleccionado, materias):
             promedios_real = [df_icfes_regular[mat].mean() for mat in materias]
             fig.add_trace(
                 go.Bar(
-                    name="🎯 ICFES Real",
+                    name="ICFES Real",
                     x=materias,
                     y=promedios_real,
                     marker_color="#f1c40f",
@@ -154,7 +154,7 @@ def render(datos_actual, simulacro_seleccionado, materias):
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
-    titulo_tabla = "### 📋 Tabla Estadísticas Detalladas por Materia (Simulacro vs ICFES Real)" if not df_icfes_regular.empty else "### 📋 Tabla Estadísticas Detalladas por Materia"
+    titulo_tabla = "### Tabla Estadísticas Detalladas por Materia (Simulacro vs ICFES Real)" if not df_icfes_regular.empty else "### Tabla Estadísticas Detalladas por Materia"
     st.markdown(titulo_tabla)
 
     stats_dict = {
@@ -162,7 +162,7 @@ def render(datos_actual, simulacro_seleccionado, materias):
         "Prom. Simulacro": [datos_actual[m].mean() for m in materias],
     }
     if not df_icfes_regular.empty:
-        stats_dict["🎯 Prom. ICFES Real"] = [df_icfes_regular[m].mean() for m in materias]
+        stats_dict["Prom. ICFES Real"] = [df_icfes_regular[m].mean() for m in materias]
         stats_dict["Δ (ICFES - Sim)"] = [df_icfes_regular[m].mean() - datos_actual[m].mean() for m in materias]
 
     stats_dict.update({
@@ -175,13 +175,13 @@ def render(datos_actual, simulacro_seleccionado, materias):
     stats_df = pd.DataFrame(stats_dict).round(2)
     columnas_num = stats_df.select_dtypes(include=["float64", "int64"]).columns
     st.dataframe(
-        stats_df.style.format({col: "{:.2f}" for col in columnas_num}).background_gradient(subset=["Prom. Simulacro"] + (["🎯 Prom. ICFES Real"] if "🎯 Prom. ICFES Real" in stats_df.columns else []), cmap="RdYlGn", vmin=40, vmax=90),
+        stats_df.style.format({col: "{:.2f}" for col in columnas_num}).background_gradient(subset=["Prom. Simulacro"] + (["Prom. ICFES Real"] if "Prom. ICFES Real" in stats_df.columns else []), cmap="RdYlGn", vmin=40, vmax=90),
         use_container_width=True,
         hide_index=True,
     )
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>🔗 Matriz de Correlación entre Materias</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Matriz de Correlación entre Materias</h2>", unsafe_allow_html=True)
     col1, col2 = st.columns([2, 1])
     with col1:
         correlacion = datos_actual[materias].corr()
@@ -209,7 +209,7 @@ def render(datos_actual, simulacro_seleccionado, materias):
         st.success(
             f"""
         **Mayor Correlación:**  
-        {materias[max_corr_idx[0]].split()[0]} ↔️ {materias[max_corr_idx[1]].split()[0]}  
+        {materias[max_corr_idx[0]].split()[0]} - {materias[max_corr_idx[1]].split()[0]}  
         Coeficiente: {max_corr:.2f}
         """
         )

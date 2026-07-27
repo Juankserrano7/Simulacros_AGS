@@ -24,7 +24,6 @@ from simulacros_ags.styles import inject_base_styles
 
 st.set_page_config(
     page_title="Dashboard Simulacros PreIcfes",
-    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -65,39 +64,39 @@ if not st.session_state.authenticated:
     with col_login:
         with st.form("login_profesores"):
             email_input = st.text_input(
-                "📧 Correo institucional",
+                "Correo institucional",
                 placeholder="nombre.apellido@aspaen.edu.co",
                 label_visibility="visible",
             ).strip().lower()
             password_input = st.text_input(
-                "🔒 Contraseña",
+                "Contraseña",
                 type="password",
                 placeholder="••••••••••",
                 label_visibility="visible",
             )
             st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
-            login = st.form_submit_button("🚀 Ingresar al panel", use_container_width=True, type="primary")
+            login = st.form_submit_button("Ingresar al panel", use_container_width=True, type="primary")
 
         if login:
             now_ts = time.time()
             if st.session_state.lockout_until > now_ts:
                 wait_sec = int(st.session_state.lockout_until - now_ts)
-                st.error(f"⚠️ Demasiados intentos fallidos. Por seguridad, espera {wait_sec} segundos antes de reintentar.")
+                st.error(f"Demasiados intentos fallidos. Por seguridad, espera {wait_sec} segundos antes de reintentar.")
             else:
                 if verify_credentials(email_input, password_input, usuarios_auth):
                     st.session_state.authenticated = True
                     st.session_state.user_email = email_input
                     st.session_state.login_attempts = 0
                     st.session_state.lockout_until = 0
-                    st.success("✅ Ingreso exitoso. Redirigiendo...")
+                    st.success("Ingreso exitoso. Redirigiendo...")
                     st.rerun()
                 else:
                     st.session_state.login_attempts += 1
                     if st.session_state.login_attempts >= 5:
                         st.session_state.lockout_until = now_ts + 30
-                        st.error("❌ Acceso bloqueado temporalmente por 30 segundos debido a 5 intentos fallidos.")
+                        st.error("Acceso bloqueado temporalmente por 30 segundos debido a 5 intentos fallidos.")
                     else:
-                        st.error(f"❌ Correo o contraseña inválidos. Intento {st.session_state.login_attempts} de 5.")
+                        st.error(f"Correo o contraseña inválidos. Intento {st.session_state.login_attempts} de 5.")
 
         st.markdown(
             """
@@ -119,7 +118,7 @@ if not st.session_state.authenticated:
 # --- Consultar Promociones Autorizadas ---
 promociones_usuario = get_user_promotions(st.session_state.user_email)
 if not promociones_usuario:
-    st.error("🔒 No tienes promociones asignadas. Contacta al administrador para habilitar tu acceso.")
+    st.error("No tienes promociones asignadas. Contacta al administrador para habilitar tu acceso.")
     st.stop()
 
 promos_by_name = {p["nombre"]: p for p in promociones_usuario}
@@ -131,7 +130,7 @@ with st.sidebar:
         """
     <div style='text-align: center; padding: 1.5rem 0; margin-bottom: 1rem;'>
         <h2 style='color: white; font-weight: 800; font-size: 1.8rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>
-            📊 PreIcfes Dashboard
+            PreIcfes Dashboard
         </h2>
         <p style='color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-top: 0.5rem; letter-spacing: 1px;'>
             SISTEMA DE ANÁLISIS
@@ -159,8 +158,8 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("<hr style='margin: 1.5rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
-    st.markdown("### 🎯 SELECCIÓN DE PROMOCIÓN")
-    nombre_promo_sel = st.selectbox("🎓 Promoción Activa", list(promos_by_name.keys()), index=0)
+    st.markdown("### SELECCIÓN DE PROMOCIÓN")
+    nombre_promo_sel = st.selectbox("Promoción Activa", list(promos_by_name.keys()), index=0)
     if nombre_promo_sel and nombre_promo_sel in promos_by_name:
         promo_activa = promos_by_name[nombre_promo_sel]
     else:
@@ -173,20 +172,20 @@ with st.sidebar:
     user_role = get_user_role(st.session_state.user_email)
 
     st.markdown("<hr style='margin: 1rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
-    st.markdown("### 🧭 NAVEGACIÓN")
+    st.markdown("### NAVEGACIÓN")
     opciones_paginas = [
-        "🏠 Inicio",
-        "🎖️ Rankings",
-        "📊 Reporte General",
-        "🔄 Comparación Simulacros",
-        "👤 Análisis Individual",
-        "📈 Avance",
-        "📉 Estadísticas Detalladas",
-        "🎯 Resultados ICFES Real",
+        "Inicio",
+        "Rankings",
+        "Reporte General",
+        "Comparación Simulacros",
+        "Análisis Individual",
+        "Avance",
+        "Estadísticas Detalladas",
+        "Resultados ICFES Real",
     ]
     if user_role == "admin":
-        opciones_paginas.append("⚙️ Panel de Administración")
-        opciones_paginas.append("🧰 Gestión de Simulacros")
+        opciones_paginas.append("Panel de Administración")
+        opciones_paginas.append("Gestión de Simulacros")
 
     pagina = st.radio("Navegación", opciones_paginas, label_visibility="collapsed")
 
@@ -195,10 +194,10 @@ metadatos, data_map, errores_carga = load_all_simulacros(st.session_state.promoc
 simulacros = ordenar_simulacros(data_map)
 
 if not simulacros:
-    st.warning(f"ℹ️ La promoción '{promo_activa['nombre']}' no tiene simulacros registrados aún.")
+    st.warning(f"La promoción '{promo_activa['nombre']}' no tiene simulacros registrados aún.")
     if user_role == "admin":
-        st.info("Puedes subir simulacros desde la sección '🧰 Gestión de Simulacros'.")
-    if pagina not in ["🧰 Gestión de Simulacros", "⚙️ Panel de Administración", "🎯 Resultados ICFES Real"]:
+        st.info("Puedes subir simulacros desde la sección 'Gestión de Simulacros'.")
+    if pagina not in ["Gestión de Simulacros", "Panel de Administración", "Resultados ICFES Real"]:
         st.stop()
     simulacro_por_nombre = {}
     opciones_simulacro = []
@@ -210,9 +209,9 @@ else:
 
 with st.sidebar:
     st.markdown("<hr style='margin: 1.5rem 0; border-color: rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
-    st.markdown("### 📋 SIMULACRO")
+    st.markdown("### SIMULACRO")
     if opciones_simulacro:
-        simulacro_seleccionado = st.selectbox("📋 Simulacro Activo", opciones_simulacro, index=len(opciones_simulacro) - 1)
+        simulacro_seleccionado = st.selectbox("Simulacro Activo", opciones_simulacro, index=len(opciones_simulacro) - 1)
         datos_actual = simulacro_por_nombre[simulacro_seleccionado]["df"]
         sim_actual_obj = simulacro_por_nombre[simulacro_seleccionado]
     else:
@@ -220,7 +219,7 @@ with st.sidebar:
         datos_actual = pd.DataFrame()
         sim_actual_obj = {}
 
-    with st.expander("🔍 Diagnóstico de Datos"):
+    with st.expander("Diagnóstico de Datos"):
         for sim in simulacros:
             st.write(f"**{sim['nombre']}:** {len(sim['df'])} estudiantes")
         if errores_carga:
@@ -231,32 +230,20 @@ if opciones_simulacro and simulacro_seleccionado in simulacro_por_nombre:
     sim_actual_obj = simulacro_por_nombre[simulacro_seleccionado]
 
 page_handlers = {
-    "🏠 Inicio": lambda: inicio.render(simulacros, MATERIAS),
-    "🎖️ Rankings": lambda: rankings.render(simulacros, MATERIAS),
-    "📊 Reporte General": lambda: reporte_general.render(datos_actual, simulacro_seleccionado, MATERIAS),
-    "🔄 Comparación Simulacros": lambda: comparacion.render(simulacros, MATERIAS),
-    "👤 Análisis Individual": lambda: analisis_individual.render(datos_actual, MATERIAS),
-    "📈 Avance": lambda: avance.render(simulacros, MATERIAS),
-    "📉 Estadísticas Detalladas": lambda: estadisticas_detalladas.render(simulacros, sim_actual_obj, MATERIAS),
-    "🎯 Resultados ICFES Real": lambda: resultados_reales.render(st.session_state.user_email),
+    "Inicio": lambda: inicio.render(simulacros, MATERIAS),
+    "Rankings": lambda: rankings.render(simulacros, MATERIAS),
+    "Reporte General": lambda: reporte_general.render(datos_actual, simulacro_seleccionado, MATERIAS),
+    "Comparación Simulacros": lambda: comparacion.render(simulacros, MATERIAS),
+    "Análisis Individual": lambda: analisis_individual.render(datos_actual, MATERIAS),
+    "Avance": lambda: avance.render(simulacros, MATERIAS),
+    "Estadísticas Detalladas": lambda: estadisticas_detalladas.render(simulacros, sim_actual_obj, MATERIAS),
+    "Resultados ICFES Real": lambda: resultados_reales.render(st.session_state.user_email),
 }
 
 if user_role == "admin":
-    page_handlers["⚙️ Panel de Administración"] = lambda: admin.render(st.session_state.user_email)
-    page_handlers["🧰 Gestión de Simulacros"] = lambda: gestion.render(st.session_state.user_email)
+    page_handlers["Panel de Administración"] = lambda: admin.render(st.session_state.user_email)
+    page_handlers["Gestión de Simulacros"] = lambda: gestion.render(st.session_state.user_email)
 
 page_handlers.get(pagina, lambda: None)()
 
 st.markdown("---")
-st.markdown(
-    """
-<div style='text-align: center; color: #6c757d; padding: 2rem;'>
-    <p style='font-size: 0.9rem;'>
-        <strong> Dashboard de Análisis de Simulacros PreIcfes</strong><br>
-        Sistema de Evaluación y Seguimiento Académico<br>
-        Conectado con Supabase PostgreSQL
-    </p>
-</div>
-""",
-    unsafe_allow_html=True,
-)

@@ -233,7 +233,7 @@ def load_all_simulacros(promocion_id: Optional[str] = None) -> Tuple[List[Dict],
 
                     meta_real = {
                         "id": "icfes_real_definitivo",
-                        "nombre": "🎯 ICFES Real (Definitivo)",
+                        "nombre": "ICFES Real (Definitivo)",
                         "origen": "oficial",
                         "estado": "ready",
                         "creado_por": "ICFES",

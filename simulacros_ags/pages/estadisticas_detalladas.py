@@ -8,13 +8,12 @@ from simulacros_ags.data import get_or_generate_insights
 
 def render(simulacros, simulacro_actual, materias):
     datos_actual = simulacro_actual["df"]
-    st.markdown(f"<h1 class='header-title'> Estadísticas Detalladas - {simulacro_actual['nombre']}</h1>", unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["📊 Correlaciones", "📈 Análisis por Grado", "🎯 Top Performers"])
+    st.markdown(f"<h1 class='header-title'>Estadísticas Detalladas - {simulacro_actual['nombre']}</h1>", unsafe_allow_html=True)
+    tab1, tab2, tab3 = st.tabs(["Correlaciones", "Análisis por Grado", "Top Performers"])
 
     # --- Correlaciones ---
     with tab1:
-        st.markdown("### 🔗 Matriz de Correlación entre Materias")
-        # mostrar hasta 3 simulacros en columnas para mantener estética previa
+        st.markdown("### Matriz de Correlación entre Materias")
         cols = st.columns(min(3, len(simulacros)))
         mostrar = simulacros[-3:] if len(simulacros) > 3 else simulacros
         for idx, sim in enumerate(mostrar):
@@ -47,7 +46,7 @@ def render(simulacros, simulacro_actual, materias):
         st.markdown(
             """
         <div style='background: linear-gradient(135deg, #1f2a44 0%, #2b3a5e 100%); padding: 1.2rem; border-radius: 12px; color: white; margin-top: 1rem;'>
-            <h4 style='margin: 0 0 0.5rem 0;'>🤖 Análisis automático (IA)</h4>
+            <h4 style='margin: 0 0 0.5rem 0;'>Análisis automático (IA)</h4>
             <p style='margin: 0 0 0.5rem 0; opacity: 0.9;'>{resumen}</p>
             <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;'>
                 <div>
@@ -70,7 +69,7 @@ def render(simulacros, simulacro_actual, materias):
 
     # --- Análisis por grado ---
     with tab2:
-        st.markdown("### 📚 Análisis Comparativo por Grado")
+        st.markdown("### Análisis Comparativo por Grado")
         datos_grado = datos_actual
         if "GRADO" in datos_grado.columns:
             grados_disponibles = [str(g) for g in datos_grado["GRADO"].dropna().unique()]
@@ -111,7 +110,7 @@ def render(simulacros, simulacro_actual, materias):
                 tabla_grados.append(fila)
             df_grados = pd.DataFrame(tabla_grados).round(2)
             columnas_num = df_grados.select_dtypes(include=["float64", "int64"]).columns
-            st.markdown("#### 📊 Tabla de Promedios por Grado")
+            st.markdown("#### Tabla de Promedios por Grado")
             subset_cols = [col for col in materias + ["Promedio General"] if col in df_grados.columns]
             styled = df_grados.style.format({col: "{:.2f}" for col in columnas_num})
             if subset_cols:
@@ -122,7 +121,7 @@ def render(simulacros, simulacro_actual, materias):
 
     # --- Top performers ---
     with tab3:
-        st.markdown("### 🏆 Top Performers por Materia")
+        st.markdown("### Top Performers por Materia")
         n_top = st.slider("Número de estudiantes a mostrar", 5, 30, 15)
         cols = st.columns(2)
         for idx, materia in enumerate(materias):
@@ -152,7 +151,7 @@ def render(simulacros, simulacro_actual, materias):
                 st.plotly_chart(fig, width="stretch")
 
         st.markdown("---")
-        st.markdown("### 🏆 Ranking General")
+        st.markdown("### Ranking General")
         ranking_general = datos_actual.nlargest(30, "PROMEDIO PONDERADO")[["ESTUDIANTE"] + materias + ["PROMEDIO PONDERADO"]].reset_index(drop=True)
         ranking_general.index = ranking_general.index + 1
         ranking_general = ranking_general.round(2)

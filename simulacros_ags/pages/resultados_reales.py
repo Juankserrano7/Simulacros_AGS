@@ -1,18 +1,20 @@
 import os
+import re
 import unicodedata
 from io import BytesIO
 from typing import Dict, List, Tuple, Optional
 
 import numpy as np
 import pandas as pd
-import psycopg2
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
+import psycopg2
 import streamlit as st
 from dotenv import load_dotenv
 
-from ..config import MATERIAS
-from ..data import _canonicalize_columns, _clean_student_frame
+from ..config import MATERIAS, MAX_UPLOAD_MB
+from ..data import COLUMN_CANONICAL_MAP, _canonicalize_columns
+from ..styles import render_inclusion_badge
 
 load_dotenv()
 
@@ -20,212 +22,178 @@ load_dotenv()
 def _get_db_connection():
     db_url = os.getenv("SUPABASE_DB_URL")
     if not db_url:
-        st.error("No se encontró la variable SUPABASE_DB_URL en el entorno.")
+        st.error("No se encontró la conexión a Supabase (SUPABASE_DB_URL).")
         st.stop()
     return psycopg2.connect(db_url)
 
 
-def load_promotion_data(promocion_id: Optional[str] = None) -> Tuple[Optional[Dict], pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def _normalize_str(s: str) -> str:
+    if not isinstance(s, str):
+        return ""
+    s = s.strip().upper()
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    s = re.sub(r"[^A-Z0-9 ]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+@st.cache_data(ttl=60)
+def load_promotion_data(promocion_id: str):
     """Carga promoción seleccionada, estudiantes, resultados de simulacros y resultados ICFES real desde Supabase."""
+    if not promocion_id:
+        return None, pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     conn = _get_db_connection()
     try:
         with conn.cursor() as cur:
-            # 1. Promoción seleccionada o por defecto
-            if promocion_id:
-                cur.execute("""
-                    SELECT id::text, nombre, anio_graduacion
-                    FROM promociones
-                    WHERE id = %s;
-                """, (promocion_id,))
-            else:
-                cur.execute("""
-                    SELECT id::text, nombre, anio_graduacion
-                    FROM promociones
-                    WHERE activa = true
-                    ORDER BY creado_en DESC
-                    LIMIT 1;
-                """)
-            promo_row = cur.fetchone()
-            if not promo_row:
+            # 1. Datos de la promoción
+            cur.execute("SELECT id::text, nombre, anio_graduacion FROM promociones WHERE id = %s;", (promocion_id,))
+            p_row = cur.fetchone()
+            if not p_row:
                 return None, pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-            
-            promo = {
-                "id": str(promo_row[0]),
-                "nombre": promo_row[1],
-                "anio_graduacion": promo_row[2]
-            }
-            promocion_id = promo["id"]
+            promo = {"id": p_row[0], "nombre": p_row[1], "anio_graduacion": p_row[2]}
 
-
-            # 2. Estudiantes
+            # 2. Estudiantes oficiales de la promoción
             cur.execute("""
-                SELECT id::text, nombre, grado, es_inclusion
-                FROM estudiantes
+                SELECT id::text, nombre, grado, es_inclusion 
+                FROM estudiantes 
                 WHERE promocion_id = %s;
             """, (promocion_id,))
-            est_rows = cur.fetchall()
-            df_estudiantes = pd.DataFrame(est_rows, columns=["estudiante_id", "nombre", "grado", "es_inclusion"])
+            e_rows = cur.fetchall()
+            df_estudiantes = pd.DataFrame(e_rows, columns=["id", "nombre", "grado", "es_inclusion"]) if e_rows else pd.DataFrame()
 
-            # 3. Resultados de simulacros
+            # 3. Resultados de Simulacros
             cur.execute("""
                 SELECT 
-                    rs.simulacro_id,
+                    rs.simulacro_id::text,
                     s.nombre AS simulacro_nombre,
-                    rs.estudiante_id::text,
+                    s.creado_en,
+                    e.id::text AS estudiante_id,
                     e.nombre AS estudiante_nombre,
                     e.es_inclusion,
-                    rs.lectura_critica,
-                    rs.matematicas,
-                    rs.sociales_ciudadanas,
-                    rs.ciencias_naturales,
-                    rs.ingles,
-                    rs.promedio_ponderado,
-                    s.creado_en
+                    rs.lectura_critica AS "LECTURA CRÍTICA",
+                    rs.matematicas AS "MATEMÁTICAS",
+                    rs.sociales_ciudadanas AS "SOCIALES Y CIUDADANAS",
+                    rs.ciencias_naturales AS "CIENCIAS NATURALES",
+                    rs.ingles AS "INGLÉS",
+                    rs.promedio_ponderado AS "PUNTAJE GLOBAL"
                 FROM resultados_simulacro rs
-                JOIN simulacros s ON rs.simulacro_id = s.id
                 JOIN estudiantes e ON rs.estudiante_id = e.id
-                WHERE s.promocion_id = %s
-                ORDER BY s.creado_en ASC;
+                JOIN simulacros s ON rs.simulacro_id = s.id
+                WHERE e.promocion_id = %s
+                ORDER BY s.creado_en ASC, e.nombre ASC;
             """, (promocion_id,))
-            sim_rows = cur.fetchall()
-            df_simulacros = pd.DataFrame(
-                sim_rows, 
-                columns=[
-                    "simulacro_id", "simulacro_nombre", "estudiante_id", "estudiante_nombre", 
-                    "es_inclusion", "LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", 
-                    "CIENCIAS NATURALES", "INGLÉS", "PUNTAJE GLOBAL", "creado_en"
-                ]
-            )
+            s_rows = cur.fetchall()
+            cols_sims = ["simulacro_id", "simulacro_nombre", "creado_en", "estudiante_id", "estudiante_nombre", "es_inclusion",
+                         "LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PUNTAJE GLOBAL"]
+            df_simulacros = pd.DataFrame(s_rows, columns=cols_sims) if s_rows else pd.DataFrame()
 
             # 4. Resultados ICFES Real
             cur.execute("""
                 SELECT 
-                    rir.estudiante_id::text,
+                    e.id::text AS estudiante_id,
                     e.nombre AS estudiante_nombre,
                     e.es_inclusion,
-                    rir.anio_presentacion,
-                    rir.puntaje_global,
-                    rir.lectura_critica,
-                    rir.matematicas,
-                    rir.sociales_ciudadanas,
-                    rir.ciencias_naturales,
-                    rir.ingles
+                    rir.lectura_critica AS "LECTURA CRÍTICA",
+                    rir.matematicas AS "MATEMÁTICAS",
+                    rir.sociales_ciudadanas AS "SOCIALES Y CIUDADANAS",
+                    rir.ciencias_naturales AS "CIENCIAS NATURALES",
+                    rir.ingles AS "INGLÉS",
+                    rir.puntaje_global AS "PUNTAJE GLOBAL"
                 FROM resultados_icfes_real rir
                 JOIN estudiantes e ON rir.estudiante_id = e.id
                 WHERE rir.promocion_id = %s;
             """, (promocion_id,))
-            real_rows = cur.fetchall()
-            df_icfes_real = pd.DataFrame(
-                real_rows,
-                columns=[
-                    "estudiante_id", "estudiante_nombre", "es_inclusion", "anio_presentacion",
-                    "PUNTAJE GLOBAL", "LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS",
-                    "CIENCIAS NATURALES", "INGLÉS"
-                ]
-            )
-
-            num_cols = ["LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PUNTAJE GLOBAL"]
-            for col in num_cols:
-                if col in df_simulacros.columns:
-                    df_simulacros[col] = pd.to_numeric(df_simulacros[col], errors="coerce")
-                if col in df_icfes_real.columns:
-                    df_icfes_real[col] = pd.to_numeric(df_icfes_real[col], errors="coerce")
+            r_rows = cur.fetchall()
+            cols_real = ["estudiante_id", "estudiante_nombre", "es_inclusion",
+                         "LECTURA CRÍTICA", "MATEMÁTICAS", "SOCIALES Y CIUDADANAS", "CIENCIAS NATURALES", "INGLÉS", "PUNTAJE GLOBAL"]
+            df_icfes_real = pd.DataFrame(r_rows, columns=cols_real) if r_rows else pd.DataFrame()
 
             return promo, df_estudiantes, df_simulacros, df_icfes_real
     finally:
         conn.close()
 
 
-def process_icfes_excel(file_buffer: BytesIO, promo: Dict, df_estudiantes: pd.DataFrame) -> Tuple[bool, str, List[Dict], List[str]]:
+def process_icfes_excel(file_buffer, promo: dict, df_estudiantes: pd.DataFrame) -> Tuple[bool, str, List[Dict], List[str]]:
     """Procesa el archivo de resultados ICFES real y cruza nombres con estudiantes de Supabase."""
-    file_buffer.seek(0)
-    header = file_buffer.read(8)
-    file_buffer.seek(0)
-
-    # Validar firma MIME/Magic Bytes de archivo
-    fname = file_buffer.name.lower()
-    if fname.endswith(".xlsx") and not header.startswith(b"PK\x03\x04"):
-        return False, "El archivo .xlsx no tiene una estructura válida de hoja de cálculo Excel.", [], []
-    elif fname.endswith(".xls") and not header.startswith(b"\xd0\xcf\x11\xe0"):
-        return False, "El archivo .xls no tiene la firma binaria válida de Excel legado.", [], []
-
     try:
+        fname = file_buffer.name.lower()
         if fname.endswith(".csv"):
-            df_raw = pd.read_csv(file_buffer)
+            df = pd.read_csv(file_buffer)
         else:
-            df_raw = pd.read_excel(file_buffer)
-    except Exception as exc:
-        return False, f"No se pudo leer el archivo: {exc}", [], []
+            df = pd.read_excel(file_buffer)
+    except Exception as e:
+        return False, f"Error leyendo el archivo: {e}", [], []
 
-    df_clean = _clean_student_frame(df_raw)
-    
-    # Mapa de nombres normalizados en DB -> estudiante_id
-    db_student_map = {row["nombre"]: row["estudiante_id"] for _, row in df_estudiantes.iterrows()}
+    df = _canonicalize_columns(df)
+    if "ESTUDIANTE" not in df.columns:
+        return False, "El archivo no contiene la columna 'ESTUDIANTE' o 'Nombre Completo'.", [], []
+
+    if df_estudiantes.empty:
+        return False, "La promoción activa no tiene estudiantes registrados en la base de datos.", [], []
+
+    est_map = {_normalize_str(row["nombre"]): row["id"] for _, row in df_estudiantes.iterrows()}
     
     rows_to_insert = []
     unmatched_names = []
 
-    for _, r in df_clean.iterrows():
-        st_name = r["ESTUDIANTE"]
-        if st_name in db_student_map:
-            st_id = db_student_map[st_name]
-            
-            def safe_num(val):
-                if pd.isna(val):
-                    return None
-                try:
-                    return float(val)
-                except (ValueError, TypeError):
-                    return None
+    for _, row in df.iterrows():
+        est_name_raw = str(row.get("ESTUDIANTE", "")).strip()
+        norm_name = _normalize_str(est_name_raw)
+        if not norm_name:
+            continue
 
-            pg = safe_num(r.get("PROMEDIO PONDERADO") or r.get("PUNTAJE GLOBAL"))
-            lc = safe_num(r.get("LECTURA CRÍTICA"))
-            mat = safe_num(r.get("MATEMÁTICAS")) if "MATEMÁTICAS" in r else safe_num(r.get("MATEMATICAS"))
-            soc = safe_num(r.get("SOCIALES Y CIUDADANAS"))
-            cn = safe_num(r.get("CIENCIAS NATURALES"))
-            ing = safe_num(r.get("INGLÉS") or r.get("INGLES"))
+        est_id = est_map.get(norm_name)
+        if not est_id:
+            unmatched_names.append(est_name_raw)
+            continue
 
+        def _val(col):
+            v = row.get(col)
+            try:
+                val = float(v)
+                return val if not np.isnan(val) else None
+            except (ValueError, TypeError):
+                return None
 
-            rows_to_insert.append({
-                "estudiante_id": st_id,
-                "promocion_id": promo["id"],
-                "anio_presentacion": promo["anio_graduacion"],
-                "puntaje_global": pg,
-                "lectura_critica": lc,
-                "matematicas": mat,
-                "sociales_ciudadanas": soc,
-                "ciencias_naturales": cn,
-                "ingles": ing
-            })
-        else:
-            unmatched_names.append(st_name)
+        rows_to_insert.append({
+            "promocion_id": promo["id"],
+            "estudiante_id": est_id,
+            "lectura_critica": _val("LECTURA CRÍTICA"),
+            "matematicas": _val("MATEMÁTICAS"),
+            "sociales_ciudadanas": _val("SOCIALES Y CIUDADANAS"),
+            "ciencias_naturales": _val("CIENCIAS NATURALES"),
+            "ingles": _val("INGLÉS"),
+            "puntaje_global": _val("PROMEDIO PONDERADO"),
+        })
 
-    return True, f"Procesados {len(rows_to_insert)} registros válidos.", rows_to_insert, unmatched_names
+    return True, "", rows_to_insert, unmatched_names
 
 
-def save_icfes_results(rows_to_insert: List[Dict]):
-    """Guarda los resultados reales de ICFES en Supabase."""
+def save_icfes_results(rows: List[Dict]):
+    """Guarda o actualiza resultados en resultados_icfes_real usando UPSERT."""
     conn = _get_db_connection()
     try:
         with conn.cursor() as cur:
-            for row in rows_to_insert:
+            for r in rows:
                 cur.execute("""
                     INSERT INTO resultados_icfes_real (
-                        estudiante_id, promocion_id, anio_presentacion, puntaje_global,
-                        lectura_critica, matematicas, sociales_ciudadanas, ciencias_naturales, ingles
+                        promocion_id, estudiante_id, lectura_critica, matematicas, 
+                        sociales_ciudadanas, ciencias_naturales, ingles, puntaje_global, actualizado_en
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, now()
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (estudiante_id, anio_presentacion) DO UPDATE SET
-                        puntaje_global = EXCLUDED.puntaje_global,
+                    ON CONFLICT (promocion_id, estudiante_id) DO UPDATE SET
                         lectura_critica = EXCLUDED.lectura_critica,
                         matematicas = EXCLUDED.matematicas,
                         sociales_ciudadanas = EXCLUDED.sociales_ciudadanas,
                         ciencias_naturales = EXCLUDED.ciencias_naturales,
-                        ingles = EXCLUDED.ingles;
+                        ingles = EXCLUDED.ingles,
+                        puntaje_global = EXCLUDED.puntaje_global,
+                        actualizado_en = now();
                 """, (
-                    row["estudiante_id"], row["promocion_id"], row["anio_presentacion"],
-                    row["puntaje_global"], row["lectura_critica"], row["matematicas"],
-                    row["sociales_ciudadanas"], row["ciencias_naturales"], row["ingles"]
+                    r["promocion_id"], r["estudiante_id"], r["lectura_critica"], r["matematicas"],
+                    r["sociales_ciudadanas"], r["ciencias_naturales"], r["ingles"], r["puntaje_global"]
                 ))
         conn.commit()
     finally:
@@ -233,7 +201,7 @@ def save_icfes_results(rows_to_insert: List[Dict]):
 
 
 def render(user_email: str):
-    st.markdown("<h1 class='header-title'>🎯 Resultados Oficiales ICFES Real</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-title'>Resultados Oficiales ICFES Real</h1>", unsafe_allow_html=True)
     st.markdown(
         """
         Monitoreo y comparación en tiempo real entre los simulacros de preparación y los resultados 
@@ -248,37 +216,37 @@ def render(user_email: str):
         st.error("No hay una promoción activa configurada en el sistema.")
         st.stop()
 
-    st.info(f"📌 Promoción activa: **{promo['nombre']}** (Año de graduación: {promo['anio_graduacion']})")
+    st.info(f"Promoción activa: **{promo['nombre']}** (Año de graduación: {promo['anio_graduacion']})")
 
     # --- Sección 1: Carga de Archivo de Resultados Reales ---
-    with st.expander("📤 Cargar / Actualizar Resultados ICFES Reales (Excel/CSV)", expanded=df_icfes_real.empty):
+    with st.expander("Cargar / Actualizar Resultados ICFES Reales (Excel/CSV)", expanded=df_icfes_real.empty):
         st.write("Sube el archivo Excel o CSV entregado por el ICFES o procesado institucionalmente.")
         file_upload = st.file_uploader("Seleccionar archivo ICFES", type=["xlsx", "xls", "csv"])
         if file_upload:
-            if st.button("🚀 Procesar e Importar a Supabase", use_container_width=True, type="primary"):
+            if st.button("Procesar e Importar a Supabase", use_container_width=True, type="primary"):
                 ok, msg, rows_to_insert, unmatched = process_icfes_excel(file_buffer=file_upload, promo=promo, df_estudiantes=df_estudiantes)
                 if not ok:
                     st.error(msg)
                 else:
                     if unmatched:
-                        st.warning(f"⚠️ Se encontraron {len(unmatched)} nombres que NO hicieron match exacto con la lista oficial de estudiantes:")
+                        st.warning(f"Se encontraron {len(unmatched)} nombres que NO hicieron match exacto con la lista oficial de estudiantes:")
                         st.dataframe(pd.DataFrame(unmatched, columns=["Estudiante No Encontrado en DB"]), hide_index=True)
                         st.info("Nota: Los nombres que hicieron match correctamente continuarán con la importación.")
 
                     if rows_to_insert:
                         save_icfes_results(rows_to_insert)
-                        st.success(f"✅ Se guardaron/actualizaron exitosamente {len(rows_to_insert)} resultados ICFES en Supabase.")
+                        st.success(f"Se guardaron/actualizaron exitosamente {len(rows_to_insert)} resultados ICFES en Supabase.")
                         st.cache_data.clear()
                         st.rerun()
 
     if df_icfes_real.empty:
-        st.warning("ℹ️ Aún no se han cargado resultados oficiales de ICFES Real para esta promoción. Sube un archivo en la sección anterior cuando estén disponibles.")
+        st.warning("Aún no se han cargado resultados oficiales de ICFES Real para esta promoción. Sube un archivo en la sección anterior cuando estén disponibles.")
         st.markdown("---")
 
     # --- Sección 2: Pestañas General vs Inclusión ---
     tab_general, tab_inclusion = st.tabs([
-        "🎓 Promoción General (Excluye Inclusión)", 
-        "♿ Estudiantes en Condición de Inclusión"
+        "Promoción General (Excluye Inclusión)", 
+        "Estudiantes en Condición de Inclusión"
     ])
 
     with tab_general:
@@ -305,7 +273,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
 
     has_real_scores = not df_icfes_real.empty and "PUNTAJE GLOBAL" in df_icfes_real.columns and df_icfes_real["PUNTAJE GLOBAL"].dropna().count() > 0
 
-    header_text = "### 🏛️ Tabla Maestra de Evaluaciones de la Promoción (Listado de Simulacros + Puntaje Final ICFES Real)" if has_real_scores else "### 🏛️ Tabla Maestra de Evaluaciones de la Promoción"
+    header_text = "### Tabla Maestra de Evaluaciones de la Promoción (Listado de Simulacros + Puntaje Final ICFES Real)" if has_real_scores else "### Tabla Maestra de Evaluaciones de la Promoción"
     st.markdown(header_text)
 
     # 1. Construir Tabla Maestra de Evaluaciones de la Promoción
@@ -339,7 +307,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
         pg_real = df_icfes_real["PUNTAJE GLOBAL"].mean()
         
         row_real = {
-            "Evaluación": "🎯 ICFES Real (Definitivo)",
+            "Evaluación": "ICFES Real (Definitivo)",
             "Tipo": "Resultado Oficial",
             "Estudiantes": n_est_real,
             "Puntaje Global": round(pg_real, 2) if pd.notna(pg_real) else None,
@@ -377,7 +345,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
     )
 
     st.markdown("---")
-    st.markdown("### 📊 Gráficas Generadas a Partir de la Tabla Maestra de la Promoción")
+    st.markdown("### Gráficas Generadas a Partir de la Tabla Maestra de la Promoción")
 
     col_g1, col_g2 = st.columns(2)
 
@@ -402,7 +370,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
             ))
 
         fig_global.update_layout(
-            title="1. Progresión Puntaje Global (Simulacros ➔ Puntaje Final)",
+            title="1. Progresión Puntaje Global (Simulacros a Puntaje Final)",
             yaxis=dict(title="Puntaje Global (0-500)", range=[0, 500]),
             xaxis=dict(title="Evaluación"),
             showlegend=False,
@@ -467,7 +435,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
 
     # 3. Vista Individual por Estudiante (Lado a Lado)
     st.markdown("---")
-    st.markdown("### 👤 Análisis Individual por Estudiante (Simulacros vs. ICFES Real)")
+    st.markdown("### Análisis Individual por Estudiante (Simulacros vs. ICFES Real)")
 
     lista_estudiantes = sorted(df_estudiantes["nombre"].unique())
     est_seleccionado = st.selectbox(
@@ -497,7 +465,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
         if not st_real.empty:
             r = st_real.iloc[0]
             rows_est.append({
-                "Evaluación": "🎯 ICFES REAL (Oficial)",
+                "Evaluación": "ICFES REAL (Oficial)",
                 "PUNTAJE GLOBAL": r["PUNTAJE GLOBAL"],
                 "LECTURA CRÍTICA": r["LECTURA CRÍTICA"],
                 "MATEMÁTICAS": r["MATEMÁTICAS"],
@@ -513,7 +481,7 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
             # Gráfica individual de progresión
             fig_ind = go.Figure()
             for idx, r in df_est_comp.iterrows():
-                is_real = (r["Evaluación"] == "🎯 ICFES REAL (Oficial)")
+                is_real = (r["Evaluación"] == "ICFES REAL (Oficial)")
                 color = "#10B981" if is_real else "#3B82F6"
                 fig_ind.add_trace(go.Bar(
                     x=[r["Evaluación"]],

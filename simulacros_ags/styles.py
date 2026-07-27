@@ -4,6 +4,7 @@ BASE_CSS = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
     @import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');
+    @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css');
     
     * {
         font-family: 'Inter', sans-serif;
@@ -598,3 +599,9 @@ BASE_CSS = """
 def inject_base_styles():
     """Inyecta el CSS del dashboard."""
     st.markdown(BASE_CSS, unsafe_allow_html=True)
+
+
+def render_inclusion_badge(text: str = "Inclusión") -> str:
+    """Retorna el badge HTML institucional y uniforme para estudiantes o pestañas en condición de inclusión."""
+    return f'<span style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.6rem; border-radius: 4px; background: rgba(99, 102, 241, 0.12); color: #6366F1; font-weight: 600; font-size: 0.85rem;" title="Estudiante en Condición de Inclusión"><i class="bi bi-universal-access-circle" style="font-size: 0.95rem;"></i> {text}</span>'
+

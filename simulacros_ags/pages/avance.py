@@ -15,7 +15,7 @@ def render(simulacros, materias):
     df_icfes_real = load_icfes_real_data(promocion_id)
     has_icfes_real = not df_icfes_real.empty
 
-    title_text = "📈 Análisis de Avance hacia el ICFES Real" if has_icfes_real else "📈 Análisis de Avance de Simulacros"
+    title_text = "Análisis de Avance hacia el ICFES Real" if has_icfes_real else "Análisis de Avance de Simulacros"
     st.markdown(f"<h1 class='header-title'>{title_text}</h1>", unsafe_allow_html=True)
 
     frames = []
@@ -28,7 +28,7 @@ def render(simulacros, materias):
     if has_icfes_real and "ESTUDIANTE" in df_icfes_real.columns:
         temp_real = df_icfes_real[["ESTUDIANTE", "PROMEDIO PONDERADO"]].copy()
         temp_real["ESTUDIANTE"] = temp_real["ESTUDIANTE"].str.strip().str.upper()
-        temp_real = temp_real.rename(columns={"PROMEDIO PONDERADO": "🎯 ICFES Real"})
+        temp_real = temp_real.rename(columns={"PROMEDIO PONDERADO": "ICFES Real"})
         frames.append(temp_real)
 
     progresion = reduce(lambda left, right: left.merge(right, on="ESTUDIANTE", how="outer"), frames)
@@ -50,9 +50,9 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white;'>
-            <h4>📈 Subieron</h4>
+            <h4>Subieron</h4>
             <h2 style='margin:0;'>{mejoraron}</h2>
-            <p style='opacity:0.9;'>{eval_cols[-2] if len(eval_cols)>=2 else '-'} → {eval_cols[-1]}</p>
+            <p style='opacity:0.9;'>{eval_cols[-2] if len(eval_cols)>=2 else '-'} -> {eval_cols[-1]}</p>
         </div>
         """,
             unsafe_allow_html=True,
@@ -61,9 +61,9 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;'>
-            <h4>📉 Bajaron</h4>
+            <h4>Bajaron</h4>
             <h2 style='margin:0;'>{empeoraron}</h2>
-            <p style='opacity:0.9;'>{eval_cols[-2] if len(eval_cols)>=2 else '-'} → {eval_cols[-1]}</p>
+            <p style='opacity:0.9;'>{eval_cols[-2] if len(eval_cols)>=2 else '-'} -> {eval_cols[-1]}</p>
         </div>
         """,
             unsafe_allow_html=True,
@@ -72,7 +72,7 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); color: white;'>
-            <h4>📊 Cambio promedio</h4>
+            <h4>Cambio promedio</h4>
             <h2 style='margin:0;'>{cambio_prom:.2f}</h2>
             <p style='opacity:0.9;'>Puntos</p>
         </div>
@@ -81,7 +81,7 @@ def render(simulacros, materias):
         )
 
     st.markdown("---")
-    st.markdown(f"<h2 class='section-header'>📊 Avance por estudiante ({eval_cols[-2] if len(eval_cols)>=2 else '-'} → {eval_cols[-1]})</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 class='section-header'>Avance por estudiante ({eval_cols[-2] if len(eval_cols)>=2 else '-'} -> {eval_cols[-1]})</h2>", unsafe_allow_html=True)
     progresion_sorted = progresion.sort_values("CAMBIO_ULTIMO")
     colores = ["#27ae60" if c > 0 else "#e74c3c" for c in progresion_sorted["CAMBIO_ULTIMO"]]
     fig = go.Figure()
@@ -96,7 +96,7 @@ def render(simulacros, materias):
         )
     )
     fig.update_layout(
-        title=f"Cambio de rendimiento: {eval_cols[-2] if len(eval_cols)>=2 else '-'} → {eval_cols[-1]}",
+        title=f"Cambio de rendimiento: {eval_cols[-2] if len(eval_cols)>=2 else '-'} -> {eval_cols[-1]}",
         xaxis_title="Cambio en Puntos",
         yaxis_title="Estudiante",
         height=750,
@@ -106,7 +106,7 @@ def render(simulacros, materias):
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📈 Evolución Individual</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Evolución Individual</h2>", unsafe_allow_html=True)
     estudiantes_mostrar = st.multiselect(
         "Seleccionar estudiantes para comparar la evolución histórica",
         progresion["ESTUDIANTE"].tolist(),
@@ -141,7 +141,7 @@ def render(simulacros, materias):
         st.plotly_chart(fig_ind, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📋 Tabla Resumen de Avance</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Tabla Resumen de Avance</h2>", unsafe_allow_html=True)
     tabla_progresion = progresion[["ESTUDIANTE"] + eval_cols + ["CAMBIO_ULTIMO", "CAMBIO_TOTAL"]].copy()
     tabla_progresion = tabla_progresion.sort_values("CAMBIO_TOTAL", ascending=False).round(2)
     columnas_num = tabla_progresion.select_dtypes(include=["float64", "int64"]).columns

@@ -23,7 +23,7 @@ def _normalize_name(name: str) -> str:
 
 
 def render(simulacros, materias):
-    st.markdown("<h2 class='section-header'>🏆 Top Global</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>Top Global</h2>", unsafe_allow_html=True)
 
     # Unificar datos de todos los simulacros
     frames = []
@@ -71,7 +71,7 @@ def render(simulacros, materias):
         .reset_index(drop=True)
     )
     if top_global.empty:
-        st.warning("⚠️ No se encontraron datos válidos para el ranking global.")
+        st.warning("No se encontraron datos válidos para el ranking global.")
     else:
         st.markdown("<div>", unsafe_allow_html=True)
         for idx in range(len(top_global)):
@@ -85,15 +85,15 @@ def render(simulacros, materias):
             font_size = "1.2rem"
 
             if idx == 0:
-                posicion_display = "🥇"
+                posicion_display = '1'
                 background_color = "linear-gradient(135deg, #FFD700, #FFA500)"
                 font_size = "1.5rem"
             elif idx == 1:
-                posicion_display = "🥈"
+                posicion_display = "2"
                 background_color = "linear-gradient(135deg, #C0C0C0, #E8E8E8)"
                 font_size = "1.4rem"
             elif idx == 2:
-                posicion_display = "🥉"
+                posicion_display = "3"
                 background_color = "linear-gradient(135deg, #CD7F32, #E8C39E)"
                 font_size = "1.3rem"
 
@@ -116,35 +116,35 @@ def render(simulacros, materias):
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("<h2 class='section-header'>📋 Tabla Completa - Ranking Global por Estudiante</h2>", unsafe_allow_html=True)
-    st.markdown("### 🎯 Controles de Visualización")
+    st.markdown("<h2 class='section-header'>Tabla Completa - Ranking Global por Estudiante</h2>", unsafe_allow_html=True)
+    st.markdown("### Controles de Visualización")
 
     col1, col2, col3, col4 = st.columns(4)
     metricas_materias = [f"{m}_PROMEDIO_GENERAL" for m in materias if f"{m}_PROMEDIO_GENERAL" in datos_unificados.columns]
     with col1:
         metrica_ordenar = st.selectbox(
-            "📊 Ordenar por:",
+            "Ordenar por:",
             options=["PROMEDIO_PONDERADO_GENERAL"] + metricas_materias,
             format_func=lambda x: "Promedio Ponderado General" if x == "PROMEDIO_PONDERADO_GENERAL" else x.replace("_PROMEDIO_GENERAL", "").replace("_", " "),
             index=0,
         )
     with col2:
-        min_puntaje = st.number_input("📉 Puntaje mínimo:", min_value=0.0, max_value=500.0, value=0.0, step=10.0)
+        min_puntaje = st.number_input("Puntaje mínimo:", min_value=0.0, max_value=500.0, value=0.0, step=10.0)
     with col3:
-        max_puntaje = st.number_input("📈 Puntaje máximo:", min_value=0.0, max_value=500.0, value=500.0, step=10.0)
+        max_puntaje = st.number_input("Puntaje máximo:", min_value=0.0, max_value=500.0, value=500.0, step=10.0)
     with col4:
         grados_disponibles = sorted(set(grados_list)) if grados_list else []
-        grado_filtro = st.multiselect("🎓 Filtrar por grado:", options=["Todos"] + grados_disponibles, default=["Todos"])
+        grado_filtro = st.multiselect("Filtrar por grado:", options=["Todos"] + grados_disponibles, default=["Todos"])
 
     col1, col2 = st.columns(2)
     with col1:
         simulacros_mostrar = st.multiselect(
-            "📋 Mostrar columnas de simulacros:",
+            "Mostrar columnas de simulacros:",
             options=[sim["nombre"] for sim in simulacros],
             default=[sim["nombre"] for sim in simulacros],
         )
     with col2:
-        buscar_nombre = st.text_input("🔍 Buscar estudiante por nombre:", placeholder="Escribe el nombre...")
+        buscar_nombre = st.text_input("Buscar estudiante por nombre:", placeholder="Escribe el nombre...")
 
     tabla_filtrada = datos_unificados.copy()
     tabla_filtrada = tabla_filtrada[(tabla_filtrada[metrica_ordenar] >= min_puntaje) & (tabla_filtrada[metrica_ordenar] <= max_puntaje)]
@@ -179,22 +179,22 @@ def render(simulacros, materias):
     columnas_numericas = tabla_mostrar.select_dtypes(include=[np.number]).columns
     tabla_mostrar[columnas_numericas] = tabla_mostrar[columnas_numericas].round(2)
 
-    st.markdown("### 📊 Estadísticas del Ranking Filtrado")
+    st.markdown("### Estadísticas del Ranking Filtrado")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("👥 Total Estudiantes", len(tabla_filtrada))
+        st.metric("Total Estudiantes", len(tabla_filtrada))
     with col2:
-        st.metric("📈 Promedio", f"{tabla_filtrada[metrica_ordenar].mean():.2f}")
+        st.metric("Promedio", f"{tabla_filtrada[metrica_ordenar].mean():.2f}")
     with col3:
-        st.metric("🏆 Máximo", f"{tabla_filtrada[metrica_ordenar].max():.2f}")
+        st.metric("Máximo", f"{tabla_filtrada[metrica_ordenar].max():.2f}")
     with col4:
-        st.metric("📉 Mínimo", f"{tabla_filtrada[metrica_ordenar].min():.2f}")
+        st.metric("Mínimo", f"{tabla_filtrada[metrica_ordenar].min():.2f}")
 
     st.markdown("---")
-    tab1, tab2, tab3 = st.tabs(["📋 Tabla Completa", "📊 Gráfica de Ranking", "📈 Distribución"])
+    tab1, tab2, tab3 = st.tabs(["Tabla Completa", "Gráfica de Ranking", "Distribución"])
 
     with tab1:
-        st.markdown("#### 📋 Ranking Completo")
+        st.markdown("#### Ranking Completo")
         tabla_display = tabla_mostrar.copy()
         rename_dict = {}
         for col in tabla_display.columns:
@@ -221,7 +221,7 @@ def render(simulacros, materias):
         st.dataframe(tabla_estilo, width="stretch", height=600)
 
     with tab2:
-        st.markdown("#### 📊 Top 30 Estudiantes")
+        st.markdown("#### Top 30 Estudiantes")
         top_30 = tabla_filtrada.head(30)
         custom_colorscale = [
             [0.0, "#E74C3C"],
@@ -252,7 +252,7 @@ def render(simulacros, materias):
         st.plotly_chart(fig, width="stretch")
 
     with tab3:
-        st.markdown("#### 📈 Distribución de Puntajes")
+        st.markdown("#### Distribución de Puntajes")
         col1, col2 = st.columns(2)
         with col1:
             fig = go.Figure()
@@ -272,7 +272,7 @@ def render(simulacros, materias):
             st.plotly_chart(fig, width="stretch")
 
     st.markdown("---")
-    st.markdown("### 💾 Descargar Datos")
+    st.markdown("### Descargar Datos")
 
     def num_to_excel_col(n):
         result = ""
@@ -314,7 +314,7 @@ def render(simulacros, materias):
         excel_data = output.getvalue()
 
         st.download_button(
-            label="📥 Descargar Tabla Filtrada (Excel)",
+            label="Descargar Tabla Filtrada (Excel)",
             data=excel_data,
             file_name="ranking_filtrado.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -351,7 +351,7 @@ def render(simulacros, materias):
         excel_completo = output_completo.getvalue()
 
         st.download_button(
-            label="📥 Descargar Datos Completos (Excel)",
+            label="Descargar Datos Completos (Excel)",
             data=excel_completo,
             file_name="datos_completos_todos_simulacros.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

@@ -1,0 +1,9 @@
+# Reglas del Rediseño Visual - Simulacros AGS
+
+1. **CERO cambios de funcionalidad:** No modifiques queries a Supabase, lógica de negocio, cálculos, validaciones, manejo de sesión, autenticación, permisos, ni ninguna función que no sea puramente de presentación. Si para lograr un efecto visual necesitas tocar lógica (por ejemplo, para animar un número necesitas cambiar cómo se calcula), detente y pregúntame antes de hacerlo — no lo hagas por tu cuenta.
+2. **CERO cambios de distribución:** El orden de las páginas en el sidebar, el orden de las pestañas dentro de cada página, el número y orden de columnas, qué información aparece antes o después de cuál otra: todo eso se queda exactamente igual. Este rediseño cambia cómo se ve cada elemento, no dónde está ni en qué orden.
+3. **Rama aislada:** Todo el trabajo va en la rama `feature/rediseno-visual`, creada desde `main` actualizado. No se hace merge a `main` hasta que yo lo apruebe explícitamente en el último prompt de esta secuencia.
+4. **Optimización para Streamlit:** Streamlit re-ejecuta todo el script de Python en cada interacción del usuario, lo que regenera el DOM completo cada vez. Evita animaciones largas (>500ms) o vistosas que se repitan de forma molesta cada vez que el usuario interactúa. Prefiere CSS (transiciones/keyframes) sobre librerías de JavaScript pesadas de animación.
+5. **Cero nuevas dependencias sin aprobación:** No agregues ninguna nueva dependencia de Python a `requirements.txt` sin decírmelo primero y explicar por qué es necesaria.
+6. **Verificación visual y evidencias:** Antes de dar cualquier prompt de esta secuencia por terminado, toma evidencia y confírmame explícitamente: *"Cero cambios de lógica, cero cambios de distribución"* con el diff de git como evidencia.
+7. **Puntos de decisión:** Cuando necesites que yo decida algo (por ejemplo, aprobar una paleta de colores, confirmar una fuente), dímelo explícitamente y espera mi respuesta antes de aplicar nada.
