@@ -1,6 +1,8 @@
+import os
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import psycopg2
 import streamlit as st
 
 from simulacros_ags.data import get_or_generate_insights
@@ -14,9 +16,25 @@ def render(simulacros, materias):
     st.markdown("<h1 class='header-title'> Dashboard de Análisis de Simulacros PreIcfes</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Sistema Integral de Evaluación y Seguimiento - Grado 11</p>", unsafe_allow_html=True)
 
-    total_estudiantes = (
+    promocion_id = st.session_state.get("promocion_activa_id")
+    db_url = os.getenv("SUPABASE_DB_URL")
+    total_estudiantes_promo = None
+    if db_url and promocion_id:
+        try:
+            conn = psycopg2.connect(db_url)
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT COUNT(*) FROM estudiantes WHERE promocion_id = %s;", (promocion_id,))
+                    total_estudiantes_promo = cur.fetchone()[0]
+            finally:
+                conn.close()
+        except Exception:
+            pass
+
+    estudiantes_con_notas = (
         pd.concat([sim["df"][["ESTUDIANTE"]] for sim in simulacros], ignore_index=True)["ESTUDIANTE"].str.strip().str.upper().nunique()
     )
+    total_estudiantes = total_estudiantes_promo if (total_estudiantes_promo and total_estudiantes_promo > 0) else estudiantes_con_notas
     total_registros = sum(len(sim["df"]) for sim in simulacros)
     ultimo = simulacros[-1]
     insights_ultimo = get_or_generate_insights(ultimo)
@@ -37,9 +55,9 @@ def render(simulacros, materias):
         st.markdown(
             f"""
         <div class='metric-card' style='background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); color: white;'>
-            <h4>👥 Estudiantes únicos</h4>
+            <h4>👥 Estudiantes Únicos</h4>
             <h2 style='font-size: 3rem; margin: 0;'>{total_estudiantes}</h2>
-            <p style='opacity: 0.9;'>Participantes</p>
+            <p style='opacity: 0.9;'>{estudiantes_con_notas} evaluados en simulacros</p>
         </div>
         """,
             unsafe_allow_html=True,
@@ -94,7 +112,7 @@ def render(simulacros, materias):
             )
         )
         fig.update_layout(height=420, showlegend=False, yaxis_title="Puntaje Promedio", template="plotly_white")
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
 
         if len(promedios_data) > 1:
             cambios = []
@@ -106,7 +124,7 @@ def render(simulacros, materias):
                 cambios.append({"De": anterior["Simulacro"], "A": actual["Simulacro"], "Cambio": cambio, "%": pct})
             cambios_df = pd.DataFrame(cambios).round(2)
             st.markdown("#### 📉 Variaciones Detectadas")
-            st.dataframe(cambios_df, width="stretch", hide_index=True)
+            st.dataframe(cambios_df, use_container_width=True, hide_index=True)
 
     # Distribución de rendimiento
     categorias = ["Alto (≥300)", "Medio (250-299)", "Bajo (<250)"]
@@ -124,7 +142,7 @@ def render(simulacros, materias):
         for sim in simulacros:
             fig_dist.add_trace(go.Bar(name=sim["nombre"], x=categorias, y=distribucion(sim["df"])))
         fig_dist.update_layout(barmode="group", height=420, yaxis_title="Número de estudiantes", template="plotly_white")
-        st.plotly_chart(fig_dist, width="stretch")
+        st.plotly_chart(fig_dist, use_container_width=True)
 
         st.markdown("#### 📋 Resumen de Distribución")
         dist_df = pd.DataFrame(
@@ -133,7 +151,7 @@ def render(simulacros, materias):
                 **{sim["nombre"]: distribucion(sim["df"]) for sim in simulacros},
             }
         )
-        st.dataframe(dist_df, width="stretch", hide_index=True)
+        st.dataframe(dist_df, use_container_width=True, hide_index=True)
 
     st.markdown("---")
     st.markdown("<h2 class='section-header'>📚 Desempeño por materia</h2>", unsafe_allow_html=True)
@@ -159,7 +177,7 @@ def render(simulacros, materias):
                 )
             )
         fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, height=500)
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("#### 📊 Tabla Comparativa de Materias")
     comp_materias_df = pd.DataFrame({"Materia": materias})
@@ -178,18 +196,16 @@ def render(simulacros, materias):
             vmin=40,
             vmax=90,
         ),
-        width="stretch",
+        use_container_width=True,
         hide_index=True,
     )
 
     st.markdown("---")
     st.markdown("<h2 class='section-header'>🔍 Hallazgos Principales y Recomendaciones</h2>", unsafe_allow_html=True)
-    # Recalcular referencias usando último simulacro y promedios dinámicos
     promedios_curr = [ultimo["df"][mat].mean() for mat in materias]
     cambio_general = (np.mean(promedios_curr) - np.mean(promedios_curr[:-1])) if len(promedios_curr) > 1 else 0
     variabilidades = {mat: ultimo["df"][mat].std() for mat in materias}
     mat_variable = max(variabilidades, key=variabilidades.get)
-    # Comparar último contra penúltimo si existe
     if len(simulacros) > 1:
         penultimo = simulacros[-2]
         promedios_penultimo = [penultimo["df"][mat].mean() for mat in materias]
