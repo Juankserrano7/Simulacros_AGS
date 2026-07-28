@@ -186,15 +186,17 @@ def render(simulacros, materias):
     for sim in simulacros:
         reg = get_regular_presented_df(sim["df"])
         comp_materias_df[sim["nombre"]] = [reg[mat].mean() for mat in materias]
-    comp_materias_df["Mejor"] = comp_materias_df.drop(columns=["Materia"]).max(axis=1)
-    comp_materias_df["Menor"] = comp_materias_df.drop(columns=["Materia"]).min(axis=1)
+    
+    sim_cols = [c for c in comp_materias_df.columns if c != "Materia"]
+    comp_materias_df["Mejor"] = comp_materias_df[sim_cols].max(axis=1)
+    comp_materias_df["Menor"] = comp_materias_df[sim_cols].min(axis=1)
     comp_materias_df["Rango"] = comp_materias_df["Mejor"] - comp_materias_df["Menor"]
     comp_materias_df = comp_materias_df.round(2)
+    
     columnas_numericas = comp_materias_df.select_dtypes(include=["float64", "int64"]).columns
-    columnas_simulacros = [c for c in comp_materias_df.columns if c not in ["Materia", "Mejor", "Menor", "Rango"]]
     st.dataframe(
         comp_materias_df.style.format({col: "{:.2f}" for col in columnas_numericas}).background_gradient(
-            subset=columnas_simulacros,
+            subset=sim_cols,
             cmap="RdYlGn",
             vmin=40,
             vmax=90,
