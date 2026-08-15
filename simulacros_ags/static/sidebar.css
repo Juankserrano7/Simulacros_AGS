@@ -1,0 +1,533 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css');
+
+:root {
+  --ink-950:#050f1a;
+  --ink-900:#081726;
+  --ink-800:#0d2438;
+  --ink-700:#15334a;
+  --cyan-300:#7ee6f7;
+  --cyan-500:#17b4d4;
+  --cyan-600:#0f8aa6;
+  --text-onDark:#ffffff;
+  --text-onDark-soft:#9fb2c4;
+  --text-onDark-mute:#71889c;
+}
+
+/* SIDEBAR CONTAINER OVERRIDE - CLEAN NATIVE STREAMLIT FLEX FIT */
+[data-testid="stSidebar"] {
+  background:
+    radial-gradient(circle at 85% 4%, rgba(23,180,212,.14), transparent 42%),
+    linear-gradient(180deg, var(--ink-950) 0%, var(--ink-900) 55%, var(--ink-800) 100%) !important;
+  border-right: 1px solid rgba(255,255,255,.05) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Set width ONLY when sidebar is expanded so Streamlit collapses natively when false */
+[data-testid="stSidebar"][aria-expanded="true"] {
+  min-width: 288px !important;
+  width: 288px !important;
+}
+
+/* Let main content flex fill remaining space natively without layout shift */
+.main,
+[data-testid="stMain"] {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.main .block-container,
+[data-testid="stMain"] .block-container {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+  padding: 24px 16px 20px !important;
+}
+
+/* BRAND BLOCK */
+.sb-brand-block {
+  text-align: center;
+  margin-bottom: 18px;
+  animation: riseIn .5s ease-out both;
+}
+
+.sb-brand-block img {
+  width: 118px;
+  height: auto;
+  margin: 0 auto 12px;
+  display: block;
+  filter: drop-shadow(0 8px 18px rgba(23,180,212,.28));
+}
+
+.sb-brand-title {
+  font-family: 'Fraunces', serif !important;
+  font-weight: 700 !important;
+  font-size: 1.35rem !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  letter-spacing: -.01em !important;
+}
+
+.sb-brand-caption {
+  font-family: 'Inter', sans-serif !important;
+  font-size: .72rem !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+  color: var(--text-onDark-mute) !important;
+  margin: 4px 0 0 !important;
+  font-weight: 500 !important;
+}
+
+/* DIVIDER */
+.sb-divider {
+  border: none !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+  margin: 16px 0 !important;
+}
+
+/* SECTION LABELS - SINGLE CYAN HEADER */
+.sb-section-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: .72rem !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+  font-weight: 700 !important;
+  color: var(--cyan-300) !important;
+  margin: 0 0 8px !important;
+}
+
+.sb-section-label i {
+  font-size: 13px !important;
+  color: var(--cyan-300) !important;
+}
+
+/* ==========================================================================
+   REACT-ARIA & BASEWEB SELECTBOX STYLING (COMPACT 56PX BUTTON WITH INNER PADDING)
+   ========================================================================== */
+
+[data-testid="stSidebar"] [data-testid="stSelectbox"] {
+  margin-bottom: 14px !important;
+}
+
+/* Hide default label if any */
+[data-testid="stSidebar"] [data-testid="stSelectbox"] label {
+  display: none !important;
+}
+
+/* 1. Reset outer wrappers */
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"],
+[data-testid="stSidebar"] [data-testid="stSelectbox"] div[class*="e1fp86qc"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* 2. THE FLEX ROW CONTAINER */
+[data-testid="stSidebar"] [data-testid="stSelectbox"] div:has(> input),
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background-color: rgba(255, 255, 255, 0.07) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 12px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stSelectbox"] div:has(> input):hover,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(23, 180, 212, 0.6) !important;
+  box-shadow: 0 0 12px rgba(23, 180, 212, 0.15) !important;
+}
+
+/* 3. THE INPUT TEXT FIELD (LEFT SIDE) */
+[data-testid="stSidebar"] [data-testid="stSelectbox"] input[type="text"],
+[data-testid="stSidebar"] [data-testid="stSelectbox"] input {
+  flex: 1 1 auto !important;
+  width: calc(100% - 56px) !important;
+  max-width: calc(100% - 56px) !important;
+  height: 44px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  padding: 0 14px !important;
+  margin: 0 !important;
+  position: relative !important;
+  cursor: pointer !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Also style BaseWeb span/p if used */
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"] span,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"] p {
+  color: #ffffff !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+/* 4. COMPACT 56PX BUTTON BOX WITH GENEROUS INTERIOR PADDING */
+[data-testid="stSidebar"] [data-testid="stSelectbox"] button,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] button[data-rac],
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"] > div > div:last-child {
+  flex: 0 0 56px !important;
+  width: 56px !important;
+  min-width: 56px !important;
+  height: 44px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border: none !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 0 11px 11px 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 0 10px !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 2 !important;
+  transition: background 0.18s ease, border-color 0.18s ease !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stSelectbox"] button:hover,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"] > div:hover > div:last-child {
+  background: rgba(23, 180, 212, 0.22) !important;
+  background-color: rgba(23, 180, 212, 0.22) !important;
+  border-left-color: rgba(23, 180, 212, 0.5) !important;
+}
+
+/* BOTH ICONS AT 13PX FIT COMFORTABLY WITH INTERIOR PADDING */
+[data-testid="stSidebar"] [data-testid="stSelectbox"] button svg,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] svg {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #7ee6f7 !important;
+  fill: #7ee6f7 !important;
+  width: 13px !important;
+  height: 13px !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+/* DROPDOWN POPUP MENU STYLING */
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+div[data-rac="popover"],
+ul[role="listbox"] {
+  background: #081726 !important;
+  background-color: #081726 !important;
+  border: 1px solid rgba(23, 180, 212, 0.35) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7) !important;
+  padding: 6px !important;
+  z-index: 999999 !important;
+}
+
+ul[role="listbox"] li,
+div[data-baseweb="option"] {
+  color: #ffffff !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  padding: 9px 12px !important;
+  border-radius: 8px !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease !important;
+}
+
+ul[role="listbox"] li:hover,
+div[data-baseweb="option"]:hover,
+li[aria-selected="true"],
+div[aria-selected="true"] {
+  background: linear-gradient(135deg, rgba(23,180,212,.3), rgba(15,138,166,.3)) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   NAVIGATION RADIO ITEMS - CYAN GRADIENT SELECTED CARD & HIDE RADIO CIRCLES
+   ========================================================================== */
+
+/* Completely hide radio dot inputs across all Streamlit versions */
+[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child,
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label > div:first-child,
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] [role="radio"] > div:first-child,
+[data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"],
+[data-testid="stSidebar"] [data-testid="stRadio"] svg,
+[data-testid="stSidebar"] [data-testid="stRadio"] circle {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Base navigation item */
+[data-testid="stSidebar"] [data-testid="stRadio"] label,
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label,
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  border-radius: 12px !important;
+  background-color: transparent !important;
+  background: transparent !important;
+  color: var(--text-onDark-soft) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: .88rem !important;
+  font-weight: 500 !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  transition: all .18s ease !important;
+  margin-bottom: 4px !important;
+  width: 100% !important;
+  box-shadow: none !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label p,
+[data-testid="stSidebar"] [data-testid="stRadio"] label div,
+[data-testid="stSidebar"] [data-testid="stRadio"] label span {
+  color: inherit !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: .88rem !important;
+  font-weight: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover,
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  transform: translateX(3px) !important;
+  color: #ffffff !important;
+}
+
+/* SELECTED NAVIGATION CARD WITH VIBRANT CYAN GRADIENT */
+[data-testid="stSidebar"] [data-testid="stRadio"] label[data-checked="true"],
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked),
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked),
+[data-testid="stSidebar"] [data-testid="stRadio"] [aria-checked="true"] {
+  background: linear-gradient(135deg, rgba(23, 180, 212, 0.35) 0%, rgba(15, 138, 166, 0.35) 100%) !important;
+  background-color: rgba(23, 180, 212, 0.35) !important;
+  border: 1px solid rgba(23, 180, 212, 0.6) !important;
+  border-radius: 12px !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(23, 180, 212, 0.25) !important;
+  transform: translateX(2px) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label[data-checked="true"] p,
+[data-testid="stSidebar"] [data-testid="stRadio"] label[data-checked="true"] span,
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) p,
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) span {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* HIGHLY REPRESENTATIVE BOOTSTRAP ICONS BEFORE NAVIGATION ITEMS */
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(1)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(1) label::before {
+  content: "\f424"; /* bi-house-door-fill */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(2)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(2) label::before {
+  content: "\f5d1"; /* bi-trophy-fill */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(3)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(3) label::before {
+  content: "\f191"; /* bi-bar-chart-line-fill */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(4)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(4) label::before {
+  content: "\f11e"; /* bi-arrow-left-right */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(5)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(5) label::before {
+  content: "\f4d6"; /* bi-person-bounding-box */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(6)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(6) label::before {
+  content: "\f3e6"; /* bi-graph-up-arrow */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(7)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(7) label::before {
+  content: "\f21c"; /* bi-calculator-fill */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(8)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(8) label::before {
+  content: "\f588"; /* bi-star-fill */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+/* ADMIN SECTION SEPARATOR & HEADER (ONLY SHOWN FOR ADMINS ON ITEMS 9 & 10) */
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(9),
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(9) label {
+  margin-top: 18px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding-top: 14px !important;
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(9)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(9) label::before {
+  content: "\f532"; /* bi-shield-lock-fill */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(10)::before,
+[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > div:nth-child(10) label::before {
+  content: "\f2c7"; /* bi-cloud-arrow-up-fill */
+  font-family: "bootstrap-icons" !important;
+  font-size: 15px;
+  color: var(--cyan-300);
+}
+
+.sb-admin-tag {
+  font-family: 'Inter', sans-serif !important;
+  font-size: .65rem !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  font-weight: 700 !important;
+  color: var(--text-onDark-mute) !important;
+  margin: 14px 0 6px 4px !important;
+}
+
+/* USER CARD IN SIDEBAR */
+.sb-user-card {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.sb-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--cyan-500), var(--cyan-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #052733;
+  font-weight: 700;
+  font-size: .82rem;
+}
+
+.sb-user-meta { min-width: 0; flex: 1; }
+.sb-user-name { font-size: .85rem; font-weight: 600; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+.sb-user-email { font-size: .72rem; color: var(--text-onDark-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+
+/* LOGOUT BUTTON IN SIDEBAR */
+[data-testid="stSidebar"] button[key="btn_logout_sidebar"],
+[data-testid="stSidebar"] button {
+  width: 100% !important;
+  margin-top: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: var(--text-onDark-soft) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: .82rem !important;
+  font-weight: 500 !important;
+  padding: 9px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  transition: background .15s ease, color .15s ease, border-color .15s ease !important;
+}
+
+[data-testid="stSidebar"] button[key="btn_logout_sidebar"]::before,
+[data-testid="stSidebar"] button::before {
+  content: "\f1bc";
+  font-family: "bootstrap-icons" !important;
+  font-size: 14px;
+  margin-right: 6px;
+  color: var(--text-onDark-soft);
+}
+
+[data-testid="stSidebar"] button[key="btn_logout_sidebar"]:hover,
+[data-testid="stSidebar"] button:hover {
+  background: rgba(255,255,255,.06) !important;
+  color: #ffffff !important;
+  border-color: rgba(255,255,255,.28) !important;
+}
+
+@keyframes riseIn { from { opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }

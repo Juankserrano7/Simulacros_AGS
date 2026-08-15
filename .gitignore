@@ -1,0 +1,39 @@
+# Entornos virtuales y dependencias
+.venv/
+venv/
+ENV/
+env/
+
+# Variables de entorno y secretos
+.env
+.env.*
+*.env
+.ssh/
+.streamlit/secrets.toml
+
+# Byte-compiled / optimizados
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+*.tmp
+
+# Archivos de datos locales y hojas de cálculo temporales
+*.xlsx
+*.XLSX
+*.xls
+*.XLS
+*.csv
+*.CSV
+
+# Builds y empaquetado
+build/
+dist/
+*.egg-info/
+
+# Herramientas de desarrollo, IDEs y agentes
+.agents/
+skills-lock.json
+.idea/
+.vscode/
+.DS_Store

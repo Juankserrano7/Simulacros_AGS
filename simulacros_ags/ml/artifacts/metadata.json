@@ -1,0 +1,208 @@
+{
+  "modelo_global_elegido": "Ensemble_Bayes_RF",
+  "modelo_subjects_elegido": "MO_Ridge",
+  "r2_global": 0.7841,
+  "rmse_global": 13.51,
+  "mae_global": 10.98,
+  "metricas_materias": {
+    "LECTURA CRÍTICA": {
+      "mae": 3.31,
+      "rmse": 4.14,
+      "r2": 0.5047
+    },
+    "MATEMÁTICAS": {
+      "mae": 5.5,
+      "rmse": 7.61,
+      "r2": 0.3638
+    },
+    "SOCIALES Y CIUDADANAS": {
+      "mae": 3.46,
+      "rmse": 4.22,
+      "r2": 0.5386
+    },
+    "CIENCIAS NATURALES": {
+      "mae": 5.02,
+      "rmse": 7.74,
+      "r2": 0.2789
+    },
+    "INGLÉS": {
+      "mae": 5.9,
+      "rmse": 7.4,
+      "r2": 0.2461
+    }
+  },
+  "n_estudiantes_entrenamiento": 29,
+  "n_features": 16,
+  "features": [
+    "promedio_ponderado_reciente",
+    "promedio_ponderado_global",
+    "promedio_ponderado_exp_decay",
+    "max_promedio_ponderado",
+    "min_promedio_ponderado",
+    "tendencia_mejora",
+    "delta_progreso",
+    "volatilidad",
+    "n_simulacros",
+    "prom_lectura_critica",
+    "prom_matematicas",
+    "prom_sociales",
+    "prom_ciencias",
+    "prom_ingles",
+    "dispersion_inter_materias",
+    "icfes_composite"
+  ],
+  "subjects": [
+    "LECTURA CRÍTICA",
+    "MATEMÁTICAS",
+    "SOCIALES Y CIUDADANAS",
+    "CIENCIAS NATURALES",
+    "INGLÉS"
+  ],
+  "fingerprint": "2d4308ba77219fa852bfe88ab48c63aa",
+  "evaluaciones_global": {
+    "Ensemble_Bayes_RF": {
+      "mae": 10.98,
+      "rmse": 13.51,
+      "r2": 0.7841
+    },
+    "Ensemble_Bayes_GB": {
+      "mae": 11.19,
+      "rmse": 13.7,
+      "r2": 0.7779
+    },
+    "BayesianRidge": {
+      "mae": 11.65,
+      "rmse": 14.45,
+      "r2": 0.753
+    },
+    "Ridge": {
+      "mae": 11.46,
+      "rmse": 14.17,
+      "r2": 0.7623
+    }
+  },
+  "evaluaciones_subjects": {
+    "MO_Ridge": {
+      "overall_rmse": 6.22,
+      "subjects": {
+        "LECTURA CRÍTICA": {
+          "mae": 3.31,
+          "rmse": 4.14,
+          "r2": 0.5047
+        },
+        "MATEMÁTICAS": {
+          "mae": 5.5,
+          "rmse": 7.61,
+          "r2": 0.3638
+        },
+        "SOCIALES Y CIUDADANAS": {
+          "mae": 3.46,
+          "rmse": 4.22,
+          "r2": 0.5386
+        },
+        "CIENCIAS NATURALES": {
+          "mae": 5.02,
+          "rmse": 7.74,
+          "r2": 0.2789
+        },
+        "INGLÉS": {
+          "mae": 5.9,
+          "rmse": 7.4,
+          "r2": 0.2461
+        }
+      }
+    },
+    "MO_BayesianRidge": {
+      "overall_rmse": 6.23,
+      "subjects": {
+        "LECTURA CRÍTICA": {
+          "mae": 3.41,
+          "rmse": 4.22,
+          "r2": 0.4844
+        },
+        "MATEMÁTICAS": {
+          "mae": 5.1,
+          "rmse": 7.47,
+          "r2": 0.3869
+        },
+        "SOCIALES Y CIUDADANAS": {
+          "mae": 3.54,
+          "rmse": 4.32,
+          "r2": 0.5148
+        },
+        "CIENCIAS NATURALES": {
+          "mae": 5.08,
+          "rmse": 7.94,
+          "r2": 0.2401
+        },
+        "INGLÉS": {
+          "mae": 5.4,
+          "rmse": 7.21,
+          "r2": 0.2853
+        }
+      }
+    },
+    "Chain_Ridge": {
+      "overall_rmse": 6.22,
+      "subjects": {
+        "LECTURA CRÍTICA": {
+          "mae": 3.31,
+          "rmse": 4.14,
+          "r2": 0.5047
+        },
+        "MATEMÁTICAS": {
+          "mae": 5.5,
+          "rmse": 7.61,
+          "r2": 0.3638
+        },
+        "SOCIALES Y CIUDADANAS": {
+          "mae": 3.46,
+          "rmse": 4.22,
+          "r2": 0.5386
+        },
+        "CIENCIAS NATURALES": {
+          "mae": 5.02,
+          "rmse": 7.74,
+          "r2": 0.2789
+        },
+        "INGLÉS": {
+          "mae": 5.9,
+          "rmse": 7.4,
+          "r2": 0.2461
+        }
+      }
+    },
+    "MO_RandomForest": {
+      "overall_rmse": 6.67,
+      "subjects": {
+        "LECTURA CRÍTICA": {
+          "mae": 3.54,
+          "rmse": 4.29,
+          "r2": 0.469
+        },
+        "MATEMÁTICAS": {
+          "mae": 6.01,
+          "rmse": 8.18,
+          "r2": 0.265
+        },
+        "SOCIALES Y CIUDADANAS": {
+          "mae": 3.41,
+          "rmse": 4.21,
+          "r2": 0.5402
+        },
+        "CIENCIAS NATURALES": {
+          "mae": 5.38,
+          "rmse": 8.23,
+          "r2": 0.1837
+        },
+        "INGLÉS": {
+          "mae": 6.41,
+          "rmse": 8.44,
+          "r2": 0.0207
+        }
+      }
+    }
+  },
+  "confiabilidad": "alta",
+  "entrenado_en": "2026-08-15T17:39:36.138886+00:00"
+}
