@@ -1,7 +1,7 @@
 """Módulo de consultas de solo lectura y carga en caché de simulacros e ICFES Real desde Supabase."""
 
 import json
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 import streamlit as st
