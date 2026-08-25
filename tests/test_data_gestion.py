@@ -154,6 +154,35 @@ class TestDataGestion(unittest.TestCase):
         ok2, msg2 = update_manual_simulacro_grid("id_falso", "Nuevo Nombre", df_dummy, "test@test.com")
         self.assertIsInstance(ok2, bool)
 
+    def test_11_save_manual_simulacro_grid_validaciones(self):
+        """Verifica que save_manual_simulacro_grid valide nombres vacíos, promociones vacías y grillas vacías."""
+        df_dummy = pd.DataFrame({"ESTUDIANTE": ["Juan"], "LECTURA CRÍTICA": [70]})
+        
+        # Nombre vacío
+        ok, msg, _ = save_manual_simulacro_grid("", "promo_id", df_dummy, "admin")
+        self.assertFalse(ok)
+        self.assertIn("vacío", msg.lower())
+
+        # Promoción vacía
+        ok, msg, _ = save_manual_simulacro_grid("Sim 1", "", df_dummy, "admin")
+        self.assertFalse(ok)
+        self.assertIn("promoción", msg.lower())
+
+        # Grilla vacía
+        ok, msg, _ = save_manual_simulacro_grid("Sim 1", "promo_id", pd.DataFrame(), "admin")
+        self.assertFalse(ok)
+        self.assertIn("vacía", msg.lower())
+
+    def test_12_save_manual_icfes_real_grid_validaciones(self):
+        """Verifica que save_manual_icfes_real_grid valide entradas nulas y grillas vacías."""
+        # Promoción vacía
+        ok, msg, _ = save_manual_icfes_real_grid("", pd.DataFrame({"ESTUDIANTE": ["A"]}), "admin")
+        self.assertFalse(ok)
+
+        # Grilla vacía
+        ok, msg, _ = save_manual_icfes_real_grid("promo_id", pd.DataFrame(), "admin")
+        self.assertFalse(ok)
+
 
 if __name__ == "__main__":
     unittest.main()
