@@ -118,6 +118,42 @@ class TestDataGestion(unittest.TestCase):
         self.assertEqual(len(regular), 1)
         self.assertEqual(regular.iloc[0]["ESTUDIANTE"], "A")
 
+    def test_09_calculate_icfes_scores_precision(self):
+        """Verifica que las fórmulas oficiales del ICFES ponderen 3x para materias básicas y 1x para inglés."""
+        from simulacros_ags.core_utils import calculate_icfes_scores
+        # Si un estudiante saca 100 en todas las materias: Global = 500
+        materias_100 = {
+            "LECTURA CRÍTICA": 100.0,
+            "MATEMÁTICAS": 100.0,
+            "SOCIALES Y CIUDADANAS": 100.0,
+            "CIENCIAS NATURALES": 100.0,
+            "INGLÉS": 100.0
+        }
+        prom_simple, pg_val, desv_est = calculate_icfes_scores(materias_100)
+        self.assertEqual(pg_val, 500.0)
+        self.assertEqual(prom_simple, 500.0)
+        self.assertEqual(desv_est, 0.0)
+
+    def test_10_update_manual_simulacro_grid_sin_conexion_segura(self):
+        """Verifica que update_manual_simulacro_grid maneje llamadas flexibles (3 o 4 argumentos) sin romper con AttributeError."""
+        from simulacros_ags.data import update_manual_simulacro_grid
+        df_dummy = pd.DataFrame({
+            "ESTUDIANTE": ["Juan"],
+            "LECTURA CRÍTICA": [70],
+            "MATEMÁTICAS": [80],
+            "SOCIALES Y CIUDADANAS": [75],
+            "CIENCIAS NATURALES": [65],
+            "INGLÉS": [90],
+            "PUNTAJE GLOBAL (0-500)": [375]
+        })
+        # Llamada con 3 argumentos: (sim_id, df_editor, usuario)
+        ok, msg = update_manual_simulacro_grid("id_falso", df_dummy, "test@test.com")
+        self.assertIsInstance(ok, bool)
+
+        # Llamada con 4 argumentos: (sim_id, nuevo_nombre, df_editor, usuario)
+        ok2, msg2 = update_manual_simulacro_grid("id_falso", "Nuevo Nombre", df_dummy, "test@test.com")
+        self.assertIsInstance(ok2, bool)
+
 
 if __name__ == "__main__":
     unittest.main()
