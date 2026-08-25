@@ -170,36 +170,46 @@ def load_icfes_real_data(promocion_id: Optional[str] = None) -> pd.DataFrame:
         conn.close()
 
 
-def ordenar_simulacros(data_map: Any) -> List[Dict]:
+def ordenar_simulacros(data_map: Any = None) -> List[Dict]:
     """Convierte el mapa de datos (o la tupla retornada por load_all_simulacros) en una lista ordenada por fecha de creación."""
-    if not data_map:
+    if data_map is None:
         return []
 
-    # Si se pasa directamente la tupla (metadatos, data_map, errores) de load_all_simulacros
-    if isinstance(data_map, tuple):
+    target_map = {}
+    if isinstance(data_map, (tuple, list)):
         if len(data_map) >= 2 and isinstance(data_map[1], dict):
-            data_map = data_map[1]
+            target_map = data_map[1]
+        elif len(data_map) > 0 and isinstance(data_map[0], dict) and "df" in data_map[0]:
+            return list(data_map)
         else:
             return []
-    elif not isinstance(data_map, dict):
+    elif isinstance(data_map, dict):
+        target_map = data_map
+    else:
         return []
 
     simulacros = []
-    for sim_id, payload in data_map.items():
+    for sim_id, payload in target_map.items():
         if not isinstance(payload, dict):
             continue
-        meta = payload.get("meta", {})
+        meta = payload.get("meta")
         if isinstance(meta, dict):
-            meta.setdefault("id", sim_id)
+            meta_clean = dict(meta)
+            meta_clean.setdefault("id", str(sim_id))
         else:
-            meta = {"id": sim_id, "nombre": str(sim_id)}
+            meta_clean = {"id": str(sim_id), "nombre": str(sim_id)}
         simulacros.append({
-            "id": sim_id,
-            "nombre": meta.get("nombre", sim_id),
-            "meta": meta,
+            "id": str(sim_id),
+            "nombre": str(meta_clean.get("nombre", sim_id)),
+            "meta": meta_clean,
             "df": payload.get("df"),
         })
-    simulacros.sort(key=lambda s: s["meta"].get("creado_en", s["nombre"]))
+
+    def _sort_key(s):
+        meta = s.get("meta") or {}
+        return str(meta.get("creado_en") or s.get("nombre") or s.get("id") or "")
+
+    simulacros.sort(key=_sort_key)
     return simulacros
 
 

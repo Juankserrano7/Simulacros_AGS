@@ -494,18 +494,44 @@ def update_simulacro_nombre(simulacro_id: str, nuevo_nombre: str, usuario: str) 
         conn.close()
 
 
-def update_manual_simulacro_grid(simulacro_id: str, nuevo_nombre: str, df_editor: pd.DataFrame, usuario: str) -> Tuple[bool, str]:
+def update_manual_simulacro_grid(
+    simulacro_id: str,
+    arg2: Any,
+    arg3: Any = "admin",
+    arg4: Optional[str] = None
+) -> Tuple[bool, str]:
     """Actualiza en caliente las notas y nombre del simulacro con recálculo automático de fórmulas ICFES."""
     if not simulacro_id:
         return False, "ID de simulacro inválido."
 
-    nuevo_nombre_clean = nuevo_nombre.strip() if nuevo_nombre else ""
-    if not nuevo_nombre_clean:
-        return False, "El nombre del simulacro no puede estar vacío."
-
     conn = get_db_connection()
     if not conn:
         return False, "No hay conexión configurada a Supabase."
+
+    # Discriminar si arg2 es un DataFrame o un string con nuevo_nombre
+    if isinstance(arg2, pd.DataFrame):
+        df_editor = arg2
+        usuario = str(arg3) if arg3 else "admin"
+        nuevo_nombre = arg4
+    else:
+        nuevo_nombre = str(arg2) if arg2 else None
+        df_editor = arg3 if isinstance(arg3, pd.DataFrame) else pd.DataFrame()
+        usuario = str(arg4) if arg4 else "admin"
+
+    if df_editor is None or df_editor.empty:
+        return False, "No se recibieron datos válidos para actualizar."
+
+    # Si no se especificó nuevo nombre, conservar el existente en la base de datos
+    if not nuevo_nombre or not str(nuevo_nombre).strip():
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT nombre FROM simulacros WHERE id = %s;", (simulacro_id,))
+                row = cur.fetchone()
+                nuevo_nombre_clean = row[0] if row else "Simulacro"
+        except Exception:
+            nuevo_nombre_clean = "Simulacro"
+    else:
+        nuevo_nombre_clean = str(nuevo_nombre).strip()
 
     # Recalcular métricas
     calculated_rows = []
