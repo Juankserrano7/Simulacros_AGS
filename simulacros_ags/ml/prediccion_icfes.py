@@ -169,6 +169,17 @@ def _calcular_fingerprint_dataset(conn) -> str:
         return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
 
+def _query_to_dataframe(conn, sql: str, params: Optional[tuple] = None) -> pd.DataFrame:
+    """Ejecuta una consulta SQL en Supabase y retorna un DataFrame limpio sin advertencias de DBAPI2."""
+    with conn.cursor() as cur:
+        cur.execute(sql, params or ())
+        rows = cur.fetchall()
+        if not rows:
+            return pd.DataFrame()
+        cols = [desc[0] for desc in cur.description]
+        return pd.DataFrame(rows, columns=cols)
+
+
 def construir_dataset_entrenamiento(conn) -> Dict[str, Any]:
     """
     Construye la matriz X, la matriz Y de asignaturas (N x 5) y el vector y_global (N).
@@ -200,7 +211,7 @@ def construir_dataset_entrenamiento(conn) -> Dict[str, Any]:
     WHERE e.es_inclusion = false
     ORDER BY e.id, s.creado_en ASC;
     """
-    df_raw = pd.read_sql_query(query, conn)
+    df_raw = _query_to_dataframe(conn, query)
 
     if df_raw.empty:
         raise ValueError("No se encontraron registros históricos de entrenamiento que cumplan es_inclusion = false.")
@@ -508,7 +519,7 @@ def predecir_puntaje_final(conn, estudiante_id: str) -> Dict[str, Any]:
     WHERE rs.estudiante_id = %s
     ORDER BY s.creado_en ASC;
     """
-    df_sims_est = pd.read_sql_query(query_sims, conn, params=(estudiante_id,))
+    df_sims_est = _query_to_dataframe(conn, query_sims, params=(estudiante_id,))
 
     if df_sims_est.empty or df_sims_est["promedio_ponderado"].dropna().empty:
         return {
@@ -632,7 +643,7 @@ def generar_analisis_diagnostico_cohorte(conn, promocion_id: Optional[str] = Non
         JOIN resultados_icfes_real r ON r.estudiante_id = e.id
         WHERE e.es_inclusion = false AND e.promocion_id = %s;
         """
-        df_est = pd.read_sql_query(query, conn, params=(promocion_id,))
+        df_est = _query_to_dataframe(conn, query, params=(promocion_id,))
     else:
         query = """
         SELECT 
@@ -650,7 +661,7 @@ def generar_analisis_diagnostico_cohorte(conn, promocion_id: Optional[str] = Non
         JOIN resultados_icfes_real r ON r.estudiante_id = e.id
         WHERE e.es_inclusion = false;
         """
-        df_est = pd.read_sql_query(query, conn)
+        df_est = _query_to_dataframe(conn, query)
 
     if df_est.empty:
         return {"error": "No hay datos de ICFES real registrados para la cohorte seleccionada."}

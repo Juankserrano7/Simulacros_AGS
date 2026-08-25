@@ -19,7 +19,7 @@ from ..core_utils import (
 from .normalization import _clean_student_frame, _validate_schema
 
 
-def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str) -> Tuple[bool, str, Dict]:
+def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str, promocion_id: Optional[str] = None) -> Tuple[bool, str, Dict]:
     """Valida e ingesta un nuevo simulacro cargado por Excel directamente en Supabase."""
     if not nombre or not nombre.strip():
         return False, "Debes indicar un nombre para el simulacro.", {}
@@ -50,7 +50,7 @@ def ingest_simulacro_excel(nombre: str, file_buffer: BytesIO, usuario: str) -> T
     if errores:
         return False, "; ".join(errores), {}
 
-    promocion_id = st.session_state.get("promocion_activa_id")
+    promocion_id = promocion_id or (st.session_state.get("promocion_activa_id") if hasattr(st, "session_state") else None)
     if not promocion_id:
         return False, "No hay una promoción activa seleccionada.", {}
 
@@ -344,7 +344,7 @@ def save_manual_icfes_real_grid(promocion_id: str, df_editor: pd.DataFrame, usua
         conn.close()
 
 
-def ingest_icfes_real_excel(file_buffer: BytesIO, usuario: str) -> Tuple[bool, str, Dict]:
+def ingest_icfes_real_excel(file_buffer: BytesIO, usuario: str, promocion_id: Optional[str] = None) -> Tuple[bool, str, Dict]:
     """Valida e ingesta las notas oficiales del ICFES Real desde un archivo Excel/CSV."""
     file_buffer.seek(0, 2)
     size_mb = file_buffer.tell() / (1024 * 1024)
@@ -371,7 +371,7 @@ def ingest_icfes_real_excel(file_buffer: BytesIO, usuario: str) -> Tuple[bool, s
     if errores:
         return False, "; ".join(errores), {}
 
-    promocion_id = st.session_state.get("promocion_activa_id")
+    promocion_id = promocion_id or (st.session_state.get("promocion_activa_id") if hasattr(st, "session_state") else None)
     if not promocion_id:
         return False, "No hay una promoción activa seleccionada.", {}
 

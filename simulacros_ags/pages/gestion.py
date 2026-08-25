@@ -163,9 +163,9 @@ def _render_tab_crear(promocion_id: str, promocion_nombre: str, estudiantes_list
             else:
                 with st.spinner("Procesando archivo e ingiriendo notas en Supabase..."):
                     if es_icfes_real:
-                        ok, msg, _ = ingest_icfes_real_excel(uploaded_file, user_email)
+                        ok, msg, _ = ingest_icfes_real_excel(uploaded_file, user_email, promocion_id=promocion_id)
                     else:
-                        ok, msg, _ = ingest_simulacro_excel(nombre_sim_file.strip(), uploaded_file, user_email)
+                        ok, msg, _ = ingest_simulacro_excel(nombre_sim_file.strip(), uploaded_file, user_email, promocion_id=promocion_id)
 
                 if ok:
                     st.success(msg)
@@ -317,8 +317,8 @@ def render(user_email: str) -> None:
 
     # Cargar estudiantes y simulacros existentes de la promoción activa
     estudiantes_list = _get_promotion_students(promocion_activa_id)
-    simulacros_raw = load_all_simulacros(promocion_id=promocion_activa_id)
-    simulacros_existentes = ordenar_simulacros(simulacros_raw)
+    _, data_map, _ = load_all_simulacros(promocion_id=promocion_activa_id)
+    simulacros_existentes = ordenar_simulacros(data_map)
 
     tab_crear, tab_editar, tab_eliminar = st.tabs([
         "➕ Registrar Evaluación (Simulacro / ICFES Real)",

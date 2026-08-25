@@ -170,12 +170,29 @@ def load_icfes_real_data(promocion_id: Optional[str] = None) -> pd.DataFrame:
         conn.close()
 
 
-def ordenar_simulacros(data_map: Dict[str, Dict]) -> List[Dict]:
-    """Convierte el mapa de datos en una lista ordenada por fecha de creación."""
+def ordenar_simulacros(data_map: Any) -> List[Dict]:
+    """Convierte el mapa de datos (o la tupla retornada por load_all_simulacros) en una lista ordenada por fecha de creación."""
+    if not data_map:
+        return []
+
+    # Si se pasa directamente la tupla (metadatos, data_map, errores) de load_all_simulacros
+    if isinstance(data_map, tuple):
+        if len(data_map) >= 2 and isinstance(data_map[1], dict):
+            data_map = data_map[1]
+        else:
+            return []
+    elif not isinstance(data_map, dict):
+        return []
+
     simulacros = []
     for sim_id, payload in data_map.items():
+        if not isinstance(payload, dict):
+            continue
         meta = payload.get("meta", {})
-        meta.setdefault("id", sim_id)
+        if isinstance(meta, dict):
+            meta.setdefault("id", sim_id)
+        else:
+            meta = {"id": sim_id, "nombre": str(sim_id)}
         simulacros.append({
             "id": sim_id,
             "nombre": meta.get("nombre", sim_id),
