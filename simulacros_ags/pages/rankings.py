@@ -143,7 +143,7 @@ def render(simulacros: List[dict], materias: List[str]):
             )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<h2 class='section-header'>📋 Tabla Completa - Ranking Global por Estudiante</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-header'>📋 Tabla Completa - Ranking por Estudiante</h2>", unsafe_allow_html=True)
     st.markdown("### 🎯 Controles de Visualización")
 
     col1, col2, col3, col4 = st.columns(4)
@@ -180,7 +180,19 @@ def render(simulacros: List[dict], materias: List[str]):
     if buscar_nombre:
         tabla_filtrada = tabla_filtrada[tabla_filtrada["ESTUDIANTE"].str.contains(buscar_nombre.upper(), na=False)]
 
-    tabla_filtrada = tabla_filtrada.sort_values(metrica_ordenar, ascending=False).reset_index(drop=True)
+    # Validación de ordenamiento: si hay exactamente 1 simulacro seleccionado, ordenar por el puntaje de ese simulacro; si hay más de 1, mantener el ranking global seleccionado
+    if len(simulacros_mostrar) == 1:
+        single_sim_name = simulacros_mostrar[0]
+        single_slug = _slug(single_sim_name)
+        single_prom_col = f"{single_slug}_PROM"
+        if single_prom_col in tabla_filtrada.columns:
+            col_orden_efectiva = single_prom_col
+        else:
+            col_orden_efectiva = metrica_ordenar
+    else:
+        col_orden_efectiva = metrica_ordenar
+
+    tabla_filtrada = tabla_filtrada.sort_values(col_orden_efectiva, ascending=False, na_position="last").reset_index(drop=True)
     tabla_filtrada.insert(0, "RANKING", range(1, len(tabla_filtrada) + 1))
 
     columnas_mostrar = ["RANKING", "ESTUDIANTE"]
@@ -210,11 +222,11 @@ def render(simulacros: List[dict], materias: List[str]):
     with col1:
         st.metric("👥 Total Estudiantes", len(tabla_filtrada))
     with col2:
-        st.metric("📈 Promedio", f"{tabla_filtrada[metrica_ordenar].mean():.2f}")
+        st.metric("📈 Promedio", f"{tabla_filtrada[col_orden_efectiva].mean():.2f}")
     with col3:
-        st.metric("🏆 Máximo", f"{tabla_filtrada[metrica_ordenar].max():.2f}")
+        st.metric("🏆 Máximo", f"{tabla_filtrada[col_orden_efectiva].max():.2f}")
     with col4:
-        st.metric("📉 Mínimo", f"{tabla_filtrada[metrica_ordenar].min():.2f}")
+        st.metric("📉 Mínimo", f"{tabla_filtrada[col_orden_efectiva].min():.2f}")
 
     st.markdown("---")
     tab1, tab2, tab3 = st.tabs(["📋 Tabla Completa", "📊 Gráfica de Ranking", "📈 Distribución"])
@@ -260,15 +272,15 @@ def render(simulacros: List[dict], materias: List[str]):
         fig.add_trace(
             go.Bar(
                 y=top_30["ESTUDIANTE"],
-                x=top_30[metrica_ordenar],
+                x=top_30[col_orden_efectiva],
                 orientation="h",
-                marker=dict(color=top_30[metrica_ordenar], colorscale=custom_colorscale, cmin=0, cmax=500, showscale=True, colorbar=dict(title="Puntaje")),
-                text=top_30[metrica_ordenar].round(2),
+                marker=dict(color=top_30[col_orden_efectiva], colorscale=custom_colorscale, cmin=0, cmax=500, showscale=True, colorbar=dict(title="Puntaje")),
+                text=top_30[col_orden_efectiva].round(2),
                 textposition="outside",
             )
         )
         fig.update_layout(
-            title=f"Top 30 - {metrica_ordenar.replace('_', ' ')}",
+            title=f"Top 30 - {col_orden_efectiva.replace('_', ' ')}",
             xaxis_title="Puntaje",
             yaxis_title="Estudiante",
             height=800,
@@ -282,18 +294,18 @@ def render(simulacros: List[dict], materias: List[str]):
         c_dist1, c_dist2 = st.columns(2)
         with c_dist1:
             fig = go.Figure()
-            fig.add_trace(go.Histogram(x=tabla_filtrada[metrica_ordenar], nbinsx=30, marker_color="#667eea", name="Frecuencia"))
+            fig.add_trace(go.Histogram(x=tabla_filtrada[col_orden_efectiva], nbinsx=30, marker_color="#667eea", name="Frecuencia"))
             fig.add_vline(
-                x=tabla_filtrada[metrica_ordenar].mean(),
+                x=tabla_filtrada[col_orden_efectiva].mean(),
                 line_dash="dash",
                 line_color="red",
-                annotation_text=f"Promedio: {tabla_filtrada[metrica_ordenar].mean():.2f}",
+                annotation_text=f"Promedio: {tabla_filtrada[col_orden_efectiva].mean():.2f}",
             )
             fig.update_layout(title="Distribución de Puntajes", xaxis_title="Puntaje", yaxis_title="Frecuencia", height=400, template="plotly_white")
             st.plotly_chart(fig, use_container_width=True)
         with c_dist2:
             fig = go.Figure()
-            fig.add_trace(go.Box(y=tabla_filtrada[metrica_ordenar], name="Puntajes", marker_color="#667eea", boxmean="sd"))
+            fig.add_trace(go.Box(y=tabla_filtrada[col_orden_efectiva], name="Puntajes", marker_color="#667eea", boxmean="sd"))
             fig.update_layout(title="Estadísticas de Puntajes", yaxis_title="Puntaje", height=400, template="plotly_white")
             st.plotly_chart(fig, use_container_width=True)
 

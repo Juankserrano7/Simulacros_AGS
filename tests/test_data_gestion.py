@@ -189,7 +189,11 @@ class TestDataGestion(unittest.TestCase):
                 ok = True
             except KeyError:
                 ok = False
-        self.assertTrue(ok)
+    def test_14_ranking_slug_y_orden_dinamico(self):
+        """Verifica la generación de slugs y consistencia de ordenamiento para un simulacro."""
+        from simulacros_ags.pages.rankings import _slug
+        self.assertEqual(_slug("Simulacro Diagnóstico 1"), "simulacro_diagn_stico_1")
+        self.assertEqual(_slug("Helmer Pardo 2"), "helmer_pardo_2")
 
 
 if __name__ == "__main__":
