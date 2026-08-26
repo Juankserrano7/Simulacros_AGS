@@ -262,8 +262,8 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
         est_id = str(st_info["id"])
         grado = st_info["grado"]
 
-        sub_sims = df_simulacros[df_simulacros["estudiante_id"] == est_id]
-        sub_real = df_icfes_real[df_icfes_real["estudiante_id"] == est_id]
+        sub_sims = df_simulacros[df_simulacros["estudiante_id"] == est_id] if (not df_simulacros.empty and "estudiante_id" in df_simulacros.columns) else pd.DataFrame()
+        sub_real = df_icfes_real[df_icfes_real["estudiante_id"] == est_id] if (not df_icfes_real.empty and "estudiante_id" in df_icfes_real.columns) else pd.DataFrame()
 
         row = {
             "Estudiante": est,
@@ -271,12 +271,12 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
             "Simulacros Presentados": len(sub_sims),
         }
 
-        if not sub_sims.empty:
-            row["Promedio Simulacros"] = round(sub_sims["PUNTAJE GLOBAL"].dropna().mean(), 1)
+        if not sub_sims.empty and "PUNTAJE GLOBAL" in sub_sims.columns and sub_sims["PUNTAJE GLOBAL"].dropna().count() > 0:
+            row["Promedio Simulacros"] = round(float(sub_sims["PUNTAJE GLOBAL"].dropna().mean()), 1)
         else:
             row["Promedio Simulacros"] = None
 
-        if not sub_real.empty and pd.notna(sub_real.iloc[0]["PUNTAJE GLOBAL"]):
+        if not sub_real.empty and "PUNTAJE GLOBAL" in sub_real.columns and pd.notna(sub_real.iloc[0]["PUNTAJE GLOBAL"]):
             row["ICFES Real"] = round(float(sub_real.iloc[0]["PUNTAJE GLOBAL"]), 1)
             if row["Promedio Simulacros"] is not None:
                 row["Diferencia"] = round(row["ICFES Real"] - row["Promedio Simulacros"], 1)
@@ -300,8 +300,8 @@ def render_comparison_dashboard(df_simulacros: pd.DataFrame, df_icfes_real: pd.D
     )
 
     if est_seleccionado:
-        st_sims = df_simulacros[df_simulacros["estudiante_nombre"] == est_seleccionado]
-        st_real = df_icfes_real[df_icfes_real["estudiante_nombre"] == est_seleccionado]
+        st_sims = df_simulacros[df_simulacros["estudiante_nombre"] == est_seleccionado] if (not df_simulacros.empty and "estudiante_nombre" in df_simulacros.columns) else pd.DataFrame()
+        st_real = df_icfes_real[df_icfes_real["estudiante_nombre"] == est_seleccionado] if (not df_icfes_real.empty and "estudiante_nombre" in df_icfes_real.columns) else pd.DataFrame()
 
         rows_est = []
         if not st_sims.empty:
@@ -449,17 +449,17 @@ def render(user_email: str):
 
     with tab_general:
         render_comparison_dashboard(
-            df_simulacros=df_simulacros[df_simulacros["es_inclusion"] == False] if not df_simulacros.empty else pd.DataFrame(),
-            df_icfes_real=df_icfes_real[df_icfes_real["es_inclusion"] == False] if not df_icfes_real.empty else pd.DataFrame(),
-            df_estudiantes=df_estudiantes[df_estudiantes["es_inclusion"] == False] if not df_estudiantes.empty else pd.DataFrame(),
+            df_simulacros=df_simulacros[df_simulacros["es_inclusion"] == False] if (not df_simulacros.empty and "es_inclusion" in df_simulacros.columns) else pd.DataFrame(columns=df_simulacros.columns),
+            df_icfes_real=df_icfes_real[df_icfes_real["es_inclusion"] == False] if (not df_icfes_real.empty and "es_inclusion" in df_icfes_real.columns) else pd.DataFrame(columns=df_icfes_real.columns),
+            df_estudiantes=df_estudiantes[df_estudiantes["es_inclusion"] == False] if (not df_estudiantes.empty and "es_inclusion" in df_estudiantes.columns) else pd.DataFrame(columns=df_estudiantes.columns),
             is_inclusion=False
         )
 
     with tab_inclusion:
         render_comparison_dashboard(
-            df_simulacros=df_simulacros[df_simulacros["es_inclusion"] == True] if not df_simulacros.empty else pd.DataFrame(),
-            df_icfes_real=df_icfes_real[df_icfes_real["es_inclusion"] == True] if not df_icfes_real.empty else pd.DataFrame(),
-            df_estudiantes=df_estudiantes[df_estudiantes["es_inclusion"] == True] if not df_estudiantes.empty else pd.DataFrame(),
+            df_simulacros=df_simulacros[df_simulacros["es_inclusion"] == True] if (not df_simulacros.empty and "es_inclusion" in df_simulacros.columns) else pd.DataFrame(columns=df_simulacros.columns),
+            df_icfes_real=df_icfes_real[df_icfes_real["es_inclusion"] == True] if (not df_icfes_real.empty and "es_inclusion" in df_icfes_real.columns) else pd.DataFrame(columns=df_icfes_real.columns),
+            df_estudiantes=df_estudiantes[df_estudiantes["es_inclusion"] == True] if (not df_estudiantes.empty and "es_inclusion" in df_estudiantes.columns) else pd.DataFrame(columns=df_estudiantes.columns),
             is_inclusion=True
         )
 

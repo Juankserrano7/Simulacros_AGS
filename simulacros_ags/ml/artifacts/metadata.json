@@ -58,7 +58,7 @@
     "CIENCIAS NATURALES",
     "INGLÉS"
   ],
-  "fingerprint": "2d4308ba77219fa852bfe88ab48c63aa",
+  "fingerprint": "a38c29d8e226ccf2b1f0aa6b14ce7b64",
   "evaluaciones_global": {
     "Ensemble_Bayes_RF": {
       "mae": 10.98,
@@ -204,5 +204,5 @@
     }
   },
   "confiabilidad": "alta",
-  "entrenado_en": "2026-08-25T18:23:11.002543+00:00"
+  "entrenado_en": "2026-08-26T00:05:46.460779+00:00"
 }

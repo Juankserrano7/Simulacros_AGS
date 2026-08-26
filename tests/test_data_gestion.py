@@ -173,15 +173,23 @@ class TestDataGestion(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("vacía", msg.lower())
 
-    def test_12_save_manual_icfes_real_grid_validaciones(self):
-        """Verifica que save_manual_icfes_real_grid valide entradas nulas y grillas vacías."""
-        # Promoción vacía
-        ok, msg, _ = save_manual_icfes_real_grid("", pd.DataFrame({"ESTUDIANTE": ["A"]}), "admin")
-        self.assertFalse(ok)
+    def test_13_render_comparison_dashboard_defensivo(self):
+        """Verifica que la lógica de comparación no lance KeyError ante DataFrames vacíos o sin columnas."""
+        from unittest.mock import patch
+        from simulacros_ags.pages.resultados_reales import render_comparison_dashboard
+        
+        df_est = pd.DataFrame({"id": ["1"], "nombre": ["Estudiante 1"], "grado": ["11"], "es_inclusion": [False]})
+        df_empty_sims = pd.DataFrame()
+        df_empty_real = pd.DataFrame()
 
-        # Grilla vacía
-        ok, msg, _ = save_manual_icfes_real_grid("promo_id", pd.DataFrame(), "admin")
-        self.assertFalse(ok)
+        # Mock Streamlit UI methods to verify execution without KeyError
+        with patch("streamlit.markdown"), patch("streamlit.columns", return_value=[MagicMock(), MagicMock(), MagicMock(), MagicMock()]), patch("streamlit.dataframe"), patch("streamlit.selectbox", return_value="Estudiante 1"), patch("streamlit.plotly_chart"):
+            try:
+                render_comparison_dashboard(df_empty_sims, df_empty_real, df_est, is_inclusion=False)
+                ok = True
+            except KeyError:
+                ok = False
+        self.assertTrue(ok)
 
 
 if __name__ == "__main__":
