@@ -110,14 +110,14 @@ def _render_tab_crear(promocion_id: str, promocion_nombre: str, estudiantes_list
                 key=f"grid_sim_new_{promocion_id}_{es_icfes_real}"
             )
 
-            btn_label = "💾 Guardar Resultados Oficiales ICFES Real" if es_icfes_real else "💾 Guardar Simulacro en Supabase"
+            btn_label = "💾 Guardar Resultados Oficiales ICFES Real" if es_icfes_real else "💾 Guardar Simulacro"
             submit_save = st.form_submit_button(btn_label, type="primary", use_container_width=True)
 
         if submit_save:
             if not es_icfes_real and (not nombre_simulacro or not nombre_simulacro.strip()):
                 st.error("⚠️ Debes ingresar un nombre válido para el simulacro.")
             else:
-                with st.spinner("Guardando en Supabase, aplicando fórmulas y actualizando modelos..."):
+                with st.spinner("Guardando resultados, aplicando fórmulas y actualizando modelos..."):
                     if es_icfes_real:
                         ok, mensaje, _ = save_manual_icfes_real_grid(
                             promocion_id=promocion_id,
@@ -158,13 +158,13 @@ def _render_tab_crear(promocion_id: str, promocion_nombre: str, estudiantes_list
 
         uploaded_file = st.file_uploader("Seleccionar archivo (.xlsx, .csv)", type=["xlsx", "xls", "csv"], key="sim_file_uploader")
 
-        btn_upload_label = "🚀 Ingestar Resultados ICFES Real a Supabase" if es_icfes_real else "🚀 Ingestar Simulacro a Supabase"
+        btn_upload_label = "🚀 Ingestar Resultados ICFES Real" if es_icfes_real else "🚀 Ingestar Simulacro"
 
         if uploaded_file and st.button(btn_upload_label, type="primary", use_container_width=True):
             if not es_icfes_real and (not nombre_sim_file or not nombre_sim_file.strip()):
                 st.error("⚠️ Ingresa un nombre para el simulacro.")
             else:
-                with st.spinner("Procesando archivo e ingiriendo notas en Supabase..."):
+                with st.spinner("Procesando archivo e importando notas..."):
                     if es_icfes_real:
                         ok, msg, _ = ingest_icfes_real_excel(uploaded_file, user_email, promocion_id=promocion_id)
                     else:
@@ -287,7 +287,7 @@ def _render_tab_eliminar(simulacros_existentes: List[dict], user_email: str) -> 
 
     if confirm_check:
         if st.button("🗑️ Eliminar Simulacro Definitivamente", type="primary", use_container_width=True, key="btn_confirm_delete"):
-            with st.spinner("Eliminando simulacro en cascada en Supabase..."):
+            with st.spinner("Eliminando simulacro del sistema..."):
                 ok, msg = delete_simulacro(selected_sim_id, user_email)
             if ok:
                 st.success(msg)
@@ -307,7 +307,7 @@ def render(user_email: str) -> None:
     st.markdown(
         """
         Panel de captura, carga masiva, edición y eliminación de simulacros de preparación 
-        y registro de resultados oficiales del ICFES Saber 11 en Supabase.
+        y registro de resultados oficiales del ICFES Saber 11.
         """
     )
 

@@ -97,7 +97,7 @@ def render_permisos_tab(current_admin_email: str):
             with c_new3:
                 new_user_rol = st.selectbox("Rol Asignado", ["docente", "admin"], key="admin_new_rol")
 
-            if st.button("🚀 Crear Usuario en Supabase", type="primary", use_container_width=True, key="btn_create_new_user"):
+            if st.button("🚀 Crear Usuario", type="primary", use_container_width=True, key="btn_create_new_user"):
                 email_clean = new_user_email.strip().lower()
                 if not email_clean or "@" not in email_clean:
                     st.error("⚠️ Ingrese un correo electrónico institucional válido.")
@@ -331,7 +331,7 @@ def render_promociones_tab(current_admin_email: str):
             key="new_promo_docentes"
         )
 
-        if st.button("🚀 Crear Promoción en Supabase", type="primary", use_container_width=True, key="btn_create_promo"):
+        if st.button("🚀 Crear Promoción", type="primary", use_container_width=True, key="btn_create_promo"):
             if not nuevo_nombre_promo or not nuevo_nombre_promo.strip():
                 st.error("⚠️ Ingresa un nombre válido para la promoción.")
             else:
@@ -353,7 +353,7 @@ def render_promociones_tab(current_admin_email: str):
                     st.cache_data.clear()
                     st.rerun()
                 else:
-                    st.error("Error al crear la promoción en Supabase.")
+                    st.error("Error al crear la promoción.")
 
     # 2. Sub-pestaña Editar Promoción Existente
     with subtab_editar:
@@ -428,7 +428,7 @@ def render_estudiantes_tab(current_admin_email: str):
                 st.write("")
                 new_est_inc = st.checkbox("♿ Inclusión", key="admin_new_est_inc")
 
-            if st.button("💾 Guardar Estudiante en Supabase", type="primary", use_container_width=True, key="btn_create_new_est"):
+            if st.button("💾 Guardar Estudiante", type="primary", use_container_width=True, key="btn_create_new_est"):
                 name_clean = new_est_name.strip().upper()
                 if not name_clean:
                     st.error("⚠️ Ingrese un nombre de estudiante válido.")
