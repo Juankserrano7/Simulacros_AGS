@@ -78,9 +78,8 @@ def _render_tab_crear(promocion_id: str, promocion_nombre: str, estudiantes_list
 
         st.markdown(f"**Estudiantes registrados ({len(estudiantes_list)}):**")
         
-        nombre_simulacro = ""
-        if not es_icfes_real:
-            nombre_simulacro = st.text_input("Nombre del Nuevo Simulacro", placeholder="Ej: Simulacro Diagnóstico 1", key="new_sim_name")
+        st.markdown("##### ✏️ Grilla de Puntajes (Notas de 0 a 100 por asignatura):")
+        st.caption("Puedes ingresar todas las notas con fluidez. Los datos solo se guardarán cuando hagas clic en el botón de abajo.")
 
         init_data = [
             {
@@ -96,21 +95,25 @@ def _render_tab_crear(promocion_id: str, promocion_nombre: str, estudiantes_list
         ]
         df_init = pd.DataFrame(init_data)
 
-        st.markdown("##### ✏️ Grilla de Puntajes (Notas de 0 a 100 por asignatura):")
-        st.caption("Si dejas 'PUNTAJE GLOBAL' en 0, el sistema lo calculará automáticamente usando la fórmula ponderada oficial del ICFES.")
+        with st.form(key=f"form_sim_new_{promocion_id}_{es_icfes_real}", clear_on_submit=False):
+            if not es_icfes_real:
+                nombre_simulacro = st.text_input("Nombre del Nuevo Simulacro", placeholder="Ej: Simulacro Diagnóstico 1", key="new_sim_name")
+            else:
+                nombre_simulacro = "ICFES Real"
 
-        edited_df = st.data_editor(
-            df_init,
-            disabled=["ESTUDIANTE"],
-            column_config=GRID_COLUMN_CONFIG,
-            hide_index=True,
-            use_container_width=True,
-            key=f"grid_sim_new_{promocion_id}_{es_icfes_real}"
-        )
+            edited_df = st.data_editor(
+                df_init,
+                disabled=["ESTUDIANTE"],
+                column_config=GRID_COLUMN_CONFIG,
+                hide_index=True,
+                use_container_width=True,
+                key=f"grid_sim_new_{promocion_id}_{es_icfes_real}"
+            )
 
-        btn_label = "💾 Guardar Resultados Oficiales ICFES Real" if es_icfes_real else "💾 Guardar Simulacro en Supabase"
+            btn_label = "💾 Guardar Resultados Oficiales ICFES Real" if es_icfes_real else "💾 Guardar Simulacro en Supabase"
+            submit_save = st.form_submit_button(btn_label, type="primary", use_container_width=True)
 
-        if st.button(btn_label, type="primary", use_container_width=True, key="btn_save_new"):
+        if submit_save:
             if not es_icfes_real and (not nombre_simulacro or not nombre_simulacro.strip()):
                 st.error("⚠️ Debes ingresar un nombre válido para el simulacro.")
             else:
@@ -235,16 +238,18 @@ def _render_tab_editar(simulacros_existentes: List[dict], user_email: str) -> No
 
     df_edit_slice = df_actual[cols_grid]
 
-    edited_grid = st.data_editor(
-        df_edit_slice,
-        disabled=["ESTUDIANTE"],
-        column_config=GRID_COLUMN_CONFIG,
-        hide_index=True,
-        use_container_width=True,
-        key=f"grid_edit_{selected_sim_id}"
-    )
+    with st.form(key=f"form_grid_edit_{selected_sim_id}", clear_on_submit=False):
+        edited_grid = st.data_editor(
+            df_edit_slice,
+            disabled=["ESTUDIANTE"],
+            column_config=GRID_COLUMN_CONFIG,
+            hide_index=True,
+            use_container_width=True,
+            key=f"grid_edit_{selected_sim_id}"
+        )
+        submit_edit = st.form_submit_button("💾 Guardar Cambios en Notas", type="primary", use_container_width=True)
 
-    if st.button("💾 Guardar Cambios en Notas", type="primary", use_container_width=True, key="btn_save_edit_notes"):
+    if submit_edit:
         with st.spinner("Actualizando notas, recalculando ponderaciones ICFES y reentrenando insights..."):
             ok, msg = update_manual_simulacro_grid(selected_sim_id, edited_grid, user_email)
         if ok:
