@@ -22,12 +22,12 @@ from ..data import (
 
 GRID_COLUMN_CONFIG = {
     "ESTUDIANTE": st.column_config.TextColumn("Estudiante", width="large"),
-    "LECTURA CRÍTICA": st.column_config.NumberColumn("Lectura Crítica (0-100)", min_value=0.0, max_value=100.0, step=1.0, format="%.1f"),
-    "MATEMÁTICAS": st.column_config.NumberColumn("Matemáticas (0-100)", min_value=0.0, max_value=100.0, step=1.0, format="%.1f"),
-    "SOCIALES Y CIUDADANAS": st.column_config.NumberColumn("Sociales (0-100)", min_value=0.0, max_value=100.0, step=1.0, format="%.1f"),
-    "CIENCIAS NATURALES": st.column_config.NumberColumn("Ciencias (0-100)", min_value=0.0, max_value=100.0, step=1.0, format="%.1f"),
-    "INGLÉS": st.column_config.NumberColumn("Inglés (0-100)", min_value=0.0, max_value=100.0, step=1.0, format="%.1f"),
-    "PUNTAJE GLOBAL (0-500)": st.column_config.NumberColumn("Puntaje Global", min_value=0.0, max_value=500.0, step=1.0, format="%.1f"),
+    "LECTURA CRÍTICA": st.column_config.NumberColumn("Lectura Crítica (0-100)", min_value=0.0, max_value=100.0, step=0.1, format="%.1f"),
+    "MATEMÁTICAS": st.column_config.NumberColumn("Matemáticas (0-100)", min_value=0.0, max_value=100.0, step=0.1, format="%.1f"),
+    "SOCIALES Y CIUDADANAS": st.column_config.NumberColumn("Sociales (0-100)", min_value=0.0, max_value=100.0, step=0.1, format="%.1f"),
+    "CIENCIAS NATURALES": st.column_config.NumberColumn("Ciencias (0-100)", min_value=0.0, max_value=100.0, step=0.1, format="%.1f"),
+    "INGLÉS": st.column_config.NumberColumn("Inglés (0-100)", min_value=0.0, max_value=100.0, step=0.1, format="%.1f"),
+    "PUNTAJE GLOBAL (0-500)": st.column_config.NumberColumn("Puntaje Global", min_value=0.0, max_value=500.0, step=0.1, format="%.1f"),
 }
 
 
