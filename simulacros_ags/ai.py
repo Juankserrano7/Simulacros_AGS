@@ -9,6 +9,9 @@ from .config import MATERIAS
 
 
 def _build_stats(df: pd.DataFrame, materias: List[str]) -> Dict:
+    from .data.normalization import get_presented_df
+
+    df = get_presented_df(df)
     promedios_materias = {mat: float(df[mat].mean()) for mat in materias if mat in df.columns}
     desviaciones = {mat: float(df[mat].std()) for mat in materias if mat in df.columns}
     orden_materias = sorted(promedios_materias.items(), key=lambda x: x[1])

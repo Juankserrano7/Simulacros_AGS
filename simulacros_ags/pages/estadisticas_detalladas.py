@@ -3,11 +3,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from simulacros_ags.data import get_or_generate_insights
+from simulacros_ags.data import get_or_generate_insights, get_presented_df
 
 
 def render(simulacros, simulacro_actual, materias):
-    datos_actual = simulacro_actual["df"]
+    datos_actual = get_presented_df(simulacro_actual["df"])
     st.markdown(f"<h1 class='header-title'> Estadísticas Detalladas - {simulacro_actual['nombre']}</h1>", unsafe_allow_html=True)
     tab1, tab2, tab3 = st.tabs(["📊 Correlaciones", "📈 Análisis por Grado", "🎯 Top Performers"])
 

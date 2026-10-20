@@ -14,6 +14,7 @@ from .normalization import (
     COLUMN_CANONICAL_MAP,
     OPTIONAL_NUMERIC,
     REQUIRED_COLUMNS,
+    get_presented_df,
     get_regular_presented_df,
 )
 from .persistence import (
@@ -30,6 +31,7 @@ __all__ = [
     "COLUMN_CANONICAL_MAP",
     "REQUIRED_COLUMNS",
     "OPTIONAL_NUMERIC",
+    "get_presented_df",
     "get_regular_presented_df",
     "load_all_simulacros",
     "load_icfes_real_data",

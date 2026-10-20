@@ -8,7 +8,7 @@ import streamlit as st
 
 from ..auth import get_user_role
 from ..config import MATERIAS
-from ..data import get_regular_presented_df, load_all_simulacros, ordenar_simulacros
+from ..data import get_presented_df, get_regular_presented_df, load_all_simulacros, ordenar_simulacros
 from ..promociones import get_user_promotions
 
 
@@ -282,8 +282,8 @@ def render(user_email: str):
     df_raw_a = sim_a_selected["df"].copy() if sim_a_selected["df"] is not None else pd.DataFrame()
     df_raw_b = sim_b_selected["df"].copy() if sim_b_selected["df"] is not None else pd.DataFrame()
 
-    df_a = get_regular_presented_df(df_raw_a) if excluir_inclusion else df_raw_a.copy()
-    df_b = get_regular_presented_df(df_raw_b) if excluir_inclusion else df_raw_b.copy()
+    df_a = get_regular_presented_df(df_raw_a) if excluir_inclusion else get_presented_df(df_raw_a)
+    df_b = get_regular_presented_df(df_raw_b) if excluir_inclusion else get_presented_df(df_raw_b)
 
     # Sanitizar columnas numéricas
     for col in MATERIAS + ["PROMEDIO PONDERADO", "PROMEDIO SIMPLE"]:

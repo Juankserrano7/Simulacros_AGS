@@ -14,6 +14,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 from ..core_utils import normalize_student_name
+from ..data import get_presented_df
 
 
 def _slug(text: str) -> str:
@@ -59,7 +60,7 @@ def render(simulacros: List[dict], materias: List[str]):
     frames = []
     grados_list = []
     for sim in simulacros:
-        base = sim["df"][["ESTUDIANTE"] + materias + ["PROMEDIO PONDERADO"]].copy()
+        base = get_presented_df(sim["df"])[["ESTUDIANTE"] + materias + ["PROMEDIO PONDERADO"]].copy()
         base["ESTUDIANTE"] = base["ESTUDIANTE"].apply(normalize_student_name)
         slug = _slug(sim["nombre"])
         rename_map = {

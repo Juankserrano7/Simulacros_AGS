@@ -30,15 +30,25 @@ COLUMN_CANONICAL_MAP = {
 }
 
 
-def get_regular_presented_df(df: pd.DataFrame) -> pd.DataFrame:
-    """Aplica el protocolo institucional: Excluye estudiantes de inclusión y ausentes."""
+def get_presented_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Excluye ausentes: sin promedio ponderado o con todas las materias en 0/vacías."""
     if df is None or df.empty:
         return pd.DataFrame()
     res = df.copy()
-    if "es_inclusion" in res.columns:
-        res = res[res["es_inclusion"] == False]  # noqa: E712
     if "PROMEDIO PONDERADO" in res.columns:
         res = res[res["PROMEDIO PONDERADO"].notna()]
+    mats = [m for m in MATERIAS if m in res.columns]
+    if mats:
+        notas = res[mats].apply(pd.to_numeric, errors="coerce").fillna(0)
+        res = res[(notas != 0).any(axis=1)]
+    return res
+
+
+def get_regular_presented_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Aplica el protocolo institucional: Excluye estudiantes de inclusión y ausentes."""
+    res = get_presented_df(df)
+    if not res.empty and "es_inclusion" in res.columns:
+        res = res[res["es_inclusion"] == False]  # noqa: E712
     return res
 
 

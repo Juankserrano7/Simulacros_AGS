@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from ..core_utils import get_db_connection
-from ..data import get_or_generate_insights, get_regular_presented_df
+from ..data import get_or_generate_insights, get_presented_df, get_regular_presented_df
 
 
 def render(simulacros, materias):
@@ -204,13 +204,15 @@ def render(simulacros, materias):
 
 
     st.markdown("<h2 class='section-header'>🔍 Hallazgos Principales y Recomendaciones</h2>", unsafe_allow_html=True)
-    promedios_curr = [ultimo["df"][mat].mean() for mat in materias]
+    df_ultimo = get_presented_df(ultimo["df"])
+    promedios_curr = [df_ultimo[mat].mean() for mat in materias]
     cambio_general = (np.mean(promedios_curr) - np.mean(promedios_curr[:-1])) if len(promedios_curr) > 1 else 0
-    variabilidades = {mat: ultimo["df"][mat].std() for mat in materias}
+    variabilidades = {mat: df_ultimo[mat].std() for mat in materias}
     mat_variable = max(variabilidades, key=variabilidades.get)
     if len(simulacros) > 1:
         penultimo = simulacros[-2]
-        promedios_penultimo = [penultimo["df"][mat].mean() for mat in materias]
+        df_penultimo = get_presented_df(penultimo["df"])
+        promedios_penultimo = [df_penultimo[mat].mean() for mat in materias]
         cambios_materias = {mat: c - p for mat, c, p in zip(materias, promedios_curr, promedios_penultimo)}
         nombre_anterior = penultimo["nombre"]
     else:
